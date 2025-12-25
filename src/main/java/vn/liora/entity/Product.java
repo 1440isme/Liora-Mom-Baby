@@ -80,6 +80,19 @@ public class Product {
     @Column(name = "IsActive")
     private Boolean isActive = true;
 
+    // Mom & Baby specific fields
+    @Column(name = "AgeRange", columnDefinition = "NVARCHAR(100)")
+    private String ageRange; // VD: "0-6 tháng", "1-2 tuổi", "Mẹ bầu"
+
+    @Column(name = "Size", columnDefinition = "NVARCHAR(50)")
+    private String size; // VD: "NB", "S", "M", "L", "XL" cho tã
+
+    @Column(name = "Volume", columnDefinition = "NVARCHAR(50)")
+    private String volume; // VD: "800g", "1.5kg" cho sữa
+
+    @Column(name = "Origin", columnDefinition = "NVARCHAR(100)")
+    private String origin; // Xuất xứ: Việt Nam, Nhật Bản, Mỹ
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<CartProduct> cartProducts;

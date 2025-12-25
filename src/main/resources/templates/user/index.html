@@ -103,9 +103,9 @@
                         <div class="col-6 col-md-3">
                             <a href="/product/featured-category/2" class="text-decoration-none text-dark">
                                 <div class="card border-0 shadow-sm h-100">
-                                    <img class="card-img-top" th:src="@{/user/img/chamsocda.jpg}" alt="Chăm sóc da">
+                                    <img class="card-img-top" th:src="@{/user/img/be.jpg}" alt="Đồ dùng cho bé">
                                     <div class="card-body text-center">
-                                        <h5 class="card-title">CHĂM SÓC DA</h5>
+                                        <h5 class="card-title">ĐỒ DÙNG CHO BÉ</h5>
                                     </div>
                                 </div>
                             </a>
@@ -113,9 +113,9 @@
                         <div class="col-6 col-md-3">
                             <a href="/product/featured-category/1" class="text-decoration-none text-dark">
                                 <div class="card border-0 shadow-sm h-100">
-                                    <img class="card-img-top" th:src="@{/user/img/trangdiem.jpg}" alt="Trang điểm">
+                                    <img class="card-img-top" th:src="@{/user/img/me.jpg}" alt="Đồ dùng cho mẹ">
                                     <div class="card-body text-center">
-                                        <h5 class="card-title">TRANG ĐIỂM</h5>
+                                        <h5 class="card-title">ĐỒ DÙNG CHO MẸ</h5>
                                     </div>
                                 </div>
                             </a>
@@ -123,9 +123,9 @@
                         <div class="col-6 col-md-3">
                             <a href="/product/featured-category/3" class="text-decoration-none text-dark">
                                 <div class="card border-0 shadow-sm h-100">
-                                    <img class="card-img-top" th:src="@{/user/img/chamsoctoc.jpg}" alt="Tóc">
+                                    <img class="card-img-top" th:src="@{/user/img/sua.jpg}" alt="Sữa và Dinh dưỡng">
                                     <div class="card-body text-center">
-                                        <h5 class="card-title">CHĂM SÓC TÓC</h5>
+                                        <h5 class="card-title">SỮA VÀ DINH DƯỠNG</h5>
                                     </div>
                                 </div>
                             </a>
@@ -133,9 +133,9 @@
                         <div class="col-6 col-md-3">
                             <a href="/product/featured-category/4" class="text-decoration-none text-dark">
                                 <div class="card border-0 shadow-sm h-100">
-                                    <img class="card-img-top" th:src="@{/user/img/chamsoccothe.png}" alt="Cơ thể">
+                                    <img class="card-img-top" th:src="@{/user/img/tabim.jpg}" alt="Tã và Bỉm">
                                     <div class="card-body text-center">
-                                        <h5 class="card-title">CHĂM SÓC CƠ THỂ</h5>
+                                        <h5 class="card-title">TÃ VÀ BỈM</h5>
                                     </div>
                                 </div>
                             </a>
@@ -216,8 +216,9 @@
             <section class="py-5 bg-light">
                 <div class="container">
                     <div class="d-flex align-items-center justify-content-between mb-4">
-                        <h2 class="fw-bold mb-0 text-uppercase">Làm đẹp cùng Liora</h2>
-                        <a href="/content/list/lam-dep-cung-liora" class="text-pink-primary fw-semibold">Xem tất cả</a>
+                        <h2 class="fw-bold mb-0 text-uppercase">Nâng cao kỹ năng nuôi bé</h2>
+                        <a href="/content/list/nang-cao-ky-nang-nuoi-be" class="text-pink-primary fw-semibold">Xem tất
+                            cả</a>
                     </div>
                     <div class="row g-4">
                         <div class="col-md-4" th:each="p : ${latestBeautyPages}">
@@ -967,39 +968,39 @@
                     popupClone.style.position = 'fixed';
                     popupClone.style.zIndex = '9999';
                     popupClone.classList.add('show');
-                    
+
                     // Calculate popup position with responsive adjustments
                     let top = rect.top - 10;
                     let left = rect.left + 30;
-                    
+
                     // Get popup dimensions
-                    const popupWidth = window.innerWidth < 480 ? 180 : 
-                                     window.innerWidth < 576 ? 200 : 
-                                     window.innerWidth < 768 ? 220 : 250;
-                    const popupHeight = window.innerWidth < 480 ? 120 : 
-                                      window.innerWidth < 576 ? 140 : 
-                                      window.innerWidth < 768 ? 160 : 180;
-                    
+                    const popupWidth = window.innerWidth < 480 ? 180 :
+                        window.innerWidth < 576 ? 200 :
+                            window.innerWidth < 768 ? 220 : 250;
+                    const popupHeight = window.innerWidth < 480 ? 120 :
+                        window.innerWidth < 576 ? 140 :
+                            window.innerWidth < 768 ? 160 : 180;
+
                     // Adjust position to prevent overflow
                     if (left + popupWidth > window.innerWidth - 20) {
                         left = rect.left - popupWidth - 10;
                     }
-                    
+
                     if (left < 20) {
                         left = 20;
                     }
-                    
+
                     if (top + popupHeight > window.innerHeight - 20) {
                         top = window.innerHeight - popupHeight - 20;
                     }
-                    
+
                     if (top < 20) {
                         top = 20;
                     }
-                    
+
                     popupClone.style.top = top + 'px';
                     popupClone.style.left = left + 'px';
-                    
+
                     // Add to portal
                     portal.appendChild(popupClone);
 
@@ -1071,7 +1072,7 @@
         function updateSliderPosition() {
             const slider = document.getElementById('discounts-container');
             let cardWidth = 344; // Default: 320px card + 24px gap
-            
+
             // Adjust card width based on screen size
             const screenWidth = window.innerWidth;
             if (screenWidth < 480) {
@@ -1145,7 +1146,7 @@
         function handleSwipe() {
             const swipeThreshold = 50; // Minimum distance for a swipe
             const swipeDistance = touchEndX - touchStartX;
-            
+
             if (Math.abs(swipeDistance) > swipeThreshold) {
                 if (swipeDistance > 0) {
                     // Swipe right - go to previous slide

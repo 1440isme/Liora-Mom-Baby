@@ -567,7 +567,22 @@ function applyFilters() {
  */
 function showAlert(type, message) {
     const toast = document.getElementById('bannerToast');
+
+    // Check if toast element exists
+    if (!toast) {
+        console.error('Toast element not found. Message:', message);
+        // Fallback to alert
+        alert(message);
+        return;
+    }
+
     const toastBody = toast.querySelector('.toast-body');
+
+    if (!toastBody) {
+        console.error('Toast body not found. Message:', message);
+        alert(message);
+        return;
+    }
 
     // Remove all existing type classes
     toast.classList.remove('admin-toast-success', 'admin-toast-error', 'admin-toast-warning', 'admin-toast-info');
