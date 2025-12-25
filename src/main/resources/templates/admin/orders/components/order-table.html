@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Table</title>
+</head>
+
+<body>
+    <!-- Orders Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered" id="ordersTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Khách hàng</th>
+                    <th>Sản phẩm</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thanh toán</th>
+                    <th>Ngày đặt</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${orders}">
+                    <td>
+                        <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="text-decoration-none fw-bold"
+                            th:text="'#' + ${order.id}">#12345</a>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="fw-bold" th:text="${order.customerName}">Nguyễn Văn A</div>
+                            <small class="text-muted" th:text="${order.customerEmail}">customer@example.com</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div th:if="${order.orderItems != null and !order.orderItems.isEmpty()}">
+                            <div th:each="item, iterStat : ${order.orderItems}" th:if="${iterStat.index < 2}">
+                                <div class="d-flex align-items-center mb-1">
+                                    <img th:src="${item.productImageUrl}" th:alt="${item.productName}"
+                                        class="img-thumbnail me-2" width="30" height="30" style="object-fit: cover;">
+                                    <div>
+                                        <div class="small" th:text="${item.productName}">Tên sản phẩm</div>
+                                        <small class="text-muted">x<span th:text="${item.quantity}">2</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${order.orderItems.size() > 2}" class="text-muted small">
+                                +<span th:text="${order.orderItems.size() - 2}">3</span> sản phẩm khác
+                            </div>
+                        </div>
+                        <div th:if="${order.orderItems == null or order.orderItems.isEmpty()}" class="text-muted">
+                            Không có sản phẩm
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-bold"
+                            th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                            2,030,000 ₫</div>
+                        <small class="text-muted" th:if="${order.discountAmount > 0}">
+                            Giảm: <span
+                                th:text="${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">50,000
+                                ₫</span>
+                        </small>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${order.orderStatus == 'PENDING'} ? 'bg-warning' : 
+                                             (${order.orderStatus == 'CONFIRMED'} ? 'bg-info' : 
+                                             (${order.orderStatus == 'COMPLETED'} ? 'bg-success' : 
+                                             (${order.orderStatus == 'CANCELLED'} ? 'bg-danger' : 'bg-secondary')))"
+                            th:text="${order.orderStatus == 'PENDING'} ? 'Chờ xử lý' : 
+                                       (${order.orderStatus == 'CONFIRMED'} ? 'Đã xác nhận' : 
+                                       (${order.orderStatus == 'COMPLETED'} ? 'Hoàn tất' : 
+                                       (${order.orderStatus == 'CANCELLED'} ? 'Đã hủy' : 'Không xác định')))">Chờ xử lý</span>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${order.paymentStatus == 'PAID'} ? 'bg-success' : 
+                                             (${order.paymentStatus == 'PENDING'} ? 'bg-warning' : 
+                                             (${order.paymentStatus == 'FAILED'} ? 'bg-danger' : 'bg-info'))" th:text="${order.paymentStatus == 'PAID'} ? 'Đã thanh toán' : 
+                                       (${order.paymentStatus == 'PENDING'} ? 'Chờ thanh toán' : 
+                                       (${order.paymentStatus == 'FAILED'} ? 'Thất bại' : 'Hoàn tiền'))">Chờ thanh
+                            toán</span>
+                        <div class="small text-muted" th:text="${order.paymentMethod}">Chuyển khoản</div>
+                    </td>
+                    <td>
+                        <div th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">15/12/2024</div>
+                        <small class="text-muted" th:text="${#temporals.format(order.createdAt, 'HH:mm')}">10:30</small>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info"
+                                title="Xem chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-warning"
+                                th:onclick="'updateOrderStatus(' + ${order.id} + ')'" title="Cập nhật trạng thái">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                th:onclick="'cancelOrder(' + ${order.id} + ')'"
+                                th:if="${order.orderStatus == 'PENDING'}"
+                                title="Hủy đơn hàng">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="8" class="text-center text-muted py-4">
+                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                        <p>Không có đơn hàng nào</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted">
+            Hiển thị <span th:text="${pageNumber * pageSize + 1}">1</span> đến
+            <span th:text="${Math.min((pageNumber + 1) * pageSize, totalElements)}">10</span>
+            trong tổng số <span th:text="${totalElements}">100</span> đơn hàng
+        </div>
+
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item" th:classappend="${pageNumber == 0} ? 'disabled'">
+                    <a class="page-link"
+                        th:href="@{/admin/orders(page=${pageNumber - 1}, size=${pageSize}, search=${param.search}, status=${param.status}, paymentStatus=${param.paymentStatus}, dateFrom=${param.dateFrom}, dateTo=${param.dateTo})}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
+                    th:classappend="${i == pageNumber} ? 'active'">
+                    <a class="page-link"
+                        th:href="@{/admin/orders(page=${i}, size=${pageSize}, search=${param.search}, status=${param.status}, paymentStatus=${param.paymentStatus}, dateFrom=${param.dateFrom}, dateTo=${param.dateTo})}"
+                        th:text="${i + 1}">1</a>
+                </li>
+
+                <li class="page-item" th:classappend="${pageNumber == totalPages - 1} ? 'disabled'">
+                    <a class="page-link"
+                        th:href="@{/admin/orders(page=${pageNumber + 1}, size=${pageSize}, search=${param.search}, status=${param.status}, paymentStatus=${param.paymentStatus}, dateFrom=${param.dateFrom}, dateTo=${param.dateTo})}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cập nhật trạng thái đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="updateStatusForm" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="newStatus" class="form-label">Trạng thái mới</label>
+                            <select class="form-select" id="newStatus" name="status" required>
+                                <option value="PENDING">Chờ xử lý</option>
+                                <option value="CONFIRMED">Đã xác nhận</option>
+                                <option value="COMPLETED">Hoàn tất</option>
+                                <option value="CANCELLED">Đã hủy</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="statusNote" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="statusNote" name="note" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hủy đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="cancelOrderForm" method="post">
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn hủy đơn hàng này?</p>
+                        <div class="mb-3">
+                            <label for="cancelReason" class="form-label">Lý do hủy</label>
+                            <textarea class="form-control" id="cancelReason" name="reason" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateOrderStatus(orderId) {
+            document.getElementById('updateStatusForm').action = '/admin/orders/' + orderId + '/status';
+            new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
+        }
+
+        function cancelOrder(orderId) {
+            document.getElementById('cancelOrderForm').action = '/admin/orders/' + orderId + '/cancel';
+            new bootstrap.Modal(document.getElementById('cancelOrderModal')).show();
+        }
+
+        // Initialize DataTable
+        $(document).ready(function () {
+            $('#ordersTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json"
+                },
+                "pageLength": 25,
+                "order": [[6, "desc"]], // Sort by created date
+                "columnDefs": [
+                    { "orderable": false, "targets": [2, 7] } // Disable sorting for products and actions columns
+                ]
+            });
+        });
+    </script>
+</body>
+
+</html>

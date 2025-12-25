@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - Liora</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+    <link rel="stylesheet" th:href="@{/user/css/checkout.css}">
+
+    <!-- Loading Overlay Styles -->
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+
+        .selected-item {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .selected-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <div th:replace="~{user/layout/user-header :: header}"></div>
+    <main class="checkout-main">
+        <div class="container">
+            <section class="breadcrumb-section py-3">
+                <div class="container">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="/" class="breadcrumb-link">
+                                    <span>Trang chủ</span>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="/cart" class="breadcrumb-link"
+                                    onclick="return checkoutPage.navigateToCart(event)">
+                                    <span>Giỏ hàng</span>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">
+                                <span>Thanh toán</span>
+                            </li>
+
+                        </ol>
+                    </nav>
+                </div>
+            </section>
+
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <form id="checkoutForm">
+
+                        <div class="box-section account-box-section">
+                            <h5 class="section-title-small text-dark-gray mb-3">Tài khoản</h5>
+                            <div class="account-box">
+                                <!-- Account info will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="box-section shipping-info-section">
+                            <div class="section-header">
+                                <h5 class="section-title-small text-dark-gray">Thông tin giao hàng</h5>
+                                <button type="button" class="btn-change"
+                                    onclick="checkoutPage.showAddressSelector()">Thay đổi</button>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="shippingFullName"
+                                            placeholder="Họ và tên" required>
+                                        <label for="shippingFullName">Họ và tên</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="tel" class="form-control" id="shippingPhone"
+                                            placeholder="Số điện thoại" required>
+                                        <label for="shippingPhone">Số điện thoại</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="shippingGmail" placeholder="Email"
+                                            required>
+                                        <label for="shippingGmail">Email</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="shippingProvince" required>
+                                            <option value="">Chọn Tỉnh/Thành phố</option>
+                                        </select>
+                                        <label for="shippingProvince">Tỉnh/Thành phố</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="shippingDistrict" required disabled>
+                                            <option value="">Chọn Quận/Huyện</option>
+                                        </select>
+                                        <label for="shippingDistrict">Quận/Huyện</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="shippingWard" required disabled>
+                                            <option value="">Chọn Phường/Xã</option>
+                                        </select>
+                                        <label for="shippingWard">Phường/Xã</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="shippingAddressDetail"
+                                            placeholder="Địa chỉ, tên đường" required>
+                                        <label for="shippingAddressDetail">Địa chỉ, tên đường</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-section delivery-method-section">
+                            <h5 class="section-title-small text-dark-gray mb-3">Phương thức giao hàng</h5>
+                            <div class="delivery-option active">
+                                <input type="radio" name="deliveryMethod" value="express" checked hidden>
+                                <div class="option-details">
+                                    <i class="fas fa-rocket"></i>
+                                    <span>Vận chuyển Hỏa tốc</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="box-section payment-method-section">
+                            <h5 class="section-title-small text-dark-gray mb-3">Phương thức thanh toán</h5>
+
+                            <div class="payment-option-row active">
+                                <input type="radio" name="paymentMethod" value="COD" checked hidden>
+                                <div class="option-details">
+                                    <img src="https://www.svgrepo.com/show/425138/cash-on-delivery.svg" alt="COD Logo">
+                                    <span>Thanh toán khi nhận hàng (COD)</span>
+                                </div>
+                            </div>
+
+                            <div class="payment-option-row">
+                                <input type="radio" name="paymentMethod" value="MoMo" hidden>
+                                <div class="option-details">
+                                    <img src="https://developers.momo.vn/v2/images/logo.svg" alt="MoMo Logo">
+                                    <span>Thanh toán bằng ví MoMo</span>
+                                </div>
+                            </div>
+
+                            <div class="payment-option-row">
+                                <input type="radio" name="paymentMethod" value="VNPay" hidden>
+                                <div class="option-details">
+                                    <img src="https://cdn.cdnlogo.com/logos/v/99/vnpay.svg" alt="VNPAY Logo">
+                                    <span>Thanh toán qua VNPAY</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-section order-notes-section">
+                            <h5 class="section-title-small text-dark-gray mb-3">Ghi chú đơn hàng</h5>
+                            <div class="form-group">
+                                <textarea class="form-control" id="orderNotes" name="orderNotes" rows="3"
+                                    placeholder="Nhập ghi chú cho đơn hàng (tùy chọn)..."
+                                    style="resize: vertical; min-height: 80px;"></textarea>
+                                <small class="form-text text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Bạn có thể ghi chú về địa chỉ giao hàng, thời gian nhận hàng, hoặc yêu cầu đặc biệt
+                                </small>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="sticky-sidebar">
+                        <div class="box-section cart-summary-section">
+                            <div class="cart-header">
+                                <h5 class="text-dark-gray">Sản phẩm</h5>
+                            </div>
+
+                            <div id="selected-items-container">
+                                <!-- Sản phẩm đã chọn sẽ được load động từ API -->
+                                <div class="text-center py-4">
+                                    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.3em; color: #e8a2b0;">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted mt-2">Đang tải sản phẩm...</p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="box-section coupon-box-section mt-3">
+                            <h6 class="section-title-small fw-bold mb-3">
+                                <i class="fas fa-tag me-2"></i>
+                                Mã giảm giá
+                            </h6>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="promoCode" placeholder="Nhập mã giảm giá">
+                                <button class="btn btn-outline-pink" type="button" id="applyPromoBtn">
+                                    Áp dụng
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Nhập mã để được giảm giá thêm
+                            </small>
+                        </div>
+                        <div class="box-section summary-box-section mt-3">
+                            <h5 class="section-title-small text-dark-gray">Tóm tắt đơn hàng</h5>
+                            <div class="summary-row">
+                                <span>Tổng tiền hàng</span>
+                                <span id="summary-subtotal" class="fw-medium">0đ</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Phí vận chuyển</span>
+                                <span id="summary-shipping" class="fw-medium">0đ</span>
+                            </div>
+
+                            <div class="summary-row total">
+                                <span>Tổng thanh toán</span>
+                                <span id="summary-total" class="fw-bold">0đ</span>
+                            </div>
+
+                            <button type="submit" form="checkoutForm" class="btn btn-checkout">
+                                ĐẶT HÀNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-stopper"></div>
+        </div>
+    </main>
+    <div th:replace="~{user/layout/user-footer :: footer}"></div>
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.3em; color: #e8a2b0;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Đang xử lý...</p>
+        </div>
+    </div>
+
+
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script th:src="@{/user/js/main.js}"></script>
+    <script th:src="@{/user/js/auth.js}"></script>
+    <script th:src="@{/user/js/cart-utils.js}"></script>
+    <script th:src="@{/user/js/checkout.js}"></script>
+
+    <!-- Demo Script for Frontend Display -->
+    <script>
+        // Initialize banner slider when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.BannerSlider) {
+                new BannerSlider();
+            }
+        });
+    </script>
+</body>
+
+</html>

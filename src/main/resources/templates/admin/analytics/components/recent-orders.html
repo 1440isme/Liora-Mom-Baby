@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Orders</title><!DOCTYPE html>
+</head>
+<body>
+    <!-- Recent Orders Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white border-start border-4 border-success">
+            <h6 class="m-0 fw-bold text-success">📦 Đơn hàng gần đây</h6>
+            <a href="/admin/orders" class="btn btn-sm btn-success">Xem tất cả</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;" class="text-center">Mã đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th style="width: 200px;">Tổng tiền</th>
+                        <th style="width: 170px;" class="text-center">Trạng thái đơn</th>
+                        <th style="width: 190px;" class="text-center">Thanh toán</th>
+                        <th style="width: 200px;" class="text-center">Ngày tạo</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="recentOrdersBody">
+                    <tr th:each="order : ${recentOrders}">
+                        <td class="text-center" th:text="${order.id}">12345</td>
+                        <td th:text="${order.customerName}">Nguyễn Văn A</td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">1,500,000 ₫</td>
+                        <td class="text-center">
+    <span class="fw-semibold"
+          th:classappend="${order.status == 'PENDING' || order.status == 'PROCESSING'} ? 'text-warning' :
+                          (${order.status == 'SHIPPED' || order.status == 'CONFIRMED'} ? 'text-info' :
+                          (${order.status == 'DELIVERED' || order.status == 'COMPLETED'} ? 'text-success' :
+                          (${order.status == 'CANCELLED' || order.status == 'FAILED'} ? 'text-danger' : 'text-secondary')))"
+          th:text="${order.status == 'PENDING'} ? 'Chờ xử lý' :
+                   (${order.status == 'PROCESSING'} ? 'Đang xử lý' :
+                   (${order.status == 'SHIPPED'} ? 'Đã giao vận' :
+                   (${order.status == 'CONFIRMED'} ? 'Đã xác nhận' :
+                   (${order.status == 'DELIVERED'} ? 'Đã giao hàng' :
+                   (${order.status == 'COMPLETED'} ? 'Hoàn thành' :
+                   (${order.status == 'CANCELLED'} ? 'Đã hủy' :
+                   (${order.status == 'FAILED'} ? 'Thất bại' : ${order.status})))))))">
+        Chờ xử lý
+    </span>
+                        </td>
+                        <td class="text-center">
+    <span class="fw-semibold"
+          th:classappend="${order.paymentStatus == 'PAID'} ? 'text-success' :
+                          (${order.paymentStatus == 'PENDING'} ? 'text-warning' :
+                          (${order.paymentStatus == 'REFUNDED'} ? 'text-info' :
+                          (${order.paymentStatus == 'FAILED' || order.paymentStatus == 'CANCELLED'} ? 'text-danger' : 'text-secondary')))"
+          th:text="${order.paymentStatus == 'PAID'} ? 'Đã thanh toán' :
+                   (${order.paymentStatus == 'PENDING'} ? 'Chờ thanh toán' :
+                   (${order.paymentStatus == 'REFUNDED'} ? 'Hoàn tiền' :
+                   (${order.paymentStatus == 'FAILED'} ? 'Thất bại' :
+                   (${order.paymentStatus == 'CANCELLED'} ? 'Đã hủy' : ${order.paymentStatus}))))">
+        Chờ thanh toán
+    </span>
+                        </td>
+
+                        <td class="text-center" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 10:30</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

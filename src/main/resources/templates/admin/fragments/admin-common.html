@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Common</title>
+</head>
+
+<body>
+    <!-- Admin Common Fragment -->
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="toast" class="toast admin-toast admin-toast-info" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast">&times;</button>
+            </div>
+            <div class="toast-body">
+                <!-- Toast message will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Xác nhận</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationModalBody">
+                    Bạn có chắc chắn muốn thực hiện hành động này?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-primary" id="confirmationModalConfirm">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagePreviewModalLabel">Xem hình ảnh</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="imagePreview" src="" alt="Preview" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Upload Progress Modal -->
+    <div class="modal fade" id="uploadProgressModal" tabindex="-1" aria-labelledby="uploadProgressModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadProgressModalLabel">Đang tải lên</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="progress">
+                        <div id="uploadProgressBar" class="progress-bar" role="progressbar" style="width: 0%"
+                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="mt-2">
+                        <span id="uploadProgressText">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="searchModalLabel">Tìm kiếm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Nhập từ khóa tìm kiếm...">
+                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="searchResults" class="search-results">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div id="quickActionsPanel" class="quick-actions-panel">
+        <div class="quick-actions-content">
+            <h6 class="mb-3">Thao tác nhanh</h6>
+            <div class="d-grid gap-2">
+                <a href="/admin/products/add" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus"></i> Thêm sản phẩm
+                </a>
+                <a href="/admin/orders" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-shopping-cart"></i> Xem đơn hàng
+                </a>
+                <a href="/admin/users/add" class="btn btn-sm btn-outline-success">
+                    <i class="fas fa-user-plus"></i> Thêm người dùng
+                </a>
+                <a href="/admin/dashboard" class="btn btn-sm btn-outline-warning">
+                    <i class="fas fa-chart-bar"></i> Báo cáo
+                </a>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-sm quick-actions-toggle">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="btn btn-primary back-to-top" title="Lên đầu trang">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Custom Styles -->
+    <style>
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-actions-panel {
+            position: fixed;
+            right: -250px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px 0 0 10px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+        }
+
+        .quick-actions-panel.show {
+            right: 0;
+        }
+
+        .quick-actions-content {
+            padding: 20px;
+        }
+
+        .quick-actions-toggle {
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+        }
+
+        .back-to-top.show {
+            display: block;
+        }
+
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+
+    <!-- JavaScript for common functionality -->
+    <script>
+        // Show loading spinner
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        // Hide loading spinner
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastBody = toast.querySelector('.toast-body');
+            const toastHeader = toast.querySelector('.toast-header i');
+
+            toastBody.textContent = message;
+
+            // Update icon based on type
+            toastHeader.className = 'fas me-2';
+            switch (type) {
+                case 'success':
+                    toastHeader.classList.add('fa-check-circle', 'text-success');
+                    break;
+                case 'error':
+                    toastHeader.classList.add('fa-exclamation-circle', 'text-danger');
+                    break;
+                case 'warning':
+                    toastHeader.classList.add('fa-exclamation-triangle', 'text-warning');
+                    break;
+                default:
+                    toastHeader.classList.add('fa-info-circle', 'text-primary');
+            }
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Show confirmation modal
+        function showConfirmation(title, message, callback) {
+            const modal = document.getElementById('confirmationModal');
+            const modalTitle = document.getElementById('confirmationModalLabel');
+            const modalBody = document.getElementById('confirmationModalBody');
+            const confirmBtn = document.getElementById('confirmationModalConfirm');
+
+            modalTitle.textContent = title;
+            modalBody.textContent = message;
+
+            // Remove existing event listeners
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            // Add new event listener
+            newConfirmBtn.addEventListener('click', function () {
+                if (callback) callback();
+                bootstrap.Modal.getInstance(modal).hide();
+            });
+
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        // Show image preview
+        function showImagePreview(imageSrc, imageAlt = 'Preview') {
+            const modal = document.getElementById('imagePreviewModal');
+            const img = document.getElementById('imagePreview');
+
+            img.src = imageSrc;
+            img.alt = imageAlt;
+
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        // Show upload progress
+        function showUploadProgress() {
+            const modal = document.getElementById('uploadProgressModal');
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        // Update upload progress
+        function updateUploadProgress(percent) {
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressText = document.getElementById('uploadProgressText');
+
+            progressBar.style.width = percent + '%';
+            progressBar.setAttribute('aria-valuenow', percent);
+            progressText.textContent = percent + '%';
+        }
+
+        // Hide upload progress
+        function hideUploadProgress() {
+            const modal = document.getElementById('uploadProgressModal');
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) bsModal.hide();
+        }
+
+        // Initialize common functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            // Back to top button
+            const backToTopBtn = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', function () {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Quick actions panel
+            const quickActionsPanel = document.getElementById('quickActionsPanel');
+            const quickActionsToggle = document.querySelector('.quick-actions-toggle');
+
+            quickActionsToggle.addEventListener('click', function () {
+                quickActionsPanel.classList.toggle('show');
+                const icon = this.querySelector('i');
+                if (quickActionsPanel.classList.contains('show')) {
+                    icon.classList.remove('fa-chevron-left');
+                    icon.classList.add('fa-chevron-right');
+                } else {
+                    icon.classList.remove('fa-chevron-right');
+                    icon.classList.add('fa-chevron-left');
+                }
+            });
+
+            // Search modal
+            const searchModal = document.getElementById('searchModal');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchResults = document.getElementById('searchResults');
+
+            searchButton.addEventListener('click', function () {
+                const query = searchInput.value.trim();
+                if (query) {
+                    performSearch(query);
+                }
+            });
+
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    if (query) {
+                        performSearch(query);
+                    }
+                }
+            });
+
+            function performSearch(query) {
+                // This would typically make an AJAX call to search endpoint
+                searchResults.innerHTML = '<div class="text-center text-muted">Đang tìm kiếm...</div>';
+
+                // Simulate search results
+                setTimeout(() => {
+                    searchResults.innerHTML = `
+                        <div class="search-result-item">
+                            <h6>Sản phẩm: ${query}</h6>
+                            <small class="text-muted">Tìm thấy 5 kết quả</small>
+                        </div>
+                        <div class="search-result-item">
+                            <h6>Đơn hàng: ${query}</h6>
+                            <small class="text-muted">Tìm thấy 3 kết quả</small>
+                        </div>
+                    `;
+                }, 1000);
+            }
+        });
+
+        // Global error handler
+        window.addEventListener('error', function (e) {
+            console.error('Global error:', e.error);
+            showToast('Đã xảy ra lỗi, vui lòng thử lại', 'error');
+        });
+
+        // Global unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function (e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            showToast('Đã xảy ra lỗi, vui lòng thử lại', 'error');
+        });
+    </script>
+
+    <!-- Permission Error Interceptor -->
+    <script src="/admin/js/admin/permission-interceptor.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{admin/fragments/admin-head :: admin-head('Dashboard - Liora Admin')}"></head>
+
+<body class="with-welcome-text">
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper">
+        <div th:replace="~{admin/layout/admin-navbar}"></div>
+        <div th:replace="~{admin/layout/admin-sidebar}"></div>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="home-tab">
+                            <div class="d-sm-flex align-items-center justify-content-between border-bottom">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab"
+                                           href="#overview" role="tab" aria-controls="overview"
+                                           aria-selected="true">Tổng quan</a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="tab-content tab-content-basic">
+                                <div class="tab-pane fade show active" id="overview" role="tabpanel"
+                                     aria-labelledby="overview">
+                                    <div th:replace="~{admin/dashboard/components/statistics-cards}"></div>
+
+                                    <!-- BIỂU ĐỒ DOANH THU & PHÂN BỐ SẢN PHẨM -->
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <div class="card card-rounded shadow-sm mb-4">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <h4 class="card-title card-title-dash mb-0">
+                                                            📈 Doanh thu 7 ngày gần nhất
+                                                        </h4>
+                                                        <a href="/admin/analytics" class="btn btn-outline-primary btn-sm">
+                                                            Xem chi tiết <i class="mdi mdi-arrow-right"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div style="height: 280px;">
+                                                        <canvas id="weeklyRevenueChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- ĐƠN HÀNG GẦN ĐÂY & SẢN PHẨM BÁN CHẠY -->
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-4 d-flex">
+                                            <div th:replace="~{admin/dashboard/components/recent-orders}"></div>
+                                        </div>
+                                        <div class="col-lg-6 mb-4 d-flex">
+                                            <div th:replace="~{admin/dashboard/components/top-products}"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SẢN PHẨM SẮP HẾT HÀNG -->
+                                    <div class="row">
+                                        <div class="col-lg-12 mb-4">
+                                            <div th:replace="~{admin/dashboard/components/low-stock-products}"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:replace="~{admin/layout/admin-footer}"></div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{admin/fragments/admin-scripts :: admin-scripts}"></div>
+
+<!-- ================= CUSTOM STYLES ================= -->
+<style>
+    /* Đảm bảo 2 card cạnh nhau có cùng chiều cao */
+    .row > div.d-flex {
+        display: flex !important;
+    }
+    
+    .row > div.d-flex > .card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .row > div.d-flex > .card > .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .row > div.d-flex > .card > .card-body > .table-responsive {
+        flex: 1;
+    }
+</style>
+
+<!-- ================= CUSTOM DASHBOARD SCRIPT ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const ctx = document.getElementById("weeklyRevenueChart").getContext("2d");
+
+            // === Tính 7 ngày gần nhất ===
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - 6); // từ 6 ngày trước đến hôm nay
+
+            // Gọi API lấy dữ liệu thực tế
+            const url = `/admin/revenue?type=time&groupType=day&startDate=${start.toISOString()}&endDate=${end.toISOString()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            // === Xử lý dữ liệu: đảm bảo đủ 7 ngày ===
+            const dailyRevenue = {};
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(start);
+                d.setDate(start.getDate() + i);
+                const label = d.toISOString().split("T")[0]; // YYYY-MM-DD
+                dailyRevenue[label] = data[label] || 0; // nếu không có thì gán 0
+            }
+
+            const labels = Object.keys(dailyRevenue);
+            const values = Object.values(dailyRevenue);
+
+            // === Vẽ biểu đồ ===
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "Doanh thu (₫)",
+                        data: values,
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        backgroundColor: "rgba(54, 162, 235, 0.2)",
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => value.toLocaleString("vi-VN") + " ₫"
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                callback: (val, i) => {
+                                    // Hiển thị dạng ngắn gọn: Thứ + ngày
+                                    const d = new Date(labels[i]);
+                                    const days = ["CN","T2","T3","T4","T5","T6","T7"];
+                                    return `${days[d.getDay()]} (${d.getDate()})`;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => "Doanh thu: " + ctx.parsed.y.toLocaleString("vi-VN") + " ₫"
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+
+</body>
+</html>

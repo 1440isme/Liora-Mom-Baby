@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý vai trò - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0" id="pageTitle">Thêm vai trò mới</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/roles">Vai trò</a></li>
+                                <li class="breadcrumb-item active" id="breadcrumbText">Thêm mới</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <div class="row">
+                        <!-- Form Column -->
+                        <div class="col-lg-8 grid-margin stretch-card">
+                            <div class="card card-rounded w-100">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Thông tin vai trò</h4>
+                                    <form id="roleForm" method="post">
+                                        <!-- Role Name -->
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">
+                                                Tên vai trò <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="name" name="name"
+                                                placeholder="Ví dụ: ADMIN, USER, MANAGER..." required>
+                                            <small class="form-text text-muted">
+                                                Tên vai trò là duy nhất và sẽ là khóa chính
+                                            </small>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Mô tả</label>
+                                            <textarea class="form-control" id="description" name="description" rows="3"
+                                                placeholder="Mô tả vai trò này..."></textarea>
+                                        </div>
+
+                                        <!-- Permissions -->
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                Quyền hạn <span class="badge bg-info" id="selectedCount">0 đã
+                                                    chọn</span>
+                                            </label>
+                                            <div class="border rounded p-3"
+                                                style="max-height: 400px; overflow-y: auto;">
+                                                <div id="permissionsContainer">
+                                                    <div class="text-center py-4">
+                                                        <div class="spinner-border text-primary" role="status">
+                                                            <span class="visually-hidden">Đang tải...</span>
+                                                        </div>
+                                                        <p class="mt-2 text-muted">Đang tải danh sách quyền hạn...</p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Select All Option -->
+                                                <div class="form-check mt-2 pt-2 ps-2 ms-4 border-top">
+                                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                                    <label class="form-check-label fw-bold" for="selectAll">
+                                                        Chọn tất cả quyền hạn
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="mt-4">
+                                            <button type="submit" class="btn btn-primary text-white me-2">
+                                                <i class="mdi mdi-content-save"></i> <span id="submitText">Lưu vai
+                                                    trò</span>
+                                            </button>
+                                            <a href="/admin/roles" class="btn btn-outline-dark">
+                                                <i class="mdi mdi-close"></i> Hủy bỏ
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Column -->
+                        <div class="col-lg-4 grid-margin stretch-card">
+                            <!-- Guidelines Card -->
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Hướng dẫn</h4>
+                                    <div class="alert alert-info mb-0">
+                                        <h6><i class="mdi mdi-information"></i> Lưu ý:</h6>
+                                        <ul class="mb-0">
+                                            <li>Tên vai trò là bắt buộc và phải duy nhất</li>
+                                            <li>Tên vai trò sẽ là khóa chính, nên đặt tên ngắn gọn</li>
+                                            <li>Nên sử dụng chữ IN HOA (ADMIN, USER...)</li>
+                                            <li>Mô tả giúp hiểu rõ vai trò này làm gì</li>
+                                            <li>Chọn các quyền hạn phù hợp với vai trò</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Example Card -->
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Ví dụ vai trò</h4>
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>ADMIN</strong>
+                                                <p class="mb-0 text-muted small">Quản trị viên hệ thống</p>
+                                            </div>
+                                            <span class="badge bg-danger">Full quyền</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>USER</strong>
+                                                <p class="mb-0 text-muted small">Người dùng thông thường</p>
+                                            </div>
+                                            <span class="badge bg-primary">Cơ bản</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>MANAGER</strong>
+                                                <p class="mb-0 text-muted small">Quản lý cửa hàng</p>
+                                            </div>
+                                            <span class="badge bg-warning">Quản lý</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+
+    <script>
+        class RoleManager {
+            constructor() {
+                this.ajax = window.adminAjax;
+                this.permissions = [];
+                this.isEditMode = false;
+                this.currentRoleName = null;
+                this.init();
+            }
+
+            async init() {
+                this.bindEvents();
+                await this.loadPermissions();
+                this.checkEditMode();
+            }
+
+            bindEvents() {
+                // Form submission
+                const form = document.getElementById('roleForm');
+                if (form) {
+                    form.addEventListener('submit', this.handleSubmit.bind(this));
+                }
+
+                // Select all checkbox
+                const selectAll = document.getElementById('selectAll');
+                if (selectAll) {
+                    selectAll.addEventListener('change', this.handleSelectAll.bind(this));
+                }
+
+                // Update count when checkboxes change
+                document.addEventListener('change', (e) => {
+                    if (e.target.matches('.permission-checkbox')) {
+                        this.updateSelectedCount();
+                    }
+                });
+            }
+
+            async loadPermissions() {
+                try {
+                    const response = await this.ajax.get('/permissions');
+                    if (response && response.result) {
+                        this.permissions = response.result;
+                        this.renderPermissions();
+                    }
+                } catch (error) {
+                    console.error('Error loading permissions:', error);
+                    this.showError('Không thể tải danh sách quyền hạn');
+                }
+            }
+
+            renderPermissions() {
+                const container = document.getElementById('permissionsContainer');
+                if (!container) return;
+
+                if (this.permissions.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="mdi mdi-shield-alert-outline mdi-36px mb-2"></i>
+                            <p>Chưa có quyền hạn nào trong hệ thống</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const html = this.permissions.map(permission => `
+                    <div class="form-check mb-2 ps-2">
+                        <input class="form-check-input permission-checkbox ms-0" 
+                               type="checkbox" 
+                               id="permission_${permission.name}" 
+                               name="permissions" 
+                               value="${permission.name}">
+                        <label class="form-check-label" for="permission_${permission.name}">
+                            <strong>${permission.name}</strong>
+                            ${permission.description ? `<br><small class="text-muted">${permission.description}</small>` : ''}
+                        </label>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+                this.updateSelectedCount();
+            }
+
+            handleSelectAll(e) {
+                const checkboxes = document.querySelectorAll('.permission-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+                this.updateSelectedCount();
+            }
+
+            updateSelectedCount() {
+                const checked = document.querySelectorAll('.permission-checkbox:checked').length;
+                const badge = document.getElementById('selectedCount');
+                if (badge) {
+                    badge.textContent = `${checked} đã chọn`;
+                }
+
+                // Update select all state
+                const selectAll = document.getElementById('selectAll');
+                const total = document.querySelectorAll('.permission-checkbox').length;
+                if (selectAll) {
+                    selectAll.checked = checked === total && total > 0;
+                    selectAll.indeterminate = checked > 0 && checked < total;
+                }
+            }
+
+            checkEditMode() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const roleName = urlParams.get('id');
+
+                if (roleName) {
+                    this.isEditMode = true;
+                    this.currentRoleName = roleName;
+                    this.loadRoleData(roleName);
+
+                    // Update UI for edit mode
+                    document.getElementById('pageTitle').textContent = 'Chỉnh sửa vai trò';
+                    document.getElementById('breadcrumbText').textContent = 'Chỉnh sửa';
+                    document.getElementById('submitText').textContent = 'Cập nhật vai trò';
+
+                    // Disable name field in edit mode
+                    const nameInput = document.getElementById('name');
+                    if (nameInput) {
+                        nameInput.disabled = true;
+                        nameInput.classList.add('bg-light');
+                    }
+                }
+            }
+
+            async loadRoleData(roleName) {
+                try {
+                    const response = await this.ajax.get(`/roles/${roleName}`);
+                    if (response && response.result) {
+                        this.populateForm(response.result);
+                    }
+                } catch (error) {
+                    console.error('Error loading role data:', error);
+                    this.showError('Không thể tải thông tin vai trò');
+                }
+            }
+
+            populateForm(role) {
+                // Set name and description
+                document.getElementById('name').value = role.name || '';
+                document.getElementById('description').value = role.description || '';
+
+                // Check permissions
+                if (role.permissions && role.permissions.length > 0) {
+                    role.permissions.forEach(permission => {
+                        const checkbox = document.querySelector(`input[value="${permission.name}"]`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
+                }
+
+                this.updateSelectedCount();
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+
+                const formData = new FormData(e.target);
+                const selectedPermissions = formData.getAll('permissions');
+
+                const data = {
+                    name: this.isEditMode ? this.currentRoleName : (formData.get('name') || '').trim(),
+                    description: (formData.get('description') || '').trim(),
+                    permissions: selectedPermissions
+                };
+
+                // Validate
+                if (!this.isEditMode && (!data.name || data.name.trim() === '')) {
+                    this.showError('Tên vai trò là bắt buộc');
+                    return;
+                }
+
+                try {
+                    let response;
+                    if (this.isEditMode) {
+                        response = await this.ajax.put(`/roles/${this.currentRoleName}`, data);
+                        this.showSuccess('Cập nhật vai trò thành công');
+                    } else {
+                        response = await this.ajax.post('/roles', data);
+                        this.showSuccess('Thêm vai trò thành công');
+                    }
+
+                    // Redirect after success
+                    setTimeout(() => {
+                        window.location.href = '/admin/roles';
+                    }, 1500);
+                } catch (error) {
+                    console.error('Error saving role:', error);
+                    let errorMessage = 'Có lỗi xảy ra khi lưu vai trò';
+                    if (error.response && error.response.data && error.response.data.message) {
+                        errorMessage = error.response.data.message;
+                    }
+                    this.showError(errorMessage);
+                }
+            }
+
+            showSuccess(message) {
+                this.showNotification(message, 'success');
+            }
+
+            showError(message) {
+                this.showNotification(message, 'error');
+            }
+
+            showNotification(message, type = 'info') {
+                // Create toast container if not exists
+                let toastContainer = document.getElementById('toast-container');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.id = 'toast-container';
+                    toastContainer.className = 'toast-container';
+                    document.body.appendChild(toastContainer);
+                }
+
+                const toastId = 'toast-' + Date.now();
+                const toastHtml = `
+                    <div id="${toastId}" class="toast admin-toast admin-toast-${type} show" role="alert">
+                        <div class="toast-header">
+                            <strong class="me-auto">
+                                ${type === 'success' ? 'Thành công!' :
+                        type === 'error' ? 'Lỗi!' : 'Thông báo'}
+                            </strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast">&times;</button>
+                        </div>
+                        <div class="toast-body">${message}</div>
+                    </div>
+                `;
+
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+                setTimeout(() => {
+                    const toast = document.getElementById(toastId);
+                    if (toast) {
+                        toast.style.animation = 'slideOutRight 0.3s ease-in';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, 4000);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new RoleManager();
+        });
+    </script>
+</body>
+
+</html>

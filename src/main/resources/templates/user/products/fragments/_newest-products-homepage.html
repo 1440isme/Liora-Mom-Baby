@@ -1,0 +1,38 @@
+<div th:fragment="newestProductsHomepageSection" class="newest-products-homepage-section">
+    <div class="container">
+        <!-- Section Header with Navigation -->
+        <div class="section-header">
+            <h2 class="section-title fw-bold text-uppercase">
+                <a href="/product/newest-products" class="text-decoration-none text-dark" title="Xem tất cả hàng mới về">
+                    HÀNG MỚI VỀ
+                </a>
+            </h2>
+            <div class="navigation-buttons hidden">
+                <button class="nav-btn" id="homepageNewestPrevBtn" title="Xem sản phẩm trước">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="nav-btn" id="homepageNewestNextBtn" title="Xem sản phẩm tiếp theo">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading state -->
+        <div id="homepageNewestProductsLoading" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Đang tải hàng mới về...</p>
+        </div>
+        
+        <!-- No products state -->
+        <div id="homepageNewestProductsEmpty" class="text-center d-none">
+            <p>Không tìm thấy hàng mới về nào.</p>
+        </div>
+        
+        <!-- Products grid -->
+        <div id="homepageNewestProductsGrid">
+            <!-- Sản phẩm sẽ được render vào đây -->
+        </div>
+    </div>
+</div>

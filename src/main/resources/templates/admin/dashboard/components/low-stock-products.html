@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm sắp hết hàng</title>
+</head>
+
+<body>
+<!-- ====================== SẢN PHẨM SẮP HẾT HÀNG ====================== -->
+<div class="card shadow mb-4 border-danger">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white border-start border-4 border-danger">
+        <h6 class="m-0 fw-bold text-danger">⚠️ Sản phẩm sắp hết hàng</h6>
+        <a href="/admin/products"
+           class="btn btn-sm text-white"
+           style="background-color:#ff9800; border-color:#ff9800;">
+            Quản lý kho
+        </a>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle" width="100%" cellspacing="0">
+                <thead class="table-light">
+                <tr>
+                    <th style="width: 80px;" class="text-center">Mã sản phẩm</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th style="width: 120px;" class="text-center">Tồn kho</th>
+                    <th style="width: 120px;" class="text-center">Trạng thái</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${lowStockProducts}">
+                    <!-- Mã sản phẩm -->
+                    <td class="text-center">
+                        <span class="text-dark" th:text="${item.productId}">2001</span>
+                    </td>
+
+                    <!-- Tên sản phẩm -->
+                    <td>
+                        <div class="fw-normal" th:text="${item.name}">Tên sản phẩm</div>
+                    </td>
+
+                    <!-- Danh mục -->
+                    <td th:text="${item.categoryName}">Danh mục</td>
+
+                    <!-- Tồn kho -->
+                    <td class="text-center" th:text="${item.stock} + ' sản phẩm'">5 sản phẩm</td>
+
+                    <!-- Trạng thái -->
+                    <td class="text-center">
+                        <span th:if="${item.isActive}" class="text-success fw-semibold">Hoạt động</span>
+                        <span th:if="${!item.isActive}" class="text-secondary fw-semibold">Ngừng</span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(lowStockProducts)}">
+                    <td colspan="5" class="text-center text-muted">Không có sản phẩm nào sắp hết hàng</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

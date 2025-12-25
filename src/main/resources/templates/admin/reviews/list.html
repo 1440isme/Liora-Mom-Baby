@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý đánh giá - Liora Admin')"></head>
+
+<body class="with-welcome-text reviews-page">
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper">
+        <div th:replace="admin/layout/admin-navbar"></div>
+        <div th:replace="admin/layout/admin-sidebar"></div>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="d-none text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+
+                <!-- Page Header -->
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="mdi mdi-star me-2"></i>Quản lý đánh giá
+                    </h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Action Buttons -->
+                        <div class="btn-wrapper">
+                            <button type="button" class="btn btn-outline-primary" id="btnExportExcel">
+                                <i class="mdi mdi-file-excel"></i> Xuất Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-primary">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                            Điểm trung bình
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="averageRating">0.0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-star mdi-36px text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-success">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                            Tổng đánh giá
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="totalReviews">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-comment-multiple mdi-36px text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-warning">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                            Đánh giá 5 sao
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="fiveStarReviews">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-star mdi-36px text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-info">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                            % 5 sao
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="fiveStarPercentage">0%</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-percent mdi-36px text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="card card-rounded mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="mdi mdi-filter-outline me-2"></i>Tìm kiếm và lọc
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Tìm kiếm</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="searchReview"
+                                           placeholder="Nội dung đánh giá...">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnSearch">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-1 mb-3">
+                                <label class="form-label">Số sao</label>
+                                <select class="form-select" id="filterRating">
+                                    <option value="">Tất cả</option>
+                                    <option value="5">5 sao</option>
+                                    <option value="4">4 sao</option>
+                                    <option value="3">3 sao</option>
+                                    <option value="2">2 sao</option>
+                                    <option value="1">1 sao</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Thương hiệu</label>
+                                <select class="form-select" id="filterBrand">
+                                    <option value="">Tất cả thương hiệu</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Danh mục</label>
+                                <select class="form-select" id="filterCategory">
+                                    <option value="">Tất cả danh mục</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Sản phẩm</label>
+                                <select class="form-select" id="filterProduct">
+                                    <option value="">Tất cả sản phẩm</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1 mb-3">
+                                <label class="form-label">Trạng thái</label>
+                                <select class="form-select" id="filterVisibility">
+                                    <option value="">Tất cả</option>
+                                    <option value="true">Hiển thị</option>
+                                    <option value="false">Ẩn</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1 mb-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="btnRefresh" title="Làm mới">
+                                    <i class="mdi mdi-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Table -->
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th scope="col" width="5%" class="text-center">STT</th>
+                                    <th scope="col" width="25%" class="text-center">Nội dung</th>
+                                    <th scope="col" width="8%" class="sortable text-center" data-sort="rating">
+                                        Số sao
+                                        <i class="mdi mdi-sort ms-1 sort-icon"></i>
+                                    </th>
+                                    <th scope="col" width="8%" class="text-center">Ẩn danh</th>
+                                    <th scope="col" width="10%" class="text-center">Mã người dùng</th>
+                                    <th scope="col" width="10%" class="text-center">Mã sản phẩm</th>
+                                    <th scope="col" width="12%" class="sortable text-center" data-sort="createdAt">
+                                        Thời gian
+                                        <i class="mdi mdi-sort ms-1 sort-icon"></i>
+                                    </th>
+                                    <th scope="col" width="10%" class="text-center">Trạng thái</th>
+                                    <th scope="col" width="12%" class="text-center">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody id="reviewTableBody">
+                                <!-- Reviews will be loaded here via AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <span id="paginationInfo" class="text-muted">Hiển thị 0-0 trong tổng số 0 đánh giá</span>
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0" id="pagination">
+                                    <!-- Pagination will be generated here -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:replace="admin/layout/admin-footer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Detail Modal -->
+<div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-labelledby="reviewDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewDetailModalLabel">
+                    <i class="mdi mdi-star me-2"></i>Chi tiết đánh giá
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Review Information -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="mdi mdi-information me-2"></i>Thông tin đánh giá</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-medium">Nội dung:</td>
+                                        <td id="modalReviewContent"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Số sao:</td>
+                                        <td id="modalReviewRating"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Ẩn danh:</td>
+                                        <td id="modalReviewAnonymous"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Trạng thái:</td>
+                                        <td id="modalReviewStatus"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User & Product Information -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="mdi mdi-account me-2"></i>Thông tin người dùng & sản phẩm</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-medium">Người đánh giá:</td>
+                                        <td id="modalReviewUser"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Sản phẩm:</td>
+                                        <td id="modalReviewProduct"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Ngày tạo:</td>
+                                        <td id="modalReviewCreatedAt"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Cập nhật cuối:</td>
+                                        <td id="modalReviewLastUpdate"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Review Visibility Modal -->
+<div class="modal fade" id="updateVisibilityModal" tabindex="-1" aria-labelledby="updateVisibilityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateVisibilityModalLabel">
+                    <i class="mdi mdi-eye me-2"></i>Cập nhật trạng thái hiển thị
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateVisibilityForm">
+                    <input type="hidden" id="updateReviewId">
+                    <div class="mb-3">
+                        <label for="updateReviewVisibility" class="form-label">Trạng thái hiển thị</label>
+                        <select class="form-select" id="updateReviewVisibility" required>
+                            <option value="true">Hiển thị</option>
+                            <option value="false">Ẩn</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="saveReviewVisibility()">
+                    <i class="mdi mdi-content-save me-2"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Visibility Toggle Modal -->
+<div class="modal fade" id="confirmVisibilityModal" tabindex="-1" aria-labelledby="confirmVisibilityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmVisibilityModalLabel">
+                    <i class="mdi mdi-help-circle me-2"></i>Xác nhận thay đổi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="confirmReviewId">
+                <input type="hidden" id="confirmNewVisibility">
+                <p>Bạn có chắc chắn muốn <strong id="confirmActionText"></strong> đánh giá này?</p>
+                <p class="text-muted"><small>Hành động này sẽ thay đổi trạng thái hiển thị của đánh giá.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="confirmToggleVisibility()">
+                    <i class="mdi mdi-check me-2"></i>Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+<script th:src="@{/admin/js/admin/reviews.js}"></script>
+
+<style>
+    .border-start-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    .border-start-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    .border-start-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+    .border-start-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    .card-rounded {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #5a5c69;
+    }
+
+    /* Fix cho chiều cao dòng bảng đánh giá */
+    .reviews-page .table td {
+        line-height: 1.4 !important;
+        padding: 0.75rem 0.9375rem !important;
+    }
+
+    .reviews-page .content-wrapper {
+        background-color: #f8f9fc;
+    }
+    .star-rating {
+        color: #ffc107;
+    }
+    .content-preview {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* Sortable column styles */
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+    
+    .sortable:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .sort-icon {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+    
+    .sortable:hover .sort-icon {
+        opacity: 1;
+    }
+    
+    .sortable.sorted .sort-icon {
+        opacity: 1;
+        color: #007bff;
+    }
+    
+    .sortable.sorted-asc .sort-icon::before {
+        content: "\F05D"; /* mdi-arrow-up */
+    }
+    
+    .sortable.sorted-desc .sort-icon::before {
+        content: "\F045"; /* mdi-arrow-down */
+    }
+    
+    /* Review content in modal with HTML support */
+    .review-modal-content {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .review-modal-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin: 8px 0;
+    }
+    
+    .review-modal-content video {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin: 8px 0;
+    }
+    
+    .review-modal-content figure {
+        margin: 8px 0;
+    }
+    
+    .review-modal-content p {
+        margin-bottom: 8px;
+    }
+    
+    /* Content preview in table */
+    .content-preview {
+        max-height: 60px;
+        overflow: hidden;
+        word-break: break-word;
+    }
+</style>
+</body>
+
+</html>

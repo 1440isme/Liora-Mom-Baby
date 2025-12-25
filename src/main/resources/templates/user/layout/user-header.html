@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <!-- Header Start -->
+    <header th:fragment="header">
+        <!-- Top Header - Tầng trên -->
+        <div class="top-header">
+            <div class="container">
+                <!-- Desktop Layout -->
+                <div class="row align-items-center d-none d-lg-flex">
+                    <!-- Logo -->
+                    <div class="col-auto">
+                        <a class="navbar-brand" href="/" onclick="showPage('home')">
+                            <img src="/admin/images/liora-white.svg" alt="Liora" height="40" class="logo-img">
+                        </a>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="col">
+                        <div class="search-container">
+                            <div class="position-relative">
+                                <i class="mdi mdi-magnify search-icon"></i>
+                                <input type="text" class="form-control search-input"
+                                    placeholder="Tìm kiếm sản phẩm, thương hiệu, ..." id="mainSearchInput">
+
+                                <!-- Search Results Dropdown -->
+                                <div id="searchResultsDropdown" class="search-results-dropdown">
+                                    <!-- Results list -->
+                                    <div id="searchResultsList" class="search-results-list">
+                                        <!-- Results will be populated here -->
+                                    </div>
+
+                                    <!-- View more link -->
+                                    <div class="search-results-footer">
+                                        <a href="#" id="viewMoreLink" class="view-more-link">
+                                            Xem thêm <span id="totalResultsCount">0</span> sản phẩm
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User & Cart -->
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- User Account -->
+                            <div id="desktop-user-section">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+
+                            <!-- Cart -->
+                            <button class="btn btn-cart position-relative" onclick="window.location.href='/cart'">
+                                <i class="mdi mdi-shopping-outline"></i>
+                                <div class="cart-text">
+                                    <div class="cart-title">GIỎ HÀNG</div>
+                                </div>
+                                <span
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
+                                    0
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Layout - Tầng 1: Hamburger, Logo, Login, Cart -->
+                <div class="row align-items-center d-lg-none">
+                    <!-- Mobile Menu Toggle -->
+                    <div class="col-auto">
+                        <button class="btn btn-mobile-menu" type="button" id="mobileMenuToggle">
+                            <i class="mdi mdi-menu" style="font-size: 30px"></i>
+                        </button>
+                    </div>
+
+                    <!-- Logo -->
+                    <div class="col-auto">
+                        <a class="navbar-brand" href="/" onclick="showPage('home')">
+                            <img src="/admin/images/liora-white.svg" alt="Liora" height="35" class="logo-img">
+                        </a>
+                    </div>
+
+                    <!-- Spacer -->
+                    <div class="col"></div>
+
+                    <!-- User & Cart -->
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- User Account - Icon only -->
+                            <div id="mobile-user-section">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+
+                            <!-- Cart - Icon only -->
+                            <button class="btn btn-cart-mobile position-relative"
+                                onclick="window.location.href='/cart'">
+                                <i class="mdi mdi-shopping-outline me-3" style="font-size: 30px"></i>
+                                <span
+                                    class="position-absolute top-30 start-100 translate-middle badge rounded-pill cart-badge">
+                                    0
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Layout - Tầng 2: Search Bar -->
+                <div class="row d-lg-none mt-0">
+                    <div class="col-12">
+                        <div class="search-container">
+                            <div class="position-relative">
+                                <i class="mdi mdi-magnify search-icon"></i>
+                                <input type="text" class="form-control search-input"
+                                    placeholder="Tìm kiếm sản phẩm, thương hiệu, ..." id="mobileSearchInput">
+
+                                <!-- Search Results Dropdown -->
+                                <div id="mobileSearchResultsDropdown" class="search-results-dropdown">
+                                    <!-- Results list -->
+                                    <div id="mobileSearchResultsList" class="search-results-list">
+                                        <!-- Results will be populated here -->
+                                    </div>
+
+                                    <!-- View more link -->
+                                    <div class="search-results-footer">
+                                        <a href="#" id="mobileViewMoreLink" class="view-more-link">
+                                            Xem thêm <span id="mobileTotalResultsCount">0</span> sản phẩm
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Header - Tầng dưới (Desktop only) -->
+        <div class="bottom-header d-none d-lg-block" id="dynamic-bottom-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <!-- Categories Button -->
+                    <div class="col-auto">
+                        <div class="dropdown categories-dropdown">
+                            <button class="btn btn-categories" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false" id="categories-button">
+                                <i class="mdi mdi-menu"></i>
+                                <span id="categories-button-text" class="d-none d-sm-inline">Danh Mục Sản Phẩm</span>
+                            </button>
+                            <div class="dropdown-menu categories-menu">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <!-- Cột 1: Danh mục chính -->
+                                        <div class="col-md-3">
+                                            <div class="category-column">
+                                                <div class="category-list">
+                                                    <div class="category-loading">
+                                                        <i class="mdi mdi-loading"></i>
+                                                        Đang tải danh mục...
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Cột 2: Danh mục cấp 2 & 3 (trái) -->
+                                        <div class="col-md-4">
+                                            <div class="category-column">
+                                                <div class="subcategory-list">
+                                                    <div class="category-loading">
+                                                        <i class="mdi mdi-loading"></i>
+                                                        Chọn danh mục để xem...
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Cột 3: Danh mục cấp 2 & 3 (phải) -->
+                                        <div class="col-md-5">
+                                            <div class="category-column">
+                                                <div class="product-list">
+                                                    <div class="category-loading">
+                                                        <i class="mdi mdi-loading"></i>
+                                                        Chọn danh mục để xem sản phẩm...
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Navigation - Hidden on mobile -->
+                    <div class="col d-none d-lg-block" id="main-navigation">
+                        <nav class="main-nav">
+                            <ul class="nav-list">
+                                <!-- Navigation items will be loaded dynamically -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+            <div class="mobile-menu-container">
+                <!-- Mobile Menu Header -->
+                <div class="mobile-menu-header">
+                    <div class="mobile-menu-title">
+                        <i class="mdi mdi-menu"></i>
+                        <span>Menu</span>
+                    </div>
+                    <button class="btn btn-close-mobile-menu" type="button" id="closeMobileMenu">
+                        <i class="mdi mdi-close"></i>
+                    </button>
+                </div>
+
+                <!-- Account Section -->
+                <div class="mobile-account-section" id="mobile-menu-account-section">
+                    <div class="mobile-account-info">
+                        <i class="mdi mdi-account-circle"></i>
+                        <div class="mobile-account-text">
+                            <div class="mobile-account-title">TÀI KHOẢN</div>
+                            <a href="#" class="mobile-account-link" data-bs-toggle="modal" data-bs-target="#authModal">
+                                Đăng nhập / Đăng ký
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Items -->
+                <nav class="mobile-nav" id="mobile-navigation-section">
+                    <ul class="mobile-nav-list" id="mobile-navigation">
+                        <!-- Mobile navigation items will be loaded dynamically -->
+                    </ul>
+                </nav>
+
+
+            </div>
+        </div>
+
+        <!-- Header Bottom Loading Script -->
+        <script>
+            function initHeaderBottom() {
+                try {
+                    loadHeaderNavigationContent();
+                } catch (e) {
+                    console.error('Header init error:', e);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initHeaderBottom);
+            } else {
+                initHeaderBottom();
+            }
+
+            async function loadHeaderNavigationContent() {
+                try {
+                    const response = await fetch('/content/api/header-bottom');
+                    const data = await response.json();
+
+                    // Update navigation items
+                    if (data.navigationItems && data.navigationItems.length > 0) {
+                        const navList = document.querySelector('#main-navigation .nav-list');
+                        const mobileNavList = document.querySelector('#mobile-navigation');
+
+                        // Clear both lists
+                        navList.innerHTML = '';
+                        mobileNavList.innerHTML = '';
+
+                        // Load sub-items for each parent item
+                        for (let i = 0; i < data.navigationItems.length; i++) {
+                            const item = data.navigationItems[i];
+                            if (item.id) {
+                                try {
+                                    const subResponse = await fetch(`/content/api/header-bottom/sub-items/${item.id}`);
+                                    const subData = await subResponse.json();
+                                    item.subItems = subData || [];
+                                } catch (subError) {
+                                    console.error('Error loading sub-items for', item.title, ':', subError);
+                                    item.subItems = [];
+                                }
+                            }
+                        }
+
+                        // Process all items in order from API
+                        data.navigationItems.forEach(item => {
+                            // Create desktop navigation item
+                            const navItem = document.createElement('li');
+                            navItem.className = 'nav-item';
+
+                            // Check if this is a category item
+                            if (item.linkType === 'PARENT_CATEGORY' || item.isCategoryParent) {
+                                // Create dropdown for categories (desktop)
+                                const dropdownId = `category-dropdown-${Math.random().toString(36).substr(2, 9)}`;
+                                navItem.innerHTML = `
+                                    <div class="nav-dropdown">
+                                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="${dropdownId}">
+                                            ${item.title.toUpperCase()}
+                                            <i class="mdi mdi-chevron-down dropdown-arrow"></i>
+                                        </a>
+                                        <ul class="dropdown-menu category-dropdown-menu" aria-labelledby="${dropdownId}">
+                                            <li><a class="dropdown-item" href="#">Đang tải danh mục con...</a></li>
+                                        </ul>
+                                    </div>
+                                `;
+
+                                // Load sub-categories for this category
+                                loadSubCategories(navItem, item);
+                            } else {
+                                // Create regular button for non-category items
+                                let href = '#';
+                                if (item.linkType === 'EXTERNAL') {
+                                    href = item.url || '#';
+                                } else if (item.linkType === 'PAGE') {
+                                    // Normalize to /content/page/{slug}
+                                    const raw = (item.url || '').toString();
+                                    const slug = raw
+                                        .replace(/^\/content\/page\//, '')
+                                        .replace(/^\//, '');
+                                    href = slug ? `/content/page/${slug}` : '#';
+                                } else if (item.linkType === 'PAGE_LIST') {
+                                    // Normalize to /content/list/{sectionSlug}
+                                    const raw = (item.url || '').toString();
+                                    const sectionSlug = raw
+                                        .replace(/^\/content\/list\//, '')
+                                        .replace(/^\//, '');
+                                    href = sectionSlug ? `/content/list/${sectionSlug}` : '#';
+                                } else if (item.linkType === 'INTERNAL') {
+                                    href = item.url || '#';
+                                }
+
+                                navItem.innerHTML = `
+                                    <a href="${href}" class="nav-link nav-button">
+                                        ${item.title.toUpperCase()}
+                                    </a>
+                                `;
+                            }
+
+                            navList.appendChild(navItem);
+                        });
+
+
+
+                        // Add additional mobile menu items
+                        addAdditionalMobileMenuItems(mobileNavList, data);
+                    }
+                } catch (error) {
+                    console.error('Error loading header bottom content:', error);
+                }
+            }
+
+            // Add additional mobile menu items from data
+            function addAdditionalMobileMenuItems(mobileNavList, data) {
+                // Add "DANH MỤC SẢN PHẨM" expandable menu
+                const categoryHeader = document.createElement('li');
+                categoryHeader.className = 'mobile-nav-item';
+                categoryHeader.innerHTML = `
+                    <div class="mobile-nav-category-container">
+                        <a href="#" class="mobile-nav-link mobile-nav-category" data-bs-toggle="collapse" data-bs-target="#mobile-categories-menu" aria-expanded="false">
+                            <span>DANH MỤC SẢN PHẨM</span>
+                            <i class="mdi mdi-plus mobile-nav-toggle"></i>
+                        </a>
+                        <div class="collapse mobile-nav-submenu" id="mobile-categories-menu">
+                            <div class="mobile-submenu-loading">
+                                <i class="mdi mdi-loading mdi-spin"></i>
+                                <span>Đang tải danh mục...</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                mobileNavList.appendChild(categoryHeader);
+
+                // Load categories for mobile menu
+                loadMobileCategories(categoryHeader);
+
+                // Add all navigation items from data to mobile menu
+                if (data.navigationItems && data.navigationItems.length > 0) {
+                    data.navigationItems.forEach(item => {
+                        const mobileNavItem = document.createElement('li');
+                        mobileNavItem.className = 'mobile-nav-item';
+
+                        // Determine URL based on link type
+                        let href = '#';
+                        if (item.linkType === 'EXTERNAL') {
+                            href = item.url || '#';
+                        } else if (item.linkType === 'PAGE') {
+                            // Normalize to /content/page/{slug}
+                            const raw = (item.url || '').toString();
+                            const slug = raw
+                                .replace(/^\/content\/page\//, '')
+                                .replace(/^\//, '');
+                            href = slug ? `/content/page/${slug}` : '#';
+                        } else if (item.linkType === 'PAGE_LIST') {
+                            // Normalize to /content/list/{sectionSlug}
+                            const raw = (item.url || '').toString();
+                            const sectionSlug = raw
+                                .replace(/^\/content\/list\//, '')
+                                .replace(/^\//, '');
+                            href = sectionSlug ? `/content/list/${sectionSlug}` : '#';
+                        } else if (item.linkType === 'INTERNAL') {
+                            href = item.url || '#';
+                        }
+
+                        const mobileNavLink = document.createElement('a');
+                        mobileNavLink.href = href;
+
+                        if (item.linkType === 'PARENT_CATEGORY' || item.isCategoryParent) {
+                            // Category items with expandable submenu
+                            mobileNavItem.innerHTML = `
+                                <div class="mobile-nav-category-container">
+                                    <a href="#" class="mobile-nav-link mobile-nav-category" data-bs-toggle="collapse" data-bs-target="#mobile-submenu-${item.id}" aria-expanded="false">
+                                        <span>${item.title.toUpperCase()}</span>
+                                        <i class="mdi mdi-plus mobile-nav-toggle"></i>
+                                    </a>
+                                    <div class="collapse mobile-nav-submenu" id="mobile-submenu-${item.id}">
+                                        <div class="mobile-submenu-loading">
+                                            <i class="mdi mdi-loading mdi-spin"></i>
+                                            <span>Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            // Load sub-items for this category
+                            loadMobileSubItems(mobileNavItem, item);
+                        } else {
+                            // Regular items with arrow icon
+                            mobileNavLink.className = 'mobile-nav-link mobile-nav-regular';
+                            mobileNavLink.innerHTML = `
+                                <span>${item.title.toUpperCase()}</span>
+                                <i class="mdi mdi-chevron-right"></i>
+                            `;
+                            mobileNavItem.appendChild(mobileNavLink);
+                        }
+
+                        mobileNavList.appendChild(mobileNavItem);
+                    });
+                }
+            }
+
+            // Load categories for mobile menu (multi-level)
+            async function loadMobileCategories(categoryHeader) {
+                try {
+                    const response = await fetch('/api/header/categories/api');
+                    const data = await response.json();
+
+                    const submenu = categoryHeader.querySelector('.mobile-nav-submenu');
+                    if (submenu && data.result && data.result.length > 0) {
+                        submenu.innerHTML = '';
+
+                        data.result.forEach(category => {
+                            const categoryElement = createMobileCategoryElement(category, 1);
+                            submenu.appendChild(categoryElement);
+                        });
+                    } else {
+                        submenu.innerHTML = '<div class="mobile-submenu-empty">Không có danh mục sản phẩm</div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading mobile categories:', error);
+                    const submenu = categoryHeader.querySelector('.mobile-nav-submenu');
+                    if (submenu) {
+                        submenu.innerHTML = '<div class="mobile-submenu-error">Lỗi tải danh mục sản phẩm</div>';
+                    }
+                }
+            }
+
+            // Create mobile category element with multi-level support
+            function createMobileCategoryElement(category, level) {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = `mobile-submenu-item mobile-category-level-${level}`;
+
+                const hasChildren = category.children && category.children.length > 0;
+                const categoryId = `mobile-category-${category.categoryId}-${Math.random().toString(36).substr(2, 9)}`;
+
+                if (hasChildren) {
+                    // Category with children - expandable
+                    categoryElement.innerHTML = `
+                        <div class="mobile-category-container">
+                            <a href="#" class="mobile-submenu-link mobile-category-toggle" data-bs-toggle="collapse" data-bs-target="#${categoryId}" aria-expanded="false">
+                                <span>${category.name}</span>
+                                <i class="mdi mdi-plus mobile-category-icon"></i>
+                            </a>
+                            <div class="collapse mobile-category-submenu" id="${categoryId}">
+                                <div class="mobile-category-children">
+                                    ${category.children.map(child => createMobileCategoryElement(child, level + 1).outerHTML).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Leaf category - direct link
+                    const categoryUrl = `/product/view/category/${category.categoryId}`;
+                    categoryElement.innerHTML = `
+                        <a href="${categoryUrl}" class="mobile-submenu-link mobile-category-link">
+                            <span>${category.name}</span>
+                            <i class="mdi mdi-chevron-right"></i>
+                        </a>
+                    `;
+                }
+
+                return categoryElement;
+            }
+
+            // Load sub-items for mobile menu
+            async function loadMobileSubItems(mobileNavItem, categoryItem) {
+                try {
+                    const subResponse = await fetch(`/content/api/header-bottom/sub-items/${categoryItem.id}`);
+                    const subData = await subResponse.json();
+
+                    const submenu = mobileNavItem.querySelector('.mobile-nav-submenu');
+                    if (submenu && subData && subData.length > 0) {
+                        submenu.innerHTML = '';
+
+                        subData.forEach(subItem => {
+                            const subItemElement = document.createElement('div');
+                            subItemElement.className = 'mobile-submenu-item';
+
+                            let subHref = '#';
+                            if (subItem.linkType === 'EXTERNAL') {
+                                subHref = subItem.url || '#';
+                            } else if (subItem.linkType === 'PAGE') {
+                                const raw = (subItem.url || '').toString();
+                                const slug = raw.replace(/^\/content\/page\//, '').replace(/^\//, '');
+                                subHref = slug ? `/content/page/${slug}` : '#';
+                            } else if (subItem.linkType === 'PAGE_LIST') {
+                                const raw = (subItem.url || '').toString();
+                                const sectionSlug = raw.replace(/^\/content\/list\//, '').replace(/^\//, '');
+                                subHref = sectionSlug ? `/content/list/${sectionSlug}` : '#';
+                            } else if (subItem.linkType === 'INTERNAL') {
+                                subHref = subItem.url || '#';
+                            }
+
+                            subItemElement.innerHTML = `
+                                <a href="${subHref}" class="mobile-submenu-link">
+                                    <span>${subItem.title}</span>
+                                    <i class="mdi mdi-chevron-right"></i>
+                                </a>
+                            `;
+
+                            submenu.appendChild(subItemElement);
+                        });
+                    } else {
+                        submenu.innerHTML = '<div class="mobile-submenu-empty">Không có danh mục con</div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading mobile sub-items:', error);
+                    const submenu = mobileNavItem.querySelector('.mobile-nav-submenu');
+                    if (submenu) {
+                        submenu.innerHTML = '<div class="mobile-submenu-error">Lỗi tải danh mục con</div>';
+                    }
+                }
+            }
+
+            // Load sub-categories for a category dropdown
+            async function loadSubCategories(navItem, parentItem) {
+                try {
+                    const dropdownMenu = navItem.querySelector('.category-dropdown-menu');
+                    dropdownMenu.innerHTML = '';
+
+                    // Use sub-items from parentItem if available
+                    if (parentItem.subItems && parentItem.subItems.length > 0) {
+                        parentItem.subItems.forEach(subItem => {
+                            const li = document.createElement('li');
+                            const a = document.createElement('a');
+                            a.className = 'dropdown-item';
+
+                            // Determine URL based on link type
+                            let href = '#';
+                            if (subItem.linkType === 'EXTERNAL') {
+                                href = subItem.url || '#';
+                            } else if (subItem.linkType === 'PAGE') {
+                                // Normalize to /content/page/{slug}
+                                const raw = (subItem.url || '').toString();
+                                const slug = raw
+                                    .replace(/^\/content\/page\//, '')
+                                    .replace(/^\//, '');
+                                href = slug ? `/content/page/${slug}` : '#';
+                            } else if (subItem.linkType === 'PAGE_LIST') {
+                                // Normalize to /content/list/{sectionSlug}
+                                const raw = (subItem.url || '').toString();
+                                const sectionSlug = raw
+                                    .replace(/^\/content\/list\//, '')
+                                    .replace(/^\//, '');
+                                href = sectionSlug ? `/content/list/${sectionSlug}` : '#';
+                            } else {
+                                href = subItem.url || '#';
+                            }
+
+                            a.href = href;
+                            a.textContent = subItem.title;
+
+                            // All dropdown items load in current tab
+                            // No special click handler needed
+
+                            li.appendChild(a);
+                            dropdownMenu.appendChild(li);
+                        });
+                    } else {
+                        // Fallback: Load from API
+                        try {
+                            const response = await fetch(`/content/api/header-bottom/sub-items/${parentItem.id}`);
+                            const data = await response.json();
+
+                            if (data && data.length > 0) {
+                                data.forEach(subItem => {
+                                    const li = document.createElement('li');
+                                    const a = document.createElement('a');
+                                    a.className = 'dropdown-item';
+
+                                    // Determine URL based on link type
+                                    let href = '#';
+                                    if (subItem.linkType === 'EXTERNAL') {
+                                        href = subItem.url || '#';
+                                    } else if (subItem.linkType === 'PAGE') {
+                                        // Normalize to /content/page/{slug}
+                                        const raw = (subItem.url || '').toString();
+                                        const slug = raw
+                                            .replace(/^\/content\/page\//, '')
+                                            .replace(/^\//, '');
+                                        href = slug ? `/content/page/${slug}` : '#';
+                                    } else if (subItem.linkType === 'PAGE_LIST') {
+                                        // Normalize to /content/list/{sectionSlug}
+                                        const raw = (subItem.url || '').toString();
+                                        const sectionSlug = raw
+                                            .replace(/^\/content\/list\//, '')
+                                            .replace(/^\//, '');
+                                        href = sectionSlug ? `/content/list/${sectionSlug}` : '#';
+                                    } else {
+                                        href = subItem.url || '#';
+                                    }
+
+                                    a.href = href;
+                                    a.textContent = subItem.title;
+
+                                    // All dropdown items load in current tab
+                                    // No special click handler needed
+
+                                    li.appendChild(a);
+                                    dropdownMenu.appendChild(li);
+                                });
+                            } else {
+                                dropdownMenu.innerHTML = '<li><a class="dropdown-item" href="#">Không có danh mục con</a></li>';
+                            }
+                        } catch (apiError) {
+                            console.error('Error loading sub-items from API:', apiError);
+                            dropdownMenu.innerHTML = '<li><a class="dropdown-item" href="#">Lỗi tải danh mục</a></li>';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading sub-categories:', error);
+                    const dropdownMenu = navItem.querySelector('.category-dropdown-menu');
+                    dropdownMenu.innerHTML = '<li><a class="dropdown-item" href="#">Lỗi tải danh mục</a></li>';
+                }
+            }
+        </script>
+
+        <!-- Auth Modal moved here to be available site-wide -->
+        <div class="modal fade" id="authModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header border-0 text-center">
+                        <h5 class="modal-title fw-bold fs-4 text-dark w-100" id="authModalTitle">Welcome Back! 💕</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body px-4 pb-4">
+                        <form id="authForm">
+                            <a class="google-btn" href="/oauth2/authorization/google">
+                                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+                                Đăng nhập với Google
+                            </a>
+
+                            <div class="divider">
+                                <span>hoặc</span>
+                            </div>
+                            <div id="signupFields" style="display: none;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-dark">Email</label>
+                                    <input type="email" class="form-control rounded-pill" placeholder="Email của bạn"
+                                        id="authEmail">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-dark">Họ</label>
+                                    <input type="text" class="form-control rounded-pill" placeholder="Họ"
+                                        id="authFirstName">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-dark">Tên</label>
+                                    <input type="text" class="form-control rounded-pill" placeholder="Tên"
+                                        id="authLastName">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium text-dark">Username</label>
+                                <input type="username" class="form-control rounded-pill"
+                                    placeholder="Tên đăng nhập của bạn" required id="username">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium text-dark">Password</label>
+                                <input type="password" class="form-control rounded-pill" placeholder="Mật khẩu của bạn"
+                                    required id="password">
+                            </div>
+                            <!-- OTP Field (hidden by default) -->
+                            <div class="mb-3" id="otpField" style="display: none;">
+                                <label class="form-label fw-medium text-dark">Mã xác thực</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control rounded-pill" placeholder="Nhập mã 6 chữ số"
+                                        id="otpCode" maxlength="6">
+                                    <button type="button" class="btn btn-outline-pink-primary rounded-pill"
+                                        id="sendOtpBtn">
+                                        Gửi mã
+                                    </button>
+                                </div>
+                                <div class="form-text text-muted">
+                                    Mã xác thực đã được gửi đến email của bạn
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-pink-primary w-100 fw-semibold py-3 rounded-pill mb-3"
+                                id="authSubmitBtn">Đăng nhập</button>
+                            <div class="forgot-password">
+                                <a href="#!" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Quên mật
+                                    khẩu?</a>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-link text-pink-primary fw-medium"
+                                    id="authToggle">Chưa có tài khoản? Đăng ký</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header border-0 text-center">
+                        <h5 class="modal-title fw-bold fs-4 text-dark w-100">Quên mật khẩu? 🔐</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body px-4 pb-4">
+                        <form id="forgotPasswordForm">
+                            <div class="mb-3">
+                                <label class="form-label fw-medium text-dark">Email</label>
+                                <input type="email" class="form-control rounded-pill" placeholder="Nhập email của bạn"
+                                    id="forgotEmail" required>
+                            </div>
+                            <button type="submit" class="btn btn-pink-primary w-100 fw-semibold py-3 rounded-pill mb-3">
+                                Gửi email đặt lại mật khẩu
+                            </button>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-link text-pink-primary fw-medium"
+                                    data-bs-dismiss="modal">
+                                    Quay lại đăng nhập
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            /* Ensure auth modal appears above any page overlays (e.g., cart overlays) */
+            .modal {
+                z-index: 2000;
+            }
+
+            .modal-backdrop {
+                z-index: 1990;
+            }
+
+            /* Ensure forgot password modal appears at same level as auth modal */
+            #forgotPasswordModal {
+                z-index: 2000 !important;
+            }
+
+            #forgotPasswordModal .modal-backdrop {
+                z-index: 1990 !important;
+            }
+
+            /* Ensure modals stack properly when opened */
+            .modal.show {
+                z-index: 2000;
+            }
+
+            .modal-backdrop.show {
+                z-index: 1990;
+            }
+
+            /* Force forgot password modal to appear on top */
+            #forgotPasswordModal.modal {
+                z-index: 2010 !important;
+            }
+
+            #forgotPasswordModal+.modal-backdrop {
+                z-index: 2000 !important;
+            }
+
+            /* Ensure proper stacking when multiple modals are open */
+            .modal.fade.show {
+                z-index: 2010;
+            }
+
+            .modal-backdrop.fade.show {
+                z-index: 2000;
+            }
+        </style>
+
+        <!-- Ensure auth.js is available globally when header is included -->
+        <script th:src="@{/user/js/auth.js}"></script>
+
+        <!-- Mobile Search Handler -->
+        <script>
+            // Sync mobile search with desktop search
+            document.addEventListener('DOMContentLoaded', function () {
+                const desktopSearchInput = document.getElementById('mainSearchInput');
+                const mobileSearchInput = document.getElementById('mobileSearchInput');
+
+                if (desktopSearchInput && mobileSearchInput) {
+                    // Sync mobile search with desktop search
+                    mobileSearchInput.addEventListener('input', function () {
+                        desktopSearchInput.value = this.value;
+                        desktopSearchInput.dispatchEvent(new Event('input'));
+                    });
+
+                    // Sync desktop search with mobile search
+                    desktopSearchInput.addEventListener('input', function () {
+                        mobileSearchInput.value = this.value;
+                        mobileSearchInput.dispatchEvent(new Event('input'));
+                    });
+                }
+            });
+        </script>
+
+        <!-- Mobile Menu Overlay Handler -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+                const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+                if (mobileMenuToggle && mobileMenuOverlay && closeMobileMenu) {
+                    // Open mobile menu
+                    mobileMenuToggle.addEventListener('click', function () {
+                        mobileMenuOverlay.classList.add('show');
+                        document.body.style.overflow = 'hidden'; // Prevent body scroll
+                    });
+
+                    // Close mobile menu
+                    closeMobileMenu.addEventListener('click', function () {
+                        mobileMenuOverlay.classList.remove('show');
+                        document.body.style.overflow = ''; // Restore body scroll
+                    });
+
+                    // Close mobile menu when clicking overlay
+                    mobileMenuOverlay.addEventListener('click', function (e) {
+                        if (e.target === mobileMenuOverlay) {
+                            mobileMenuOverlay.classList.remove('show');
+                            document.body.style.overflow = ''; // Restore body scroll
+                        }
+                    });
+                }
+            });
+        </script>
+        <script>
+            // Move modals to body to avoid being constrained by header's stacking context
+            (function () {
+                function moveModalsToBody() {
+                    try {
+                        // Move auth modal
+                        var authModal = document.getElementById('authModal');
+                        if (authModal && authModal.parentElement !== document.body) {
+                            document.body.appendChild(authModal);
+                        }
+
+                        // Move forgot password modal
+                        var forgotModal = document.getElementById('forgotPasswordModal');
+                        if (forgotModal && forgotModal.parentElement !== document.body) {
+                            document.body.appendChild(forgotModal);
+                        }
+                    } catch (e) { /* noop */ }
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', moveModalsToBody);
+                } else {
+                    moveModalsToBody();
+                }
+            })();
+        </script>
+
+    </header>
+    <!-- Header End -->
+</body>
+
+</html>
+
+</html>

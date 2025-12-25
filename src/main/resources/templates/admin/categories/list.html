@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Danh sách danh mục - Liora Admin')"></head>
+
+<body class="with-welcome-text categories-page">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">Quản lý danh mục</h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/categories/add" class="btn btn-primary text-white me-2"><i
+                                    class="mdi mdi-plus"></i> Thêm danh mục</a>
+                            <button type="button" class="btn btn-otline-dark me-2" onclick="expandAll()"><i
+                                    class="mdi mdi-arrow-expand-all"></i> Mở rộng tất cả</button>
+                            <button type="button" class="btn btn-otline-dark me-2" onclick="collapseAll()"><i
+                                    class="mdi mdi-arrow-collapse-all"></i> Thu gọn tất cả</button>
+                            <button type="button" class="btn btn-otline-dark" id="exportExcelBtn"><i
+                                    class="mdi mdi-file-excel"></i> Xuất Excel</button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search" placeholder="Tìm kiếm danh mục...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="mdi mdi-magnify"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="status">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Ngừng hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
+                                <i class="mdi mdi-refresh"></i> Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title">Tổng danh mục</h6>
+                                            <h3 class="mb-0" id="totalCategories">0</h3>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <i class="mdi mdi-folder mdi-24px"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title">Đang hoạt động</h6>
+                                            <h3 class="mb-0" id="activeCategories">0</h3>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <i class="mdi mdi-check-circle mdi-24px"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title">Danh mục cha</h6>
+                                            <h3 class="mb-0" id="parentCategories">0</h3>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <i class="mdi mdi-folder-plus mdi-24px"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title">Danh mục con</h6>
+                                            <h3 class="mb-0" id="childCategories">0</h3>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <i class="mdi mdi-file-document mdi-24px"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categories List -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Danh sách danh mục</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tên danh mục</th>
+                                        <th>Loại</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="categories-container">
+                                    <!-- Categories will be loaded here via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            <!-- Pagination info will be updated via JavaScript -->
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0" id="pagination">
+                                <!-- Pagination will be generated via JavaScript -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="/admin/js/admin/admin-ajax.js"></script>
+    <script src="/admin/js/admin/categories.js?v=20251007"></script>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,106 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy JAR app to Azure Web App - liora
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+
+      - name: Clear Maven cache
+        run: mvn dependency:purge-local-repository -DmanualInclude="org.springframework:spring-core"
+
+      - name: Build with Maven
+        run: mvn clean install -U
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment
+          cp target/*.jar deployment/app.jar
+          
+          # Copy uploads folder nếu có để sync files lên Azure
+          # Note: Azure sẽ tự động sync folder /home/uploads
+          if [ -d "uploads" ]; then
+            echo "📦 Uploads folder found, will sync to Azure /home/uploads"
+            mkdir -p deployment/uploads
+            cp -r uploads/* deployment/uploads/ || true
+          fi
+          
+          echo "✅ Deployment package created"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/deployment'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: https://liora.azurewebsites.net
+      
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/deployment'
+      
+      - name: List deployment contents
+        run: |
+          echo "Deployment package contents:"
+          ls -lah ${{ github.workspace }}/deployment/
+      
+      - name: Deploy JAR to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'liora'
+          slot-name: 'Production'
+          package: '${{ github.workspace }}/deployment/app.jar'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F03850EE7CCB4EC69DC616AB3E8164E8 }}
+      
+      - name: Install Azure CLI Extension
+        run: |
+          az extension add --name webapp 2>/dev/null || true
+      
+      - name: Setup Uploads Folder on Azure
+        if: hashFiles('uploads/**') != ''
+        run: |
+          echo "📤 Setting up uploads folder on Azure..."
+          # Note: Azure Web App sẽ tự động mount /home/uploads
+          # Bạn chỉ cần tạo folder này thông qua Kudu hoặc SSH
+          echo "⚠️  Please manually create /home/uploads folder via Kudu Console:"
+          echo "   https://liora.scm.azurewebsites.net"
+          echo "   Debug console → mkdir uploads"
+      
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "⚠️  IMPORTANT: Please set these environment variables in Azure Portal:"
+          echo "   - SPRING_PROFILES_ACTIVE=azure"
+          echo "   - SQL_USERNAME, SQL_PASSWORD"
+          echo "   - JWT_SIGNER_KEY"
+          echo "   - GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET"
+          echo "   - MAIL_USERNAME, MAIL_PASSWORD"
+          echo ""
+          echo "👉 Then RESTART the web app from Azure Portal"

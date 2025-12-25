@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Xem trước Header Tầng Dưới - Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <style>
+                        .preview-container {
+                            background: #f8f9fa;
+                            min-height: 100vh;
+                            padding: 20px 0;
+                        }
+
+                        .header-preview {
+                            background: white;
+                            border: 1px solid #dee2e6;
+                            border-radius: 8px;
+                            overflow: hidden;
+                        }
+
+                        .bottom-header {
+                            background: #f8f9fa;
+                            padding: 15px 0;
+                            border-top: 1px solid #dee2e6;
+                        }
+
+                        .btn-categories {
+                            background: #e91e63;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                        }
+
+                        .btn-about {
+                            background: #6c757d;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            text-decoration: none;
+                        }
+
+                        .nav-list {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+                            display: flex;
+                            gap: 20px;
+                        }
+
+                        .nav-link {
+                            color: #333;
+                            text-decoration: none;
+                            font-weight: 500;
+                        }
+
+                        .nav-link:hover {
+                            color: #e91e63;
+                        }
+
+                        .info-item {
+                            border-left: 3px solid #e91e63;
+                            padding-left: 15px;
+                        }
+
+                        .nav-item-info {
+                            background: #f8f9fa;
+                            transition: all 0.3s ease;
+                        }
+
+                        .nav-item-info:hover {
+                            background: #e9ecef;
+                            transform: translateX(5px);
+                        }
+
+                        .badge {
+                            font-size: 0.75rem;
+                        }
+                    </style>
+                    </head>
+
+                    <body>
+                        <div class="preview-container">
+                            <div class="container">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h2>Xem trước Header Tầng Dưới</h2>
+                                                <p class="text-muted mb-0">Xem trước giao diện header hiện tại trên
+                                                    website</p>
+                                            </div>
+                                            <div>
+                                                <a href="/admin/header-bottom" class="btn btn-primary">
+                                                    <i class="mdi mdi-pencil me-1"></i>Chỉnh sửa
+                                                </a>
+                                                <a href="/admin/dashboard" class="btn btn-outline-secondary ms-2">
+                                                    <i class="mdi mdi-arrow-left me-1"></i>Quay lại
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Header Preview -->
+                                <div class="header-preview">
+                                    <div class="bottom-header">
+                                        <div class="container">
+                                            <div class="row align-items-center">
+                                                <!-- Fixed Categories Button -->
+                                                <div class="col-auto">
+                                                    <button class="btn btn-categories" type="button">
+                                                        <i class="mdi mdi-menu me-2"></i>
+                                                        <span
+                                                            th:text="${headerBottom?.categoriesButtonText ?: 'Danh Mục Sản Phẩm'}">Danh
+                                                            Mục Sản Phẩm</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Main Navigation -->
+                                                <div class="col">
+                                                    <nav class="main-nav">
+                                                        <ul class="nav-list">
+                                                            <li th:each="item : ${navigationItems}" class="nav-item">
+                                                                <a th:href="${item.url}" th:text="${item.title}"
+                                                                    class="nav-link">Navigation Item</a>
+                                                            </li>
+                                                        </ul>
+                                                    </nav>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Information Panel -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="mdi mdi-information me-2"></i>
+                                                    Thông tin Header
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="info-item mb-3">
+                                                            <h6 class="text-primary mb-2">
+                                                                <i class="mdi mdi-menu me-1"></i>
+                                                                Nút Danh mục (Cố định)
+                                                            </h6>
+                                                            <p class="mb-0 fw-bold"
+                                                                th:text="${headerBottom?.categoriesButtonText ?: 'Danh Mục Sản Phẩm'}">
+                                                                Danh Mục Sản Phẩm</p>
+                                                        </div>
+
+                                                        <div class="info-item">
+                                                            <h6 class="text-primary mb-2">
+                                                                <i class="mdi mdi-counter me-1"></i>
+                                                                Số mục điều hướng
+                                                            </h6>
+                                                            <p class="mb-0 fw-bold"
+                                                                th:text="${#lists.size(navigationItems)}">0</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <h6 class="text-primary mb-2">
+                                                                <i class="mdi mdi-format-list-bulleted me-1"></i>
+                                                                Danh sách mục điều hướng
+                                                            </h6>
+                                                            <div
+                                                                th:if="${navigationItems != null and !navigationItems.empty}">
+                                                                <div th:each="item : ${navigationItems}"
+                                                                    class="nav-item-info mb-2 p-2 border rounded">
+                                                                    <div
+                                                                        class="d-flex justify-content-between align-items-center">
+                                                                        <strong th:text="${item.title}">Mục điều
+                                                                            hướng</strong>
+                                                                        <span class="badge"
+                                                                            th:classappend="${item.linkType == 'CATEGORY'} ? 'bg-primary' : 
+                                                                                            (item.linkType == 'PARENT_CATEGORY') ? 'bg-info' :
+                                                                                            (item.linkType == 'INTERNAL') ? 'bg-success' :
+                                                                                            (item.linkType == 'EXTERNAL') ? 'bg-warning' :
+                                                                                            (item.linkType == 'PAGE') ? 'bg-secondary' : 'bg-light'">
+                                                                            <span
+                                                                                th:if="${item.linkType == 'CATEGORY'}">Danh
+                                                                                mục lớn</span>
+                                                                            <span
+                                                                                th:if="${item.linkType == 'PARENT_CATEGORY'}">Danh
+                                                                                mục cha</span>
+                                                                            <span
+                                                                                th:if="${item.linkType == 'INTERNAL'}">Trang
+                                                                                nội bộ</span>
+                                                                            <span
+                                                                                th:if="${item.linkType == 'EXTERNAL'}">Link
+                                                                                bên ngoài</span>
+                                                                            <span
+                                                                                th:if="${item.linkType == 'PAGE'}">Trang
+                                                                                tĩnh</span>
+                                                                        </span>
+                                                                    </div>
+                                                                    <small class="text-muted"
+                                                                        th:text="${item.url ?: '#'}">URL</small>
+                                                                </div>
+                                                            </div>
+                                                            <div th:if="${navigationItems == null or navigationItems.empty}"
+                                                                class="text-muted">
+                                                                <i class="mdi mdi-information me-1"></i>
+                                                                Chưa có mục điều hướng nào
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+</body>
+
+</html>

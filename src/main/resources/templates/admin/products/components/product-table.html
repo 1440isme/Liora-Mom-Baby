@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Table</title>
+</head>
+
+<body>
+    <!-- Products Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered" id="productsTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Thương hiệu</th>
+                    <th>Giá</th>
+                    <th>Kho</th>
+                    <th>Đã bán</th>
+                    <th>Còn hàng</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="productsTableBody">
+                <!-- Data will be loaded here via AJAX -->
+                <tr>
+                    <td colspan="10" class="text-center text-muted py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <p class="mt-2">Đang tải dữ liệu...</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationContainer" class="d-flex justify-content-between align-items-center mt-3" style="display: none;">
+        <div class="text-muted" id="paginationInfo">
+            <!-- Pagination info will be loaded here -->
+        </div>
+
+        <nav>
+            <ul class="pagination mb-0" id="paginationNav">
+                <!-- Pagination links will be loaded here -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa sản phẩm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include JavaScript files -->
+    <script src="/admin/js/admin/products/product-modal.js"></script>
+    <script src="/admin/js/admin/products/product-table.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Thêm sản phẩm - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">Thêm sản phẩm mới</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/products">Sản phẩm</a></li>
+                                <li class="breadcrumb-item active">Thêm mới</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <!-- Product Form -->
+                    <div class="row">
+                        <!-- Form chính - 8 cột -->
+                        <div class="col-lg-8">
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Thông tin sản phẩm</h4>
+                                    <div th:replace="admin/products/components/product-form"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hình ảnh - 4 cột bên phải -->
+                        <div class="col-lg-4">
+                            <!-- Image Upload Card -->
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Hình ảnh sản phẩm</h4>
+                                    <div class="mb-3">
+                                        <label for="productImages" class="form-label">Hình ảnh sản phẩm</label>
+                                        <input type="file" class="form-control" id="productImages" name="productImages" multiple accept="image/*">
+                                        <div class="form-text">Chọn một hoặc nhiều hình ảnh (bắt buộc)</div>
+                                    </div>
+
+                                    <!-- Image Preview -->
+                                    <div id="imagePreview" class="mt-3">
+                                        <div class="text-center text-muted">
+                                            <i class="mdi mdi-image-multiple mdi-48px"></i>
+                                            <p class="mt-2">Hình ảnh sẽ hiển thị ở đây</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include JavaScript files -->
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="/admin/js/admin/products/product-form.js"></script>
+    <script src="/admin/js/admin/products/product-add.js"></script>
+
+    <!-- Footer ở cuối -->
+    <div th:replace="admin/layout/admin-footer"></div>
+</body>
+
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Tree Item</title>
+</head>
+
+<body>
+    <!-- Category Tree Item -->
+    <div class="tree-item" th:style="'margin-left: ' + ${category.level * 20} + 'px;'">
+        <div class="d-flex align-items-center py-2 border-bottom">
+            <!-- Expand/Collapse Button -->
+            <div class="me-2">
+                <button th:if="${category.hasChildren}" class="btn btn-sm btn-outline-secondary tree-toggle"
+                    th:data-target="'#children-' + ${category.id}">
+                    <i class="fas fa-folder"></i>
+                </button>
+                <span th:unless="${category.hasChildren}" class="text-muted ms-3">
+                    <i class="fas fa-folder"></i>
+                </span>
+            </div>
+
+            <!-- Category Image -->
+            <div class="me-3">
+                <img th:src="${category.imageUrl != null ? category.imageUrl : 'https://placehold.co/300x300'}"
+                    th:alt="${category.name}" class="img-thumbnail" width="40" height="40" style="object-fit: cover;">
+            </div>
+
+            <!-- Category Info -->
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center">
+                    <h6 class="mb-0 me-2" th:text="${category.name}">Tên danh mục</h6>
+                    <span class="badge" th:classappend="${category.status == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                        th:text="${category.status == 'ACTIVE'} ? 'Hoạt động' : 'Ngừng hoạt động'">Hoạt động</span>
+                </div>
+                <div class="text-muted small">
+                    <span th:text="${category.productCount}">0</span> sản phẩm |
+                    <span th:text="${category.childrenCount}">0</span> danh mục con |
+                    Thứ tự: <span th:text="${category.sortOrder}">0</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary"
+                    th:onclick="'showCategoryActions(' + ${category.id} + ', \'' + ${category.name} + '\')'"
+                    title="Thao tác">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}" class="btn btn-sm btn-outline-warning"
+                    title="Chỉnh sửa">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                    th:onclick="'deleteCategory(' + ${category.id} + ', \'' + ${category.name} + '\')'" title="Xóa">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Children Categories -->
+        <div th:if="${category.hasChildren}" class="tree-children" th:id="'children-' + ${category.id}"
+            style="display: none;">
+            <div th:each="child : ${category.children}" th:replace="admin/categories/components/category-tree-item">
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

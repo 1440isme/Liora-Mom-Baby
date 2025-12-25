@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý Trang Nội dung - Liora Admin')">
+    <style>
+        .page-card {
+            transition: all 0.3s ease;
+        }
+
+        .page-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+        }
+
+        .content-preview {
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .slug-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            Quản lý Trang Nội dung
+                        </h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/static-pages/add" class="btn btn-primary text-white">
+                                <i class="fas fa-plus me-2"></i>Tạo Trang Mới
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="get" class="row g-3" id="filterForm">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tìm kiếm <span class="text-muted small">(tự áp
+                                                    dụng)</span></label>
+                                            <input type="text" class="form-control" name="search" th:value="${search}"
+                                                placeholder="Nhập tiêu đề trang..." id="searchInput">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select class="form-select" name="isActive" id="isActiveSelect">
+                                                <option value="">Tất cả</option>
+                                                <option value="true" th:selected="${isActive == true}">Hoạt động
+                                                </option>
+                                                <option value="false" th:selected="${isActive == false}">Tạm dừng
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Xuất bản</label>
+                                            <select class="form-select" name="isPublished" id="isPublishedSelect">
+                                                <option value="">Tất cả</option>
+                                                <option value="true" th:selected="${isPublished == true}">Đã xuất bản
+                                                </option>
+                                                <option value="false" th:selected="${isPublished == false}">Bản nháp
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Sắp xếp</label>
+                                            <select class="form-select" name="sortBy" id="sortBySelect">
+                                                <option value="title" th:selected="${sortBy == 'title'}">Tiêu đề
+                                                </option>
+                                                <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Ngày
+                                                    tạo</option>
+                                                <option value="updatedAt" th:selected="${sortBy == 'updatedAt'}">Cập
+                                                    nhật</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">&nbsp;</label>
+                                            <div class="d-grid">
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    id="clearFilters">
+                                                    <i class="fas fa-eraser me-1"></i>Xóa bộ lọc
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Static Pages List -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-list me-2"></i>
+                                        Danh sách Trang
+                                        <span class="badge bg-primary ms-2" th:text="${totalElements}">0</span>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Success/Error Messages will be shown via toast -->
+
+                                    <!-- Static Pages List (table-like) -->
+                                    <div th:if="${staticPages.content.size() > 0}">
+                                        <div class="table-responsive">
+                                            <table class="table align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tiêu đề</th>
+                                                        <th>Ngày xuất bản</th>
+                                                        <th>Trạng thái</th>
+                                                        <th class="text-end">Hành động</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="page : ${staticPages.content}">
+                                                        <td>
+                                                            <div class="fw-semibold" th:text="${page.title}">Tiêu đề
+                                                            </div>
+                                                            <div class="text-muted small" th:text="'/' + ${page.slug}">
+                                                                /slug</div>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                th:text="${page.publishedAt != null ? #temporals.format(page.publishedAt, 'dd/MM/yyyy HH:mm') : '-'}">-</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge status-badge me-1"
+                                                                th:classappend="${page.isPublished} ? 'bg-primary' : 'bg-warning'"
+                                                                th:text="${page.isPublished ? 'Đã xuất bản' : 'Bản nháp'}">Xuất
+                                                                bản</span>
+                                                            <span class="badge status-badge"
+                                                                th:classappend="${page.isActive} ? 'bg-success' : 'bg-secondary'"
+                                                                th:text="${page.isActive ? 'Hoạt động' : 'Tạm dừng'}">Hoạt
+                                                                động</span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <a class="btn btn-sm btn-outline-secondary me-2"
+                                                                th:href="@{/admin/static-pages/edit/{id}(id=${page.id})}"><i
+                                                                    class="fas fa-edit me-1"></i>Chỉnh sửa</a>
+                                                            <a class="btn btn-sm btn-outline-primary me-2"
+                                                                th:href="@{/content/page/{slug}(slug=${page.slug})}"
+                                                                target="_blank"><i
+                                                                    class="fas fa-external-link-alt me-1"></i>Xem</a>
+                                                            <button class="btn btn-sm btn-outline-danger delete-page"
+                                                                th:data-id="${page.id}"><i
+                                                                    class="fas fa-trash me-1"></i>Xóa</button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Empty State -->
+                                    <div th:if="${staticPages.content.size() == 0}" class="text-center py-5">
+                                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Chưa có trang nào</h5>
+                                        <p class="text-muted">Hãy tạo trang đầu tiên để bắt đầu</p>
+                                        <a href="/admin/static-pages/add" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Tạo Trang Mới
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div th:if="${staticPages.totalPages > 1}" class="row mt-4">
+                        <div class="col-12">
+                            <nav>
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:classappend="${staticPages.first} ? 'disabled'">
+                                        <a class="page-link"
+                                            th:href="@{/admin/static-pages(page=${staticPages.number - 1}, search=${search}, isActive=${isActive}, isPublished=${isPublished}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    <li th:each="i : ${#numbers.sequence(0, staticPages.totalPages - 1)}"
+                                        class="page-item" th:classappend="${i == staticPages.number} ? 'active'">
+                                        <a class="page-link"
+                                            th:href="@{/admin/static-pages(page=${i}, search=${search}, isActive=${isActive}, isPublished=${isPublished}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                                            th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${staticPages.last} ? 'disabled'">
+                                        <a class="page-link"
+                                            th:href="@{/admin/static-pages(page=${staticPages.number + 1}, search=${search}, isActive=${isActive}, isPublished=${isPublished}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Xác nhận xóa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa trang này không?</p>
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash me-1"></i>Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="listToast" class="toast admin-toast admin-toast-info" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast">&times;</button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script>
+        // Auto submit filters (with debounce for search)
+        (function () {
+            const form = document.getElementById('filterForm');
+            if (!form) return;
+
+            const searchInput = document.getElementById('searchInput');
+            const isActiveSelect = document.getElementById('isActiveSelect');
+            const isPublishedSelect = document.getElementById('isPublishedSelect');
+            const sortBySelect = document.getElementById('sortBySelect');
+            const clearBtn = document.getElementById('clearFilters');
+
+            let debounceTimer;
+            function debounceSubmit() {
+                if (debounceTimer) clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => form.submit(), 400);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', debounceSubmit);
+            }
+            if (isActiveSelect) {
+                isActiveSelect.addEventListener('change', () => form.submit());
+            }
+            if (isPublishedSelect) {
+                isPublishedSelect.addEventListener('change', () => form.submit());
+            }
+            if (sortBySelect) {
+                sortBySelect.addEventListener('change', () => form.submit());
+            }
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function () {
+                    if (searchInput) searchInput.value = '';
+                    if (isActiveSelect) isActiveSelect.value = '';
+                    if (isPublishedSelect) isPublishedSelect.value = '';
+                    if (sortBySelect) sortBySelect.value = 'title';
+
+                    // Giữ nguyên sortDir hiện tại, chỉ reset các filter
+                    form.submit();
+                });
+            }
+        })();
+
+        // Toggle active status
+        document.querySelectorAll('.toggle-active').forEach(toggle => {
+            toggle.addEventListener('change', function () {
+                const pageId = this.dataset.id;
+                const isActive = this.checked;
+
+                fetch(`/admin/static-pages/toggle-active/${pageId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('success', 'Cập nhật trạng thái hoạt động thành công!');
+                            // Update badge
+                            const card = this.closest('.page-card');
+                            const badge = card.querySelector('.badge.bg-success, .badge.bg-secondary');
+                            if (badge) {
+                                badge.textContent = data.isActive ? 'Hoạt động' : 'Tạm dừng';
+                                badge.className = `badge status-badge ${data.isActive ? 'bg-success' : 'bg-secondary'}`;
+                            }
+                        } else {
+                            this.checked = !isActive; // Revert toggle
+                            showToast('danger', 'Lỗi khi cập nhật trạng thái: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        this.checked = !isActive; // Revert toggle
+                        showToast('danger', 'Lỗi khi cập nhật trạng thái');
+                    });
+            });
+        });
+
+        // Toggle published status
+        document.querySelectorAll('.toggle-published').forEach(toggle => {
+            toggle.addEventListener('change', function () {
+                const pageId = this.dataset.id;
+                const isPublished = this.checked;
+
+                fetch(`/admin/static-pages/toggle-published/${pageId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('success', 'Cập nhật trạng thái xuất bản thành công!');
+                            // Update badge
+                            const card = this.closest('.page-card');
+                            const badge = card.querySelector('.badge.bg-primary, .badge.bg-warning');
+                            if (badge) {
+                                badge.textContent = data.isPublished ? 'Đã xuất bản' : 'Bản nháp';
+                                badge.className = `badge status-badge ${data.isPublished ? 'bg-primary' : 'bg-warning'}`;
+                            }
+                        } else {
+                            this.checked = !isPublished; // Revert toggle
+                            showToast('danger', 'Lỗi khi cập nhật trạng thái: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        this.checked = !isPublished; // Revert toggle
+                        showToast('danger', 'Lỗi khi cập nhật trạng thái');
+                    });
+            });
+        });
+
+        // Delete page
+        let deletePageId = null;
+        document.querySelectorAll('.delete-page').forEach(btn => {
+            btn.addEventListener('click', function () {
+                deletePageId = this.dataset.id;
+                const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                modal.show();
+            });
+        });
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            if (deletePageId) {
+                fetch(`/admin/static-pages/delete/${deletePageId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('success', 'Xóa trang thành công!');
+                            // Remove the card from DOM
+                            const card = document.querySelector(`[data-id="${deletePageId}"]`).closest('.col-lg-6');
+                            if (card) {
+                                card.remove();
+                            }
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                            modal.hide();
+                        } else {
+                            showToast('danger', 'Lỗi khi xóa: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        showToast('danger', 'Lỗi khi xóa trang');
+                    });
+            }
+        });
+
+        // Toast notification
+        function showToast(type, message) {
+            const toast = document.getElementById('listToast');
+            const toastBody = toast.querySelector('.toast-body');
+            const iconEl = toast.querySelector('.toast-header i');
+
+            iconEl.className = 'fas me-2';
+            switch (type) {
+                case 'success':
+                    iconEl.classList.add('fa-check-circle', 'text-success');
+                    break;
+                case 'danger':
+                case 'error':
+                    iconEl.classList.add('fa-exclamation-circle', 'text-danger');
+                    break;
+                case 'warning':
+                    iconEl.classList.add('fa-exclamation-triangle', 'text-warning');
+                    break;
+                default:
+                    iconEl.classList.add('fa-info-circle', 'text-primary');
+            }
+
+            toastBody.textContent = message;
+            const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 4000 });
+            bsToast.show();
+        }
+
+        // Show toast for URL parameters (?success=..., ?error=...)
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('success')) {
+                const s = params.get('success');
+                showToast('success', s === 'add' ? 'Tạo trang thành công!' : 'Cập nhật trang thành công!');
+            }
+            if (params.has('error')) {
+                const e = params.get('error');
+                showToast('danger', e === 'notfound' ? 'Không tìm thấy trang!' : 'Đã xảy ra lỗi!');
+            }
+        })();
+    </script>
+</body>
+
+</html>

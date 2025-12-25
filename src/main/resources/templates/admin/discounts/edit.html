@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Chỉnh sửa mã giảm giá - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper">
+        <div th:replace="admin/layout/admin-navbar"></div>
+        <div th:replace="admin/layout/admin-sidebar"></div>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Page Header -->
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                    <h1 class="h3 mb-0">Chỉnh sửa mã giảm giá</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="/admin/discounts">Mã giảm giá</a></li>
+                            <li class="breadcrumb-item active">Chỉnh sửa</li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <!-- Discount Form -->
+                <div class="row">
+                    <!-- Form chính - 8 cột -->
+                    <div class="col-lg-8">
+                        <div class="card card-rounded">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash">Thông tin mã giảm giá</h4>
+                                <form id="discountForm" novalidate>
+                                    <!-- Hidden field để lưu discountId -->
+                                    <input type="hidden" id="discountId" name="discountId">
+
+                                    <!-- Tên mã giảm giá -->
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Tên mã giảm giá <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="name" name="name" required
+                                               placeholder="Ví dụ: Giảm 20% cho đơn hàng đầu tiên">
+                                    </div>
+
+                                    <!-- Mô tả -->
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Mô tả</label>
+                                        <textarea class="form-control auto-resize" id="description" name="description" rows="3"
+                                                  placeholder="Nhập mô tả chi tiết về mã giảm giá..."></textarea>
+                                    </div>
+
+                                    <!-- Giá trị giảm -->
+                                    <div class="mb-3">
+                                        <label for="discountValue" class="form-label">Giá trị giảm (%) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="discountValue" name="discountValue"
+                                                   min="0" max="100" step="0.01" required placeholder="0.00">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Đơn hàng tối thiểu -->
+                                    <div class="mb-3">
+                                        <label for="minOrderValue" class="form-label">Đơn hàng tối thiểu</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="minOrderValue" name="minOrderValue"
+                                                   min="0" step="1000" placeholder="0">
+                                            <span class="input-group-text">₫</span>
+                                        </div>
+                                        <div class="form-text">Để trống nếu không có yêu cầu tối thiểu</div>
+                                    </div>
+
+                                    <!-- Giảm tối đa -->
+                                    <div class="mb-3">
+                                        <label for="maxDiscountAmount" class="form-label">Giảm tối đa</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="maxDiscountAmount" name="maxDiscountAmount"
+                                                   min="0" step="1000" placeholder="0">
+                                            <span class="input-group-text">₫</span>
+                                        </div>
+                                        <div class="form-text">Để trống nếu không giới hạn số tiền giảm</div>
+                                    </div>
+
+                                    <!-- Thời gian hiệu lực -->
+                                    <div class="mb-3">
+                                        <h5 class="card-title card-title-dash">Thời gian hiệu lực</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="startDate" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                                <input type="datetime-local" class="form-control" id="startDate" name="startDate" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="endDate" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                                <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Giới hạn sử dụng -->
+                                    <div class="mb-3">
+                                        <h5 class="card-title card-title-dash">Giới hạn sử dụng</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="usageLimit" class="form-label">Tổng lượt sử dụng</label>
+                                                <div class="input-group">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="decreaseValue('usageLimit')">
+                                                        <i class="mdi mdi-minus"></i>
+                                                    </button>
+                                                    <input type="number" class="form-control text-center" id="usageLimit" name="usageLimit"
+                                                           min="0" value="0">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="increaseValue('usageLimit')">
+                                                        <i class="mdi mdi-plus"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="form-text">Để 0 nếu không giới hạn</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="userUsageLimit" class="form-label">Lượt sử dụng/người dùng</label>
+                                                <div class="input-group">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="decreaseValue('userUsageLimit')">
+                                                        <i class="mdi mdi-minus"></i>
+                                                    </button>
+                                                    <input type="number" class="form-control text-center" id="userUsageLimit" name="userUsageLimit"
+                                                           min="0" value="0">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="increaseValue('userUsageLimit')">
+                                                        <i class="mdi mdi-plus"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="form-text">Để 0 nếu không giới hạn</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Trạng thái -->
+                                    <div class="mb-3">
+                                        <h5 class="card-title card-title-dash">Trạng thái mã giảm giá</h5>
+                                        <div class="row mt-3">
+                                            <div class="col-md-12">
+                                                <div class="form-check ps-4">
+                                                    <input class="form-check-input" type="checkbox" id="isActive" name="isActive">
+                                                    <label class="form-check-label" for="isActive">Kích hoạt mã giảm giá</label>
+                                                </div>
+                                                <small class="text-muted">Mã giảm giá sẽ được kích hoạt và có thể sử dụng.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Actions -->
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Làm mới</button>
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner"></span>
+                                            <span id="submitText">Cập nhật mã giảm giá</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview - 4 cột bên phải -->
+                    <div class="col-lg-4">
+                        <!-- Preview Card -->
+                        <div class="card card-rounded mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash">Xem trước</h4>
+                                <div id="discountPreview" class="text-center text-muted">
+                                    <i class="mdi mdi-percent mdi-48px"></i>
+                                    <p class="mt-2">Thông tin mã giảm giá sẽ hiển thị ở đây</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include JavaScript files -->
+<div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+<script th:src="@{/admin/js/admin/discounts.js}"></script>
+
+<!-- Footer ở cuối -->
+<div th:replace="admin/layout/admin-footer"></div>
+</body>
+
+</html>

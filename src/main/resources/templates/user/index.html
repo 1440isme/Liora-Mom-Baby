@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liora</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+    <link rel="stylesheet" th:href="@{/user/css/bestseller-products-homepage.css}">
+    <link rel="stylesheet" th:href="@{/user/css/newest-products-homepage.css}">
+
+</head>
+
+<body class="homepage">
+    <!-- Navigation -->
+    <div th:replace="user/layout/user-header :: header"></div>
+    <!-- Chatbot -->
+    <div th:replace="user/layout/chatbot :: chatbot-button"></div>
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Home Page -->
+        <div id="home-page" class="page active">
+            <!-- Banner Slider Section -->
+            <section class="banner-slider-section">
+                <div class="banner-slider-container">
+                    <div class="banner-slider" id="bannerSlider">
+                        <!-- Banners will be loaded here -->
+                    </div>
+                    <div class="slider-controls">
+                        <button class="slider-btn prev-btn" id="prevBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="slider-btn next-btn" id="nextBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="slider-dots" id="sliderDots">
+                        <!-- Dots will be generated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- USP / Lợi ích nhanh -->
+            <section class="py-4 border-bottom bg-white">
+                <div class="container">
+                    <div class="row g-3 text-center">
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="mdi mdi-truck-fast-outline fs-2 text-pink-primary"></i>
+                                <div class="fw-semibold mt-2">Freeship đơn từ 0đ</div>
+                                <small class="text-muted">Giao nhanh toàn quốc</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="mdi mdi-shield-check-outline fs-2 text-pink-primary"></i>
+                                <div class="fw-semibold mt-2">100% Chính hãng</div>
+                                <small class="text-muted">Hóa đơn, tem phân phối</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="mdi mdi-cash-multiple fs-2 text-pink-primary"></i>
+                                <div class="fw-semibold mt-2">COD toàn quốc</div>
+                                <small class="text-muted">Nhận hàng rồi thanh toán</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="mdi mdi-heart-outline fs-2 text-pink-primary"></i>
+                                <div class="fw-semibold mt-2">Chất lượng cao</div>
+                                <small class="text-muted">Hiệu quả tức thì</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Danh mục nổi bật -->
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-uppercase">Danh mục nổi bật</h2>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-6 col-md-3">
+                            <a href="/product/featured-category/2" class="text-decoration-none text-dark">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <img class="card-img-top" th:src="@{/user/img/chamsocda.jpg}" alt="Chăm sóc da">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">CHĂM SÓC DA</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="/product/featured-category/1" class="text-decoration-none text-dark">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <img class="card-img-top" th:src="@{/user/img/trangdiem.jpg}" alt="Trang điểm">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">TRANG ĐIỂM</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="/product/featured-category/3" class="text-decoration-none text-dark">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <img class="card-img-top" th:src="@{/user/img/chamsoctoc.jpg}" alt="Tóc">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">CHĂM SÓC TÓC</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="/product/featured-category/4" class="text-decoration-none text-dark">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <img class="card-img-top" th:src="@{/user/img/chamsoccothe.png}" alt="Cơ thể">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">CHĂM SÓC CƠ THỂ</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Khuyến mãi dành cho bạn -->
+            <section class="py-5">
+                <div class="container">
+                    <h2 class="fw-bold mb-4 text-center text-uppercase">Khuyến mãi dành cho bạn</h2>
+
+                    <!-- Slider Container - copied from product detail page -->
+                    <div class="discount-slider-container">
+                        <!-- Navigation Arrows -->
+                        <button class="slider-btn slider-btn-prev" onclick="slideDiscounts('prev')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+
+                        <div class="discount-slider-wrapper">
+                            <div id="discounts-container" class="discount-slider">
+                                <!-- Discounts will be loaded here by JavaScript -->
+                            </div>
+                        </div>
+
+                        <button class="slider-btn slider-btn-next" onclick="slideDiscounts('next')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Best Sellers -->
+            <section class="py-5">
+                <div class="container">
+                    <div
+                        th:replace="user/products/fragments/_bestseller-products-homepage :: bestsellerProductsHomepageSection">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hàng mới về -->
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div
+                        th:replace="user/products/fragments/_newest-products-homepage :: newestProductsHomepageSection">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thương hiệu đối tác -->
+            <section class="py-5">
+                <div class="container">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-uppercase">Thương hiệu</h2>
+                        <p class="text-muted mb-0">Đồng hành cùng các brand chính hãng</p>
+                    </div>
+                    <div class="brand-slider position-relative">
+                        <div class="brand-track d-flex align-items-center">
+                            <div class="brand-item px-4 opacity-1" th:each="brand : ${activeBrands}">
+                                <a th:href="@{'/brand/' + ${brand.brandId}}" class="text-decoration-none">
+                                    <img th:src="${brand.logoUrl}" th:alt="${brand.name}">
+                                </a>
+                            </div>
+                            <!-- Duplicate for seamless loop -->
+                            <div class="brand-item px-4 opacity-1" th:each="brand : ${activeBrands}">
+                                <a th:href="@{'/brand/' + ${brand.brandId}}" class="text-decoration-none">
+                                    <img th:src="${brand.logoUrl}" th:alt="${brand.name}">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bài viết / Tin tức -->
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h2 class="fw-bold mb-0 text-uppercase">Làm đẹp cùng Liora</h2>
+                        <a href="/content/list/lam-dep-cung-liora" class="text-pink-primary fw-semibold">Xem tất cả</a>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4" th:each="p : ${latestBeautyPages}">
+                            <a th:href="@{'/content/page/' + ${p.slug}}"
+                                class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
+                                <div class="ratio ratio-16x9">
+                                    <img th:if="${p.thumbnailUrl != null}" th:src="${p.thumbnailUrl}" alt="thumbnail"
+                                        class="card-img-top" style="object-fit:cover;">
+                                    <img th:if="${p.thumbnailUrl == null}"
+                                        src="https://via.placeholder.com/800x450?text=No+Image" alt="placeholder"
+                                        class="card-img-top" style="object-fit:cover;">
+                                </div>
+                                <div class="card-body">
+                                    <div class="fw-semibold" th:text="${p.title}">Tiêu đề</div>
+                                    <small class="text-muted"
+                                        th:text="${p.publishedAt != null ? #temporals.format(p.publishedAt, 'dd/MM/yyyy') : (#temporals.format(p.createdAt, 'dd/MM/yyyy'))}">Ngày</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-12" th:if="${#lists.isEmpty(latestBeautyPages)}">
+                            <div class="alert alert-info mb-0">Chưa có bài viết nào trong nhóm này.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="user/layout/user-footer :: footer"></div>
+
+
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer">
+        <!-- Toasts will be added here dynamically -->
+    </div>
+
+    <!-- Popup Portal -->
+    <div id="popup-portal"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript (ensure main.js loads before others) -->
+    <script th:src="@{/user/js/main.js}"></script>
+    <script th:src="@{/user/js/products.js}"></script>
+    <script th:src="@{/user/js/reviews.js}"></script>
+    <script th:src="@{/user/js/product-rating-utils.js}"></script>
+    <script th:src="@{/user/js/bestseller-products-homepage.js}"></script>
+    <script th:src="@{/user/js/newest-products-homepage.js}"></script>
+
+    <!-- Discount Slider Styles - copied from product detail page -->
+    <style>
+        .discount-slider-container {
+            position: relative;
+            padding: 0 50px;
+            overflow: hidden;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            background: #ff6b9d;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            color: white;
+        }
+
+        .slider-btn:hover {
+            background: #e55a8a;
+        }
+
+        .slider-btn-prev {
+            left: 10px;
+        }
+
+        .slider-btn-next {
+            right: 10px;
+        }
+
+        .slider-btn i {
+            font-size: 14px;
+        }
+
+        .discount-slider-wrapper {
+            overflow: hidden;
+        }
+
+        .discount-slider {
+            display: flex;
+            transition: transform 0.3s ease;
+            gap: 20px;
+        }
+
+        .discount-card {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            height: 160px;
+            width: 320px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .discount-card-left {
+            width: 22%;
+            background: #ffc0cb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .discount-icon {
+            font-size: 2rem;
+            color: #ff6b9d;
+        }
+
+        .discount-card-right {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .discount-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .discount-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .discount-info-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .discount-info-icon:hover {
+            background: #ff6b9d;
+            color: white;
+        }
+
+        /* Popup styles */
+        .discount-popup {
+            position: absolute;
+            top: -10px;
+            left: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            min-width: 250px;
+            max-width: 280px;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .discount-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .popup-code {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .popup-copy-icon {
+            width: 24px;
+            height: 24px;
+            background: #ff6b9d;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .popup-copy-icon:hover {
+            background: #e55a8a;
+        }
+
+        .popup-expiry {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .popup-expiry-label {
+            color: #666;
+        }
+
+        .popup-expiry-date {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .popup-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .popup-usage {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .popup-usage-label {
+            color: #666;
+        }
+
+        .popup-usage-count {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .discount-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+            max-height: 2.8em;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .discount-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .discount-expiry {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .discount-copy-btn {
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .discount-copy-btn:hover {
+            background: #e55a8a;
+            transform: translateY(-1px);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .discount-slider-container {
+                padding: 0 45px;
+            }
+
+            .discount-card {
+                width: 300px;
+                height: 155px;
+            }
+
+            .discount-title {
+                max-width: 180px;
+                font-size: 15px;
+            }
+
+            .discount-description {
+                font-size: 12px;
+                line-height: 1.3;
+            }
+
+            .discount-copy-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .discount-slider-container {
+                padding: 0 35px;
+            }
+
+            .slider-btn {
+                width: 32px;
+                height: 32px;
+            }
+
+            .slider-btn i {
+                font-size: 11px;
+            }
+
+            .discount-card {
+                width: 280px;
+                height: 145px;
+            }
+
+            .discount-card-left {
+                width: 25%;
+            }
+
+            .discount-icon {
+                font-size: 1.5rem;
+            }
+
+            .discount-card-right {
+                padding: 12px;
+            }
+
+            .discount-title {
+                max-width: 140px;
+                font-size: 14px;
+            }
+
+            .discount-description {
+                font-size: 11px;
+                line-height: 1.3;
+                margin-bottom: 6px;
+            }
+
+            .discount-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .discount-expiry {
+                font-size: 11px;
+            }
+
+            .discount-copy-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+                border-radius: 15px;
+            }
+
+            .discount-popup {
+                min-width: 200px;
+                max-width: 240px;
+                left: 15px;
+                padding: 12px;
+            }
+
+            .popup-header {
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+            }
+
+            .popup-code {
+                font-size: 14px;
+            }
+
+            .popup-copy-icon {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+
+            .popup-description {
+                font-size: 12px;
+                margin-bottom: 8px;
+            }
+
+            .popup-expiry,
+            .popup-usage {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .discount-slider-container {
+                padding: 0 25px;
+            }
+
+            .slider-btn {
+                width: 28px;
+                height: 28px;
+            }
+
+            .slider-btn i {
+                font-size: 10px;
+            }
+
+            .discount-card {
+                width: 260px;
+                height: 135px;
+            }
+
+            .discount-card-left {
+                width: 28%;
+            }
+
+            .discount-icon {
+                font-size: 1.3rem;
+            }
+
+            .discount-card-right {
+                padding: 10px;
+            }
+
+            .discount-title {
+                max-width: 120px;
+                font-size: 13px;
+            }
+
+            .discount-description {
+                font-size: 10px;
+                line-height: 1.2;
+                margin-bottom: 4px;
+            }
+
+            .discount-expiry {
+                font-size: 10px;
+            }
+
+            .discount-copy-btn {
+                padding: 3px 6px;
+                font-size: 9px;
+                border-radius: 12px;
+            }
+
+            .discount-popup {
+                min-width: 180px;
+                max-width: 220px;
+                left: 10px;
+                padding: 10px;
+            }
+
+            .popup-code {
+                font-size: 13px;
+            }
+
+            .popup-copy-icon {
+                width: 18px;
+                height: 18px;
+                font-size: 9px;
+            }
+
+            .popup-description {
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+
+            .popup-expiry,
+            .popup-usage {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .discount-slider-container {
+                padding: 0 20px;
+            }
+
+            .slider-btn {
+                width: 26px;
+                height: 26px;
+            }
+
+            .slider-btn i {
+                font-size: 9px;
+            }
+
+            .discount-card {
+                width: 240px;
+                height: 125px;
+            }
+
+            .discount-card-left {
+                width: 30%;
+            }
+
+            .discount-icon {
+                font-size: 1.2rem;
+            }
+
+            .discount-card-right {
+                padding: 8px;
+            }
+
+            .discount-title {
+                max-width: 100px;
+                font-size: 12px;
+            }
+
+            .discount-description {
+                font-size: 9px;
+                line-height: 1.2;
+                margin-bottom: 3px;
+            }
+
+            .discount-expiry {
+                font-size: 9px;
+            }
+
+            .discount-copy-btn {
+                padding: 2px 5px;
+                font-size: 8px;
+                border-radius: 10px;
+            }
+
+            .discount-popup {
+                min-width: 160px;
+                max-width: 200px;
+                left: 5px;
+                padding: 8px;
+            }
+
+            .popup-code {
+                font-size: 12px;
+            }
+
+            .popup-copy-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 8px;
+            }
+
+            .popup-description {
+                font-size: 10px;
+                margin-bottom: 4px;
+            }
+
+            .popup-expiry,
+            .popup-usage {
+                font-size: 10px;
+                margin-bottom: 3px;
+            }
+        }
+    </style>
+
+    <!-- Initialize Banner Slider -->
+    <script>
+        // Initialize banner slider when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.BannerSlider) {
+                new BannerSlider();
+            }
+
+            // Load active discounts - copied from product detail page
+            loadActiveDiscounts();
+        });
+
+        // Load active discounts - copied from product detail page
+        function loadActiveDiscounts() {
+            fetch('/api/products/discounts/active')
+                .then(response => response.json())
+                .then(data => {
+                    if ((data.code === 200 || data.code === 1000) && data.result) {
+                        renderDiscounts(data.result);
+                    } else {
+                        console.log('No discounts found or error in response');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading discounts:', error);
+                });
+        }
+
+        // Slider state - copied from product detail page
+        let currentSlide = 0;
+        let totalCards = 0;
+        let cardsPerView = 4; // Number of cards visible at once
+
+        function renderDiscounts(discounts) {
+            const container = document.getElementById('discounts-container');
+            if (!container) {
+                console.error('discounts-container not found!');
+                return;
+            }
+
+            if (discounts.length === 0) {
+                console.log('No discounts to render');
+                container.innerHTML = '<div class="col-12 text-center text-muted">Không có mã giảm giá nào đang hoạt động</div>';
+                return;
+            }
+
+            // Calculate slider parameters
+            totalCards = discounts.length;
+            currentSlide = 0;
+
+            // Update cards per view based on screen size
+            updateCardsPerView();
+
+            // Debug log
+            console.log(`Rendering ${totalCards} discount cards, cardsPerView: ${cardsPerView}`);
+
+            const html = discounts.map(discount => `
+                <div class="discount-card">
+                    <div class="discount-card-left">
+                        <div class="discount-icon">
+                            ${getDiscountIcon(discount)}
+                        </div>
+                    </div>
+                    
+                    <div class="discount-card-right">
+                        <div class="discount-header">
+                            <div class="discount-title">${discount.name}</div>
+                            <div class="discount-info-icon" onclick="toggleDiscountPopup(this)">
+                                <i class="fas fa-info"></i>
+                                <div class="discount-popup">
+                                    <div class="popup-header">
+                                        <div class="popup-code">${discount.name}</div>
+                                        <div class="popup-copy-icon" onclick="copyDiscountCodeFromPopup('${discount.name}', this)">
+                                            <i class="fas fa-copy"></i>
+                                        </div>
+                                    </div>
+                                    <div class="popup-description">
+                                        ${discount.description && discount.description.trim() !== '' ? discount.description : 'Áp dụng cho đơn hàng'}
+                                    </div>
+                                    <div class="popup-expiry">
+                                        <span class="popup-expiry-label">Hạn sử dụng</span>
+                                        <span class="popup-expiry-date">${formatDate(discount.endDate)}</span>
+                                    </div>
+                                    <div class="popup-usage">
+                                        <span class="popup-usage-label">Lượt dùng</span>
+                                        <span class="popup-usage-count">${discount.userUsageLimit && discount.userUsageLimit > 0 ? discount.userUsageLimit : 'Không giới hạn'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="discount-description">
+                            ${discount.description && discount.description.trim() !== '' ? discount.description : 'Áp dụng cho đơn hàng'}
+                        </div>
+                        
+                        <div class="discount-details">
+                            <div class="discount-expiry">HSD: ${formatDate(discount.endDate)}</div>
+                            <button class="discount-copy-btn" onclick="copyDiscountCode('${discount.name}', this)">
+                                Sao chép mã
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+
+            // Initialize slider with a small delay to ensure DOM is ready
+            setTimeout(() => {
+                initializeSlider();
+            }, 100);
+
+            // Initialize popup hover effects
+            initializeDiscountPopups();
+        }
+
+        function getDiscountIcon(discount) {
+            return '<i class="mdi mdi-ticket-percent-outline"></i>';
+        }
+
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        function initializeDiscountPopups() {
+            const infoIcons = document.querySelectorAll('.discount-info-icon');
+            const portal = document.getElementById('popup-portal');
+
+            infoIcons.forEach(icon => {
+                const popup = icon.querySelector('.discount-popup');
+                let hoverTimeout;
+
+                // Show popup on mouse enter
+                icon.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    // Hide all other popups first
+                    portal.innerHTML = '';
+
+                    // Get icon position
+                    const rect = icon.getBoundingClientRect();
+                    const popupClone = popup.cloneNode(true);
+                    popupClone.style.position = 'fixed';
+                    popupClone.style.zIndex = '9999';
+                    popupClone.classList.add('show');
+                    
+                    // Calculate popup position with responsive adjustments
+                    let top = rect.top - 10;
+                    let left = rect.left + 30;
+                    
+                    // Get popup dimensions
+                    const popupWidth = window.innerWidth < 480 ? 180 : 
+                                     window.innerWidth < 576 ? 200 : 
+                                     window.innerWidth < 768 ? 220 : 250;
+                    const popupHeight = window.innerWidth < 480 ? 120 : 
+                                      window.innerWidth < 576 ? 140 : 
+                                      window.innerWidth < 768 ? 160 : 180;
+                    
+                    // Adjust position to prevent overflow
+                    if (left + popupWidth > window.innerWidth - 20) {
+                        left = rect.left - popupWidth - 10;
+                    }
+                    
+                    if (left < 20) {
+                        left = 20;
+                    }
+                    
+                    if (top + popupHeight > window.innerHeight - 20) {
+                        top = window.innerHeight - popupHeight - 20;
+                    }
+                    
+                    if (top < 20) {
+                        top = 20;
+                    }
+                    
+                    popupClone.style.top = top + 'px';
+                    popupClone.style.left = left + 'px';
+                    
+                    // Add to portal
+                    portal.appendChild(popupClone);
+
+                    // Add event listeners to popup clone
+                    popupClone.addEventListener('mouseenter', () => {
+                        clearTimeout(hoverTimeout);
+                    });
+
+                    popupClone.addEventListener('mouseleave', () => {
+                        hoverTimeout = setTimeout(() => {
+                            portal.innerHTML = '';
+                        }, 100);
+                    });
+                });
+
+                // Hide popup on mouse leave
+                icon.addEventListener('mouseleave', () => {
+                    hoverTimeout = setTimeout(() => {
+                        portal.innerHTML = '';
+                    }, 100);
+                });
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function updateCardsPerView() {
+            const screenWidth = window.innerWidth;
+            if (screenWidth < 480) {
+                cardsPerView = 1;
+            } else if (screenWidth < 576) {
+                cardsPerView = 1;
+            } else if (screenWidth < 768) {
+                cardsPerView = 1;
+            } else if (screenWidth < 992) {
+                cardsPerView = 2;
+            } else {
+                cardsPerView = 3; // Show 3 cards on desktop
+            }
+        }
+
+        function initializeSlider() {
+            updateSliderPosition();
+            updateSliderButtons();
+        }
+
+        function slideDiscounts(direction) {
+            // Calculate maximum slide to show all cards
+            const maxSlide = Math.max(0, totalCards - cardsPerView);
+
+            if (direction === 'next') {
+                // Move forward by 1 card
+                currentSlide = Math.min(currentSlide + 1, maxSlide);
+            } else {
+                // Move backward by 1 card
+                currentSlide = Math.max(currentSlide - 1, 0);
+            }
+
+            updateSliderPosition();
+            updateSliderButtons();
+
+            // Debug log
+            console.log(`Sliding ${direction}: currentSlide=${currentSlide}, maxSlide=${maxSlide}, totalCards=${totalCards}, cardsPerView=${cardsPerView}`);
+        }
+
+        function updateSliderPosition() {
+            const slider = document.getElementById('discounts-container');
+            let cardWidth = 344; // Default: 320px card + 24px gap
+            
+            // Adjust card width based on screen size
+            const screenWidth = window.innerWidth;
+            if (screenWidth < 480) {
+                cardWidth = 280; // 240px card + 40px gap for small mobile
+            } else if (screenWidth < 576) {
+                cardWidth = 300; // 260px card + 40px gap for mobile
+            } else if (screenWidth < 768) {
+                cardWidth = 320; // 280px card + 40px gap for tablet
+            } else if (screenWidth < 992) {
+                cardWidth = 340; // 300px card + 40px gap for small desktop
+            } else {
+                cardWidth = 344; // 320px card + 24px gap for desktop
+            }
+
+            const translateX = -(currentSlide * cardWidth);
+            slider.style.transform = `translateX(${translateX}px)`;
+
+            // Debug log
+            console.log(`Slider position: translateX=${translateX}px, currentSlide=${currentSlide}, cardWidth=${cardWidth}, screenWidth=${screenWidth}`);
+        }
+
+        function updateSliderButtons() {
+            const prevBtn = document.querySelector('.slider-btn-prev');
+            const nextBtn = document.querySelector('.slider-btn-next');
+            const maxSlide = Math.max(0, totalCards - cardsPerView);
+
+            if (prevBtn) {
+                prevBtn.style.opacity = currentSlide === 0 ? '0.5' : '1';
+                prevBtn.disabled = currentSlide === 0;
+            }
+            if (nextBtn) {
+                nextBtn.style.opacity = currentSlide >= maxSlide ? '0.5' : '1';
+                nextBtn.disabled = currentSlide >= maxSlide;
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            updateCardsPerView();
+            const maxSlide = Math.max(0, totalCards - cardsPerView);
+            currentSlide = Math.min(currentSlide, maxSlide);
+            updateSliderPosition();
+            updateSliderButtons();
+
+            // Debug log
+            console.log(`Window resized: totalCards=${totalCards}, cardsPerView=${cardsPerView}, maxSlide=${maxSlide}, currentSlide=${currentSlide}`);
+        });
+
+        // Touch support for mobile devices
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let isDragging = false;
+
+        function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+            isDragging = true;
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent scrolling while dragging
+        }
+
+        function handleTouchEnd(e) {
+            if (!isDragging) return;
+            touchEndX = e.changedTouches[0].clientX;
+            handleSwipe();
+            isDragging = false;
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50; // Minimum distance for a swipe
+            const swipeDistance = touchEndX - touchStartX;
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0) {
+                    // Swipe right - go to previous slide
+                    slideDiscounts('prev');
+                } else {
+                    // Swipe left - go to next slide
+                    slideDiscounts('next');
+                }
+            }
+        }
+
+        // Add touch event listeners to the slider container
+        document.addEventListener('DOMContentLoaded', () => {
+            const sliderContainer = document.querySelector('.discount-slider-container');
+            if (sliderContainer) {
+                sliderContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+                sliderContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+                sliderContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+            }
+        });
+
+        // Copy discount code function - copied from product detail page
+        function copyDiscountCode(code, button) {
+            navigator.clipboard.writeText(code).then(() => {
+                // Show success feedback
+                const originalText = button.textContent;
+                button.textContent = 'Đã sao chép!';
+                button.style.background = '#28a745';
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#ff6b9d';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy discount code:', err);
+
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                // Show success feedback
+                const originalText = button.textContent;
+                button.textContent = 'Đã sao chép!';
+                button.style.background = '#28a745';
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#ff6b9d';
+                }, 2000);
+            });
+        }
+
+        // Copy discount code from popup - keeps icon unchanged
+        function copyDiscountCodeFromPopup(code, button) {
+            navigator.clipboard.writeText(code).then(() => {
+                // Show success feedback without changing the button
+                showSimpleNotification(`Đã sao chép mã "${code}"`);
+            }).catch(err => {
+                console.error('Failed to copy discount code:', err);
+
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                // Show success feedback
+                showSimpleNotification(`Đã sao chép mã "${code}"`);
+            });
+        }
+
+        // Simple notification function
+        function showSimpleNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-size: 14px;
+                font-weight: 500;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            notification.textContent = message;
+
+            // Add to body
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Function to toggle discount popup
+        function toggleDiscountPopup(iconElement) {
+            const popup = iconElement.querySelector('.discount-popup');
+            if (!popup) return;
+
+            // Close all other popups first
+            document.querySelectorAll('.discount-popup').forEach(p => {
+                if (p !== popup) {
+                    p.classList.remove('show');
+                }
+            });
+
+            // Toggle current popup
+            popup.classList.toggle('show');
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.discount-info-icon')) {
+                document.querySelectorAll('.discount-popup.show').forEach(popup => {
+                    popup.classList.remove('show');
+                });
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cartButtons = document.querySelectorAll('.btn-cart');
+            cartButtons.forEach(function (button) {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.location.href = '/cart';
+                });
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

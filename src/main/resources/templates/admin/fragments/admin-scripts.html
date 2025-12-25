@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<body th:fragment="admin-scripts">
+    <!-- Core vendor bundle (jQuery, Bootstrap, etc.) -->
+    <script th:src="@{/admin/vendors/js/vendor.bundle.base.js}"></script>
+
+    <!-- Optional vendor plugins (chart.js from local vendors) -->
+    <script th:src="@{/admin/vendors/chart.js/chart.umd.js}"></script>
+
+    <!-- Core scripts: chỉ giữ vendor và ajax utils; không can thiệp điều hướng/collapse -->
+
+    <!-- DataTables (CDN) -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Chart.js CDN (disabled to avoid duplicate with local) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+    <!-- Select2 (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/vi.min.js"></script>
+
+    <!-- Project common scripts -->
+    <script src="/admin/js/admin/admin-ajax.js"></script>
+    <script src="/admin/js/admin/admin-auth.js"></script>
+    
+    <!-- Notification system -->
+    <script src="/admin/js/utils/notification.js"></script>
+
+    <!-- Sidebar scripts -->
+    <script src="/admin/js/off-canvas.js"></script>
+    <script src="/admin/js/hoverable-collapse.js"></script>
+
+    <script>
+        // Global configuration
+        window.AdminConfig = {
+            baseUrl: '/admin',
+            apiUrl: '/admin/api',
+            locale: 'vi',
+            timezone: 'Asia/Ho_Chi_Minh',
+            dateFormat: 'DD/MM/YYYY',
+            datetimeFormat: 'DD/MM/YYYY HH:mm',
+            currency: 'VND',
+            currencySymbol: '₫'
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                console.log('%c========================================', 'color: cyan; font-weight: bold');
+                console.log('%c[ADMIN-SCRIPTS] DOMContentLoaded', 'color: cyan; font-weight: bold');
+                console.log('%c========================================', 'color: cyan; font-weight: bold');
+                console.log('[ADMIN-SCRIPTS] Current URL:', window.location.href);
+                console.log('[ADMIN-SCRIPTS] jQuery loaded:', typeof jQuery !== 'undefined');
+                console.log('[ADMIN-SCRIPTS] Bootstrap loaded:', typeof bootstrap !== 'undefined');
+
+                // Xử lý sidebar active state
+                var currentPath = window.location.pathname;
+                var sidebar = document.getElementById('sidebar');
+                if (sidebar) {
+                    var links = sidebar.querySelectorAll('a.nav-link');
+                    links.forEach(function (link) {
+                        var href = link.getAttribute('href');
+                        if (!href) return;
+                        if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+                            link.classList.add('active');
+                            var collapseParent = link.closest('.collapse');
+                            if (collapseParent && typeof bootstrap !== 'undefined') {
+                                collapseParent.classList.add('show');
+                            }
+                        }
+                    });
+                }
+
+                // Khôi phục trạng thái sidebar từ localStorage
+                var sidebarMinimized = localStorage.getItem('sidebarMinimized');
+                if (sidebarMinimized === 'true') {
+                    document.body.classList.add('sidebar-icon-only');
+                    console.log('Sidebar state restored: minimized');
+                }
+
+            } catch (e) {
+                console.error('Admin scripts error:', e);
+            }
+        });
+
+        // jQuery ready function
+        $(document).ready(function () {
+            console.log('jQuery ready!');
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+
+            // Initialize Select2
+            $('.select2').select2({
+                theme: 'bootstrap-5',
+                language: 'vi'
+            });
+        });
+
+        // Utility functions
+        window.AdminUtils = {
+            // Bắt sự kiện sidebar minimize
+            onSidebarMinimize: function (callback) {
+                window.addEventListener('sidebarToggle', function (e) {
+                    callback(e.detail.minimized);
+                });
+            },
+
+            // Kiểm tra trạng thái sidebar
+            isSidebarMinimized: function () {
+                return document.body.classList.contains('sidebar-icon-only');
+            },
+
+            // Toggle sidebar programmatically
+            toggleSidebar: function () {
+                var minimizeBtn = document.querySelector('button[data-bs-toggle="minimize"]');
+                if (minimizeBtn) {
+                    minimizeBtn.click();
+                }
+            },
+
+            // Minimize sidebar
+            minimizeSidebar: function () {
+                if (!this.isSidebarMinimized()) {
+                    this.toggleSidebar();
+                }
+            },
+
+            // Expand sidebar
+            expandSidebar: function () {
+                if (this.isSidebarMinimized()) {
+                    this.toggleSidebar();
+                }
+            },
+
+            formatCurrency: function (amount) {
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(amount);
+            },
+
+            formatDate: function (date, format) {
+                return moment(date).format(format || AdminConfig.dateFormat);
+            },
+
+            formatDateTime: function (date) {
+                return moment(date).format(AdminConfig.datetimeFormat);
+            },
+
+            showLoading: function () {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            },
+
+            hideLoading: function () {
+                Swal.close();
+            },
+
+            showSuccess: function (message) {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            },
+
+            showError: function (message) {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            },
+
+            showWarning: function (message) {
+                Swal.fire({
+                    title: 'Cảnh báo!',
+                    text: message,
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
+            },
+
+            confirmDelete: function (callback) {
+                Swal.fire({
+                    title: 'Bạn có chắc chắn?',
+                    text: "Hành động này không thể hoàn tác!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed && callback) {
+                        callback();
+                    }
+                });
+            }
+        };
+
+        // Không can thiệp điều hướng/collapse bằng JS; để Bootstrap xử lý theo data-bs-*
+    </script>
+</body>
+
+</html>

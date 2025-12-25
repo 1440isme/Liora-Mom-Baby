@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả tìm kiếm - Liora</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/newest-products-page.css}">
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+
+    <!-- Inline CSS for hover effect -->
+    <style>
+        .product-name-link:hover {
+            color: #E8A2B0 !important;
+            text-decoration: none !important;
+        }
+
+        .brand-link:hover {
+            color: #E8A2B0 !important;
+            text-decoration: none !important;
+        }
+
+        /* Hide numeric input arrows */
+        #quickViewModal input[type="number"]::-webkit-outer-spin-button,
+        #quickViewModal input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #quickViewModal input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+
+    <style>
+        /* Quick view modal z-index fix */
+        #quickViewModal {
+            z-index: 9999 !important;
+        }
+
+        #quickViewModal .modal-backdrop {
+            z-index: 9998 !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        #quickViewModal .modal-content {
+            z-index: 9999 !important;
+        }
+
+        /* Hide numeric input arrows */
+        #quickViewModal input[type="number"]::-webkit-outer-spin-button,
+        #quickViewModal input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #quickViewModal input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Filter spacer for alignment */
+        .filter-spacer {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .filter-spacer {
+                display: none;
+            }
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: transparent;
+            border-radius: 0;
+            padding: 8px 0;
+            box-shadow: none;
+        }
+
+        .breadcrumb-item a {
+            color: #6c757d;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #E8A2B0;
+        }
+
+        .breadcrumb-item.active {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .breadcrumb-item+.breadcrumb-item::before {
+            content: "›";
+            color: #adb5bd;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <div th:replace="~{user/layout/user-header :: header}"></div>
+
+    <!-- Main Content -->
+    <div class="container py-2">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/" class="text-decoration-none">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Kết quả tìm kiếm
+                </li>
+            </ol>
+        </nav>
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Bộ lọc sản phẩm</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Price Range -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Khoảng giá</label>
+                            <select class="form-select" id="priceRange">
+                                <option value="">Tất cả mức giá</option>
+                                <option value="0,100000">Dưới 100.000 ₫</option>
+                                <option value="100000,300000">100.000 ₫ - 300.000 ₫</option>
+                                <option value="300000,500000">300.000 ₫ - 500.000 ₫</option>
+                                <option value="500000,800000">500.000 ₫ - 800.000 ₫</option>
+                                <option value="800000,1000000">800.000 ₫ - 1.000.000 ₫</option>
+                                <option value="1000000,999999999">Trên 1.000.000 ₫</option>
+                            </select>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Thương hiệu</label>
+                            <div id="brandFilters">
+                                <!-- Brands will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Đánh giá</label>
+                            <div id="ratingFilters">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="5" id="rating5">
+                                    <label class="form-check-label" for="rating5">★★★★★ & up</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="4" id="rating4">
+                                    <label class="form-check-label" for="rating4">★★★★☆ & up</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="3" id="rating3">
+                                    <label class="form-check-label" for="rating3">★★★☆☆ & up</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="2" id="rating2">
+                                    <label class="form-check-label" for="rating2">★★☆☆☆ & up</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="1" id="rating1">
+                                    <label class="form-check-label" for="rating1">★☆☆☆☆ & up</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Apply Filters Button -->
+                        <div class="d-grid">
+                            <button class="btn btn-primary" id="applyFilters">
+                                <i class="fas fa-filter me-2"></i>Áp dụng bộ lọc
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="col-lg-10">
+
+                <!-- Results Info and Sort -->
+                <div class="d-flex justify-content-between align-items-center mb-1 mt-0">
+                    <div>
+                        <h5 class="text-dark fw-bold mb-2">Kết quả tìm kiếm cho: "<span id="searchQueryDisplay"></span>"
+                        </h5>
+                        <span id="resultsCount" class="fw-bold text-dark">Hiển thị 0 sản phẩm</span>
+                    </div>
+                    <div>
+                        <select class="form-select d-inline-block w-auto" id="sortSelect">
+                            <option value="">Sắp xếp: Mặc định</option>
+                            <option value="name,asc">Tên (A-Z)</option>
+                            <option value="name,desc">Tên (Z-A)</option>
+                            <option value="price,desc">Giá (Cao -> Thấp)</option>
+                            <option value="price,asc">Giá (Thấp -> Cao)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="productsGrid" style="display: none;">
+                    <!-- Products will be loaded here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>Không tìm thấy sản phẩm</h4>
+                    <p class="text-muted">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination at bottom -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <nav id="pagination" class="mt-4" style="display: none;">
+                    <ul class="pagination justify-content-center">
+                        <!-- Pagination will be generated here -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="quickViewModalLabel">Xem nhanh sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Product Image Slider -->
+                        <div class="col-md-6">
+                            <div class="product-image-slider">
+                                <!-- Main Image -->
+                                <div class="main-image-container mb-3">
+                                    <button class="slider-nav slider-prev" id="prevBtn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img id="mainProductImage" src="" class="img-fluid rounded" alt="Product Image"
+                                        onerror="this.src='/user/img/default-product.jpg'">
+                                    <button class="slider-nav slider-next" id="nextBtn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Thumbnail Slider -->
+                                <div class="thumbnail-slider">
+                                    <div class="thumbnail-container d-flex gap-2">
+                                        <!-- Thumbnails will be generated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="col-md-6">
+                            <h4 class="product-name mb-3">
+                                <a href="#" class="text-decoration-none text-dark">
+                                    Product Name
+                                </a>
+                            </h4>
+                            <p class="brand-name text-muted mb-2">Brand Name</p>
+
+                            <!-- Product Status -->
+                            <div class="product-status mb-3">
+                                <span class="badge bg-success">Còn hàng</span>
+                                <span class="ms-2 text-muted">Mã sản phẩm: 123</span>
+                            </div>
+
+                            <!-- Rating -->
+                            <div class="rating mb-3">
+                                <span class="stars">
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </span>
+                                <span class="review-count ms-2">(0 đánh giá)</span>
+                            </div>
+
+                            <!-- Sales Progress -->
+                            <div class="sales-progress mb-3">
+                                <div class="sales-info d-flex justify-content-between align-items-center mb-1">
+                                    <span class="sales-label">Đã bán</span>
+                                    <span class="sales-count">0</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 0%" role="progressbar">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="price-section mb-4">
+                                <span class="current-price h4 text-primary">
+                                    0 ₫
+                                </span>
+                            </div>
+
+                            <!-- Quantity Selector -->
+                            <div class="quantity-selector mb-4">
+                                <div class="d-flex align-items-center">
+                                    <label class="form-label mb-0" style="margin-right: 2rem;">Số lượng:</label>
+                                    <div class="input-group" style="max-width: 150px;">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="app.decrementQuantity()">-</button>
+                                        <input type="number" class="form-control text-center" value="1" min="1" max="99"
+                                            id="quantityInput" onchange="app.validateQuantity()"
+                                            oninput="app.validateQuantity()"
+                                            onblur="app.validateQuantityOnBlur()">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="app.incrementQuantity()">+</button>
+                                    </div>
+                                </div>
+                                <!-- Error Message -->
+                                <div id="quantityError" class="text-danger mt-2" style="display: none;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <span id="quantityErrorMessage">Số lượng tối đa bạn có thể mua là 99.</span>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-grid gap-2">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button class="btn btn-danger btn-lg w-100"
+                                            onclick="window.searchResultsManager.buyNow(window.searchResultsManager.currentProductId || 0)">
+                                            <i class="fas fa-bolt me-1"></i>
+                                            Mua ngay
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-primary btn-lg w-100"
+                                            onclick="window.searchResultsManager.addToCartWithQuantity(window.searchResultsManager.currentProductId || 0)">
+                                            <i class="fas fa-shopping-cart me-1"></i>
+                                            Thêm vào giỏ
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- View Details Button -->
+                                <a href="#" class="btn btn-outline-primary btn-lg w-100">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Xem chi tiết sản phẩm
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{user/layout/user-footer :: footer}"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script th:src="@{/user/js/main.js}"></script>
+    <script th:src="@{/user/js/product-rating-utils.js}"></script>
+    <script th:src="@{/user/js/search-results.js}"></script>
+
+    <script>
+        // Initialize the search results page manager
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, initializing search results page manager');
+            console.log('SearchResultsManager class:', typeof SearchResultsManager);
+
+            if (typeof SearchResultsManager === 'undefined') {
+                console.error('SearchResultsManager class not found!');
+                return;
+            }
+
+            try {
+                window.searchResultsManager = new SearchResultsManager();
+                console.log('SearchResultsManager instance created');
+                console.log('SearchResultsManager initialize() called automatically in constructor');
+            } catch (error) {
+                console.error('Error creating SearchResultsManager:', error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

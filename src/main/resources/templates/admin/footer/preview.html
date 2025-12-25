@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Xem trước Footer - Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <style>
+                        .preview-container {
+                            background: #f8f9fa;
+                            min-height: 100vh;
+                            padding: 20px 0;
+                        }
+
+                        .footer-preview {
+                            background: #343a40;
+                            color: white;
+                            padding: 40px 0;
+                        }
+
+                        .text-pink-primary {
+                            color: #e91e63 !important;
+                        }
+
+                        .text-light-muted {
+                            color: #adb5bd !important;
+                        }
+
+                        .footer-link {
+                            color: #adb5bd;
+                            text-decoration: none;
+                        }
+
+                        .footer-link:hover {
+                            color: #e91e63;
+                        }
+                    </style>
+                    </head>
+
+                    <body>
+                        <div class="preview-container">
+                            <div class="container">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h2>Xem trước Footer</h2>
+                                            <a href="/admin/footer" class="btn btn-primary">
+                                                <i class="mdi mdi-arrow-left me-1"></i>Quay lại chỉnh sửa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer Preview -->
+                                <div class="footer-preview">
+                                    <div class="container">
+                                        <div class="row g-4">
+                                            <!-- Brand Section -->
+                                            <div class="col-lg-4">
+                                                <h5 class="fw-bold mb-3 text-pink-primary"
+                                                    th:text="${footer?.brandName ?: 'Liora ✨'}">Liora
+                                                    ✨</h5>
+                                                <p class="text-light-muted"
+                                                    th:text="${footer?.brandDescription ?: 'Your trusted destination for authentic Korean beauty products.'}">
+                                                    Your trusted destination for authentic Korean beauty products.
+                                                </p>
+                                                <div class="social-links d-flex gap-3">
+                                                    <a th:each="socialLink : ${socialLinks}" th:href="${socialLink.url}"
+                                                        th:class="'text-pink-primary fs-5'"
+                                                        th:title="${socialLink.platform}">
+                                                        <i th:class="${socialLink.iconClass}"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <!-- Footer Columns -->
+                                            <div th:each="column : ${columns}" class="col-lg-2 col-md-6">
+                                                <h6 class="fw-semibold mb-3" th:text="${column.title}">Column Title</h6>
+                                                <ul class="list-unstyled">
+                                                    <li th:each="item : ${column.items}">
+                                                        <a th:href="${item.url}" th:text="${item.title}"
+                                                            class="text-light-muted footer-link">Item Title</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4 border-secondary">
+
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <p class="text-light-muted mb-0">
+                                                    © 2025 Liora. All rights reserved.
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6 text-md-end">
+                                                <div class="payment-methods d-flex justify-content-md-end gap-2 mt-2 mt-md-0"
+                                                    id="footer-payment-methods">
+                                                    <i class="fab fa-cc-visa fs-4 text-light-muted"></i>
+                                                    <i class="fab fa-cc-mastercard fs-4 text-light-muted"></i>
+                                                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png"
+                                                        alt="VNPAY" class="payment-logo" style="height: 24px;"
+                                                        title="VNPAY">
+                                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                                                        alt="MOMO" class="payment-logo" style="height: 24px;"
+                                                        title="MOMO">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+</body>
+
+</html>

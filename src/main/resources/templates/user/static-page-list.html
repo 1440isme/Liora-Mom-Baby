@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${navItemTitle != null ? navItemTitle : sectionSlug}">Danh sách bài viết</title>
+    <meta name="description" th:content="${'Danh sách bài viết thuộc nhóm ' + sectionSlug}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="/user/css/style.css" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{user/layout/user-header :: header}"></div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="breadcrumb-line text-uppercase">
+                            <a th:href="@{/}" class="text-decoration-none text-reset">Trang chủ</a>
+                            <span class="mx-1">/</span>
+                            <span th:text="${navItemTitle != null ? navItemTitle : sectionSlug}">Bài viết</span>
+                        </div>
+                        <h1 class="h2 fw-normal mb-1 mt-2"
+                            th:text="${navItemTitle != null ? navItemTitle : sectionSlug}">
+                            Bài viết</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content mb-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-12" th:if="${#lists.isEmpty(pages)}">
+                        <div class="alert alert-info mb-0">Chưa có bài viết nào trong nhóm này.</div>
+                    </div>
+
+                    <div class="col-12 col-md-6" th:each="p : ${pages}">
+                        <div class="card h-100 shadow-sm">
+                            <a th:href="@{'/content/page/' + ${p.slug}}" class="ratio ratio-16x9"
+                                style="display:block; background-color:#f8f9fa;">
+                                <img th:if="${p.thumbnailUrl != null}" th:src="${p.thumbnailUrl}" alt="thumbnail"
+                                    style="object-fit:cover; width:100%; height:100%; border-top-left-radius:.375rem; border-top-right-radius:.375rem;">
+                                <img th:if="${p.thumbnailUrl == null}"
+                                    src="https://via.placeholder.com/800x450?text=No+Image" alt="placeholder"
+                                    style="object-fit:cover; width:100%; height:100%; border-top-left-radius:.375rem; border-top-right-radius:.375rem;">
+                            </a>
+                            <div class="card-body">
+                                <h2 class="h5 mb-2">
+                                    <a th:href="@{'/content/page/' + ${p.slug}}" class="text-decoration-none"
+                                        th:text="${p.title}">Tiêu đề</a>
+                                </h2>
+                                <div class="text-muted small mb-2"
+                                    th:text="${p.publishedAt != null ? #temporals.format(p.publishedAt, 'dd/MM/yyyy') : (#temporals.format(p.createdAt, 'dd/MM/yyyy'))}">
+                                    11/12/2023</div>
+                                <p class="mb-0 text-body" th:if="${p.seoDescription}" th:text="${p.seoDescription}">Mô
+                                    tả
+                                    ngắn</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{user/layout/user-footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/user/js/main.js"></script>
+</body>
+
+</html>

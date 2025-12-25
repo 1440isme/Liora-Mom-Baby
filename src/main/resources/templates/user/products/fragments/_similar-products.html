@@ -1,0 +1,36 @@
+<div th:fragment="similarProductsSection" class="similar-products-section">
+    <div class="container">
+        <div class="product-related-wrap">
+            <!-- Section Header with Navigation -->
+            <div class="section-header">
+                <h2 class="section-title fw-bold text-uppercase">SẢN PHẨM TƯƠNG TỰ</h2>
+                <div class="navigation-buttons">
+                    <button class="nav-btn" id="prevBtn" title="Xem sản phẩm trước">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-btn" id="nextBtn" title="Xem sản phẩm tiếp theo">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Loading state -->
+            <div id="similarProductsLoading" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Đang tải sản phẩm tương tự...</p>
+            </div>
+            
+            <!-- No products state -->
+            <div id="similarProductsEmpty" class="text-center d-none">
+                <p>Không tìm thấy sản phẩm tương tự nào.</p>
+            </div>
+            
+            <!-- Products grid -->
+            <div id="similarProductsGrid">
+                <!-- Sản phẩm sẽ được render vào đây -->
+            </div>
+        </div>
+    </div>
+</div>

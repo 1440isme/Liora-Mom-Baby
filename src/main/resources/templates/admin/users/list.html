@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Danh sách người dùng - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">Quản lý người dùng</h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/users/add" class="btn btn-primary text-white me-2"><i
+                                    class="mdi mdi-account-plus-outline"></i> Thêm người dùng</a>
+                            <button type="button" class="btn btn-otline-dark"><i class="mdi mdi-file-excel"></i> Xuất
+                                Excel</button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                                Tổng người dùng
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="totalUsers">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-account-group-outline mdi-36px text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                                Người dùng mới
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="newUsers">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-account-plus-outline mdi-36px text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                                Người dùng hoạt động
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="activeUsers">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-account-check-outline mdi-36px text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                                Admin
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="adminUsers">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-shield-account-outline mdi-36px text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card card-rounded mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title card-title-dash">Bộ lọc</h4>
+                            <form method="get" action="/admin/users">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label for="search" class="form-label">Tìm kiếm</label>
+                                        <input type="text" class="form-control" id="search" name="search"
+                                            th:value="${param.search}" placeholder="Tên, email, số điện thoại...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="role" class="form-label">Vai trò</label>
+                                        <select class="form-select" id="role" name="role">
+                                            <option value="">Tất cả vai trò</option>
+                                            <option value="ADMIN" th:selected="${param.role == 'ADMIN'}">Admin</option>
+                                            <option value="USER" th:selected="${param.role == 'USER'}">Người dùng
+                                            </option>
+                                            <option value="MODERATOR" th:selected="${param.role == 'MODERATOR'}">
+                                                Moderator
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="status" class="form-label">Trạng thái</label>
+                                        <select class="form-select" id="status" name="status">
+                                            <option value="">Tất cả trạng thái</option>
+                                            <option value="ACTIVE" th:selected="${param.status == 'ACTIVE'}">Hoạt động
+                                            </option>
+                                            <option value="INACTIVE" th:selected="${param.status == 'INACTIVE'}">Không
+                                                hoạt
+                                                động</option>
+                                            <option value="BANNED" th:selected="${param.status == 'BANNED'}">Bị cấm
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="dateFrom" class="form-label">Từ ngày</label>
+                                        <input type="date" class="form-control" id="dateFrom" name="dateFrom"
+                                            th:value="${param.dateFrom}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="dateTo" class="form-label">Đến ngày</label>
+                                        <input type="date" class="form-control" id="dateTo" name="dateTo"
+                                            th:value="${param.dateTo}">
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-secondary" id="clearFilters"><i
+                                                class="mdi mdi-filter-remove"></i> Xóa bộ lọc</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="card card-rounded mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title card-title-dash">Danh sách người dùng</h4>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="usersTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th width="50">STT</th>
+                                            <th>Avatar</th>
+                                            <th>Thông tin</th>
+                                            <th>Vai trò</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="users-container">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Đang tải...</span>
+                                                </div>
+                                                <p class="mt-3 text-muted">Đang tải danh sách người dùng...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            Hiển thị <span th:text="${pageNumber * pageSize + 1}">1</span> đến
+                            <span th:text="${Math.min((pageNumber + 1) * pageSize, totalElements)}">10</span>
+                            trong tổng số <span th:text="${totalElements}">100</span> người dùng
+                        </div>
+
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${pageNumber == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                        th:href="@{/admin/users(page=${pageNumber - 1}, size=${pageSize}, search=${param.search}, role=${param.role}, status=${param.status}, dateFrom=${param.dateFrom}, dateTo=${param.dateTo})}"><i
+                                            class="mdi mdi-chevron-left"></i>
+                                    </a>
+                                </li>
+
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
+                                    th:classappend="${i == pageNumber} ? 'active'">
+                                    <a class="page-link"
+                                        th:href="@{/admin/users(page=${i}, size=${pageSize}, search=${param.search}, role=${param.role}, status=${param.status}, dateFrom=${param.dateFrom}, dateTo=${param.dateTo})}"
+                                        th:text="${i + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${pageNumber == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link"
+                                        th:href="@{/admin/users(page=${pageNumber + 1}, size=${pageSize}, search=${param.search}, role=${param.role}, status=${param.status}, dateFrom=${param.dateFrom}, dateTo=${param.dateTo})}"><i
+                                            class="mdi mdi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Include Footer -->
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa người dùng <strong id="deleteUserName">Tên người dùng</strong>?</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Cảnh báo:</strong> Hành động này sẽ xóa vĩnh viễn tài khoản và tất cả dữ liệu liên quan.
+                    </div>
+                    <p class="text-danger">Hành động này không thể hoàn tác!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteUser">Xóa người dùng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{admin/fragments/admin-scripts :: admin-scripts}"></div>
+
+    <script src="/admin/js/admin/users.js"></script>
+
+    <script>
+        let deleteUserId = null;
+        function deleteUser(userId, userName) {
+            deleteUserId = userId;
+            document.getElementById('deleteUserName').textContent = userName;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+</body>
+
+</html>

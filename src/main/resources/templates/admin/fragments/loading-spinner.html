@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Spinner</title>
+</head>
+
+<body>
+    <!-- Loading Spinner Fragment -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <div class="spinner-text mt-2">
+                <span id="loadingText">Đang xử lý...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inline Loading Spinner (for buttons) -->
+    <div id="inlineLoadingSpinner" class="inline-loading-spinner" style="display: none;">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span id="inlineLoadingText">Đang xử lý...</span>
+    </div>
+
+    <!-- Page Loading Overlay -->
+    <div id="pageLoadingOverlay" class="page-loading-overlay" style="display: none;">
+        <div class="page-loading-content">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Đang tải trang...</span>
+            </div>
+            <h5 id="pageLoadingText">Đang tải trang...</h5>
+            <div class="progress mt-3" style="width: 200px;">
+                <div id="pageLoadingProgress" class="progress-bar" role="progressbar" style="width: 0%"
+                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Styles -->
+    <style>
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+        .spinner-container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .spinner-text {
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .inline-loading-spinner {
+            display: inline-flex;
+            align-items: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .page-loading-content {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-loading-content h5 {
+            color: #495057;
+            margin-bottom: 0;
+        }
+
+        /* Animation for spinner */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-border {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Pulse animation for loading text */
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .spinner-text {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Fade in/out animations */
+        .loading-spinner.fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .loading-spinner.fade-out {
+            animation: fadeOut 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <!-- JavaScript for loading spinner functionality -->
+    <script>
+        // Loading spinner utility functions
+        window.LoadingSpinner = {
+            // Show main loading spinner
+            show: function (text = 'Đang xử lý...') {
+                const spinner = document.getElementById('loadingSpinner');
+                const loadingText = document.getElementById('loadingText');
+
+                loadingText.textContent = text;
+                spinner.style.display = 'flex';
+                spinner.classList.add('fade-in');
+            },
+
+            // Hide main loading spinner
+            hide: function () {
+                const spinner = document.getElementById('loadingSpinner');
+                spinner.classList.add('fade-out');
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                    spinner.classList.remove('fade-in', 'fade-out');
+                }, 300);
+            },
+
+            // Show inline loading spinner
+            showInline: function (element, text = 'Đang xử lý...') {
+                const inlineSpinner = document.getElementById('inlineLoadingSpinner');
+                const inlineLoadingText = document.getElementById('inlineLoadingText');
+
+                inlineLoadingText.textContent = text;
+                inlineSpinner.style.display = 'inline-flex';
+
+                // Hide the original element and show spinner
+                if (element) {
+                    element.style.display = 'none';
+                    element.parentNode.insertBefore(inlineSpinner, element);
+                }
+            },
+
+            // Hide inline loading spinner
+            hideInline: function (element) {
+                const inlineSpinner = document.getElementById('inlineLoadingSpinner');
+                inlineSpinner.style.display = 'none';
+
+                // Show the original element
+                if (element) {
+                    element.style.display = 'inline-block';
+                }
+            },
+
+            // Show page loading overlay
+            showPageLoading: function (text = 'Đang tải trang...') {
+                const overlay = document.getElementById('pageLoadingOverlay');
+                const loadingText = document.getElementById('pageLoadingText');
+
+                loadingText.textContent = text;
+                overlay.style.display = 'flex';
+            },
+
+            // Hide page loading overlay
+            hidePageLoading: function () {
+                const overlay = document.getElementById('pageLoadingOverlay');
+                overlay.style.display = 'none';
+            },
+
+            // Update page loading progress
+            updateProgress: function (percent) {
+                const progressBar = document.getElementById('pageLoadingProgress');
+                progressBar.style.width = percent + '%';
+                progressBar.setAttribute('aria-valuenow', percent);
+            },
+
+            // Show loading with progress
+            showWithProgress: function (text = 'Đang tải...', initialProgress = 0) {
+                this.showPageLoading(text);
+                this.updateProgress(initialProgress);
+            },
+
+            // Simulate progress loading
+            simulateProgress: function (text = 'Đang tải...', duration = 3000) {
+                this.showWithProgress(text, 0);
+
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 100) progress = 100;
+
+                    this.updateProgress(progress);
+
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            this.hidePageLoading();
+                        }, 500);
+                    }
+                }, duration / 20);
+            }
+        };
+
+        // Auto-hide loading spinner after 30 seconds (safety measure)
+        let loadingTimeout;
+
+        function setLoadingTimeout() {
+            clearTimeout(loadingTimeout);
+            loadingTimeout = setTimeout(() => {
+                LoadingSpinner.hide();
+                LoadingSpinner.hidePageLoading();
+                console.warn('Loading spinner auto-hidden after 30 seconds');
+            }, 30000);
+        }
+
+        // Override show methods to include timeout
+        const originalShow = LoadingSpinner.show;
+        const originalShowPageLoading = LoadingSpinner.showPageLoading;
+
+        LoadingSpinner.show = function (text) {
+            originalShow(text);
+            setLoadingTimeout();
+        };
+
+        LoadingSpinner.showPageLoading = function (text) {
+            originalShowPageLoading(text);
+            setLoadingTimeout();
+        };
+
+        // Global AJAX loading handlers
+        $(document).ready(function () {
+            // Show loading on AJAX start
+            $(document).ajaxStart(function () {
+                LoadingSpinner.show('Đang tải dữ liệu...');
+            });
+
+            // Hide loading on AJAX complete
+            $(document).ajaxComplete(function () {
+                LoadingSpinner.hide();
+                clearTimeout(loadingTimeout);
+            });
+
+            // Hide loading on AJAX error
+            $(document).ajaxError(function () {
+                LoadingSpinner.hide();
+                clearTimeout(loadingTimeout);
+            });
+        });
+
+        // Button loading state helper
+        function setButtonLoading(button, loading = true) {
+            if (loading) {
+                const originalText = button.textContent;
+                button.setAttribute('data-original-text', originalText);
+                button.disabled = true;
+                LoadingSpinner.showInline(button, 'Đang xử lý...');
+            } else {
+                const originalText = button.getAttribute('data-original-text');
+                if (originalText) {
+                    button.textContent = originalText;
+                    button.removeAttribute('data-original-text');
+                }
+                button.disabled = false;
+                LoadingSpinner.hideInline(button);
+            }
+        }
+
+        // Form submission loading helper
+        function setFormLoading(form, loading = true) {
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                setButtonLoading(submitButton, loading);
+            }
+
+            if (loading) {
+                LoadingSpinner.show('Đang xử lý form...');
+            } else {
+                LoadingSpinner.hide();
+            }
+        }
+    </script>
+</body>
+
+</html>

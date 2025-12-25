@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm bán chạy - Liora</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+
+    <!-- Inline CSS for hover effect -->
+    <style>
+        .product-name-link:hover {
+            color: #E8A2B0 !important;
+            text-decoration: none !important;
+        }
+
+        .brand-link:hover {
+            color: #E8A2B0 !important;
+            text-decoration: none !important;
+        }
+
+        /* Hide numeric input arrows */
+        #quickViewModal input[type="number"]::-webkit-outer-spin-button,
+        #quickViewModal input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #quickViewModal input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: transparent;
+            border-radius: 0;
+            padding: 8px 0;
+            box-shadow: none;
+        }
+
+        .breadcrumb-item a {
+            color: #6c757d;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #E8A2B0;
+        }
+
+        .breadcrumb-item.active {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .breadcrumb-item+.breadcrumb-item::before {
+            content: "›";
+            color: #adb5bd;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div th:replace="user/layout/user-header :: header"></div>
+
+    <!-- Main Content -->
+    <div class="container py-2">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/" class="text-decoration-none">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Sản phẩm bán chạy
+                </li>
+            </ol>
+        </nav>
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Bộ lọc sản phẩm</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Price Range -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Khoảng giá</label>
+                            <select class="form-select" id="priceRange">
+                                <option value="">Tất cả mức giá</option>
+                                <option value="0,100000">Dưới 100.000 ₫</option>
+                                <option value="100000,300000">100.000 ₫ - 300.000 ₫</option>
+                                <option value="300000,500000">300.000 ₫ - 500.000 ₫</option>
+                                <option value="500000,800000">500.000 ₫ - 800.000 ₫</option>
+                                <option value="800000,1000000">800.000 ₫ - 1.000.000 ₫</option>
+                                <option value="1000000,999999999">Trên 1.000.000 ₫</option>
+                            </select>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Thương hiệu</label>
+                            <div id="brandFilters">
+                                <!-- Brands will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Đánh giá</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="5" id="rating5">
+                                <label class="form-check-label" for="rating5">★★★★★ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="4" id="rating4">
+                                <label class="form-check-label" for="rating4">★★★★☆ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="3" id="rating3">
+                                <label class="form-check-label" for="rating3">★★★☆☆ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="2" id="rating2">
+                                <label class="form-check-label" for="rating2">★★☆☆☆ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="rating1">
+                                <label class="form-check-label" for="rating1">★☆☆☆☆ & up</label>
+                            </div>
+                        </div>
+
+                        <!-- Apply Filters Button -->
+                        <div class="d-grid">
+                            <button class="btn btn-primary" id="applyFilters">Áp dụng bộ lọc</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="col-lg-10">
+
+                <!-- Results Info and Sort -->
+                <div class="d-flex justify-content-between align-items-center mb-1 mt-0">
+                    <div>
+                        <h5 class="text-dark fw-bold mb-2">Sản phẩm bán chạy</h5>
+                        <span id="resultsCount" class="fw-bold text-dark">Hiển thị 0 sản phẩm</span>
+                    </div>
+                    <div>
+                        <select class="form-select d-inline-block w-auto" id="sortSelect">
+                            <option value="">Sắp xếp: Mặc định</option>
+                            <option value="sold,desc">Bán chạy nhất</option>
+                            <option value="created,desc">Mới nhất</option>
+                            <option value="name,asc">Tên (A-Z)</option>
+                            <option value="name,desc">Tên (Z-A)</option>
+                            <option value="price,desc">Giá (Cao -> Thấp)</option>
+                            <option value="price,asc">Giá (Thấp -> Cao)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="productsGrid" style="display: none;">
+                    <!-- Products will be loaded here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <h4>Không tìm thấy sản phẩm</h4>
+                    <p class="text-muted">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination at bottom -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <nav id="pagination" class="mt-4" style="display: none;">
+                    <ul class="pagination justify-content-center">
+                        <!-- Pagination will be generated here -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="user/layout/user-footer :: footer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script th:src="@{/user/js/main.js}"></script>
+    <script th:src="@{/user/js/product-rating-utils.js}"></script>
+    <script th:src="@{/user/js/bestseller-products-page.js}"></script>
+    <script>
+        // Initialize bestseller products page
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                if (!window.bestsellerProductsPageManager) {
+                    window.bestsellerProductsPageManager = new BestsellerProductsPageManager();
+                }
+                window.bestsellerProductsPageManager.init();
+            } catch (e) {
+                console.error('Failed to initialize BestsellerProductsPageManager:', e);
+            }
+        });
+    </script>
+</body>
+
+</html>

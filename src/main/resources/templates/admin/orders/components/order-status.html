@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status</title>
+</head>
+
+<body>
+    <!-- Order Status Timeline -->
+    <div class="timeline">
+        <div class="timeline-item" th:classappend="${order.orderStatus == 'PENDING'} ? 'active' : 'completed'">
+            <div class="timeline-marker">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="timeline-content">
+                <h6 class="timeline-title">Đơn hàng được tạo</h6>
+                <p class="timeline-text">Đơn hàng đã được tạo và đang chờ xử lý</p>
+                <small class="text-muted" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">15/12/2024
+                    10:30</small>
+            </div>
+        </div>
+
+        <div class="timeline-item"
+            th:classappend="${order.orderStatus == 'CONFIRMED'} ? 'active' : (${order.orderStatus == 'COMPLETED'}) ? 'completed' : ''">
+            <div class="timeline-marker">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="timeline-content">
+                <h6 class="timeline-title">Đã xác nhận</h6>
+                <p class="timeline-text">Đơn hàng đã được xác nhận và đang chuẩn bị</p>
+                <small class="text-muted" th:if="${order.confirmedAt != null}"
+                    th:text="${#temporals.format(order.confirmedAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 11:00</small>
+            </div>
+        </div>
+
+        <div class="timeline-item" th:classappend="${order.orderStatus == 'COMPLETED'} ? 'active completed' : ''">
+            <div class="timeline-marker">
+                <i class="fas fa-check-double"></i>
+            </div>
+            <div class="timeline-content">
+                <h6 class="timeline-title">Hoàn tất</h6>
+                <p class="timeline-text">Đơn hàng đã được hoàn tất</p>
+                <small class="text-muted" th:if="${order.completedAt != null}"
+                    th:text="${#temporals.format(order.completedAt, 'dd/MM/yyyy HH:mm')}">17/12/2024 14:30</small>
+            </div>
+        </div>
+
+        <!-- Cancelled Status -->
+        <div class="timeline-item" th:if="${order.orderStatus == 'CANCELLED'}" th:classappend="'cancelled'">
+            <div class="timeline-marker">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="timeline-content">
+                <h6 class="timeline-title">Đã hủy</h6>
+                <p class="timeline-text">Đơn hàng đã bị hủy</p>
+                <div th:if="${order.cancellationReason != null}">
+                    <small class="text-muted">
+                        <strong>Lý do:</strong> <span th:text="${order.cancellationReason}">Khách hàng yêu cầu
+                            hủy</span>
+                    </small>
+                </div>
+                <small class="text-muted" th:if="${order.cancelledAt != null}"
+                    th:text="${#temporals.format(order.cancelledAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 12:00</small>
+            </div>
+        </div>
+
+        <!-- Returned Status -->
+        <div class="timeline-item" th:if="${order.status == 'RETURNED'}" th:classappend="'returned'">
+            <div class="timeline-marker">
+                <i class="fas fa-undo"></i>
+            </div>
+            <div class="timeline-content">
+                <h6 class="timeline-title">Đã trả hàng</h6>
+                <p class="timeline-text">Đơn hàng đã được trả lại</p>
+                <div th:if="${order.returnReason != null}">
+                    <small class="text-muted">
+                        <strong>Lý do:</strong> <span th:text="${order.returnReason}">Sản phẩm không đúng mô tả</span>
+                    </small>
+                </div>
+                <small class="text-muted" th:if="${order.returnedAt != null}"
+                    th:text="${#temporals.format(order.returnedAt, 'dd/MM/yyyy HH:mm')}">18/12/2024 10:00</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Actions -->
+    <div class="mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Thao tác nhanh</h6>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-primary" th:if="${order.orderStatus == 'PENDING'}"
+                        th:onclick="'updateOrderStatus(\'' + ${order.id} + '\', \'CONFIRMED\')'">
+                        <i class="fas fa-check"></i> Xác nhận
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" th:if="${order.orderStatus == 'CONFIRMED'}"
+                        th:onclick="'updateOrderStatus(\'' + ${order.id} + '\', \'COMPLETED\')'">
+                        <i class="fas fa-check-double"></i> Hoàn tất
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                        th:if="${order.orderStatus == 'PENDING'}"
+                        th:onclick="'cancelOrder(\'' + ${order.id} + '\')'">
+                        <i class="fas fa-times"></i> Hủy đơn
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Thông tin bổ sung</h6>
+                <div class="small text-muted">
+                    <div th:if="${order.notes != null and !order.notes.isEmpty()}">
+                        <strong>Ghi chú:</strong> <span th:text="${order.notes}">Ghi chú đơn hàng</span>
+                    </div>
+                    <div th:if="${order.internalNotes != null and !order.internalNotes.isEmpty()}">
+                        <strong>Ghi chú nội bộ:</strong> <span th:text="${order.internalNotes}">Ghi chú nội bộ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 30px;
+        }
+
+        .timeline-item.completed .timeline-marker {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .timeline-item.active .timeline-marker {
+            background-color: #007bff;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-item.cancelled .timeline-marker {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .timeline-item.returned .timeline-marker {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -22px;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #dee2e6;
+        }
+
+        .timeline-item.completed .timeline-content {
+            border-left-color: #28a745;
+        }
+
+        .timeline-item.active .timeline-content {
+            border-left-color: #007bff;
+        }
+
+        .timeline-item.cancelled .timeline-content {
+            border-left-color: #dc3545;
+        }
+
+        .timeline-item.returned .timeline-content {
+            border-left-color: #ffc107;
+        }
+
+        .timeline-title {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .timeline-text {
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+            }
+        }
+    </style>
+
+    <script>
+        function updateOrderStatus(orderId, newStatus) {
+            if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/admin/orders/' + orderId + '/status';
+
+                const statusInput = document.createElement('input');
+                statusInput.type = 'hidden';
+                statusInput.name = 'status';
+                statusInput.value = newStatus;
+
+                form.appendChild(statusInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function cancelOrder(orderId) {
+            const reason = prompt('Nhập lý do hủy đơn hàng:');
+            if (reason && reason.trim() !== '') {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/admin/orders/' + orderId + '/cancel';
+
+                const reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden';
+                reasonInput.name = 'reason';
+                reasonInput.value = reason;
+
+                form.appendChild(reasonInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</body>
+
+</html>

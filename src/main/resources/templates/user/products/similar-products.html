@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm tương tự - Liora</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+    
+    <!-- Inline CSS for hover effect -->
+    <style>
+        .product-name-link:hover {
+            color: #E8A2B0 !important;
+            text-decoration: none !important;
+        }
+        .brand-link:hover {
+            color: #E8A2B0 !important;
+            text-decoration: none !important;
+        }
+        .original-product-info {
+            background: #fff;
+            border: 1px solid #e8a2b0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Products grid - Bootstrap grid layout */
+        #productsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .product-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .product-card .card-body {
+            padding: 1rem;
+        }
+        
+        .product-card .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .product-card .brand-name {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-card .rating {
+            margin-bottom: 0.75rem;
+        }
+        
+        .product-card .price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .product-card .current-price {
+            font-weight: 700;
+            color: #e8a2b0;
+            font-size: 1.1rem;
+        }
+        
+        .product-card .add-to-cart-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #e8a2b0;
+            background: white;
+            color: #e8a2b0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card .add-to-cart-icon:hover {
+            background: #e8a2b0;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div th:replace="user/layout/user-header :: header"></div>
+
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Original Product Info -->
+        <div id="originalProductInfo" class="original-product-info" style="display: none;">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <img id="originalProductImage" src="" alt="Original Product" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                </div>
+                <div class="col-md-6">
+                    <h5 id="originalProductName" class="mb-1" style="color: #e8a2b0;"></h5>
+                    <p id="originalProductBrand" class="mb-0 text-muted"></p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a id="originalProductLink" href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-2"></i>
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Bộ lọc sản phẩm</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Price Range -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Khoảng giá</label>
+                            <select class="form-select" id="priceRange">
+                                <option value="">Tất cả mức giá</option>
+                                <option value="0,100000">Dưới 100.000 ₫</option>
+                                <option value="100000,300000">100.000 ₫ - 300.000 ₫</option>
+                                <option value="300000,500000">300.000 ₫ - 500.000 ₫</option>
+                                <option value="500000,800000">500.000 ₫ - 800.000 ₫</option>
+                                <option value="800000,1000000">800.000 ₫ - 1.000.000 ₫</option>
+                                <option value="1000000,999999999">Trên 1.000.000 ₫</option>
+                            </select>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Thương hiệu</label>
+                            <div id="brandFilters">
+                                <!-- Brands will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Đánh giá</label>
+                            <div class="form-check">
+                                <input class="form-check-input rating-filter" type="checkbox" value="5" id="rating5">
+                                <label class="form-check-label" for="rating5">★★★★★ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input rating-filter" type="checkbox" value="4" id="rating4">
+                                <label class="form-check-label" for="rating4">★★★★☆ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input rating-filter" type="checkbox" value="3" id="rating3">
+                                <label class="form-check-label" for="rating3">★★★☆☆ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input rating-filter" type="checkbox" value="2" id="rating2">
+                                <label class="form-check-label" for="rating2">★★☆☆☆ & up</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input rating-filter" type="checkbox" value="1" id="rating1">
+                                <label class="form-check-label" for="rating1">★☆☆☆☆ & up</label>
+                            </div>
+                        </div>
+
+                        <!-- Apply Filters Button -->
+                        <div class="d-grid">
+                            <button class="btn btn-primary" id="applyFilters">Xóa bộ lọc</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="col-lg-10">
+                <!-- Results Info and Sort -->
+                <div class="d-flex justify-content-between align-items-center mb-1 mt-0">
+                    <div>
+                        <h5 id="similarProductsTitle" class="text-dark fw-bold mb-2">Sản phẩm tương tự</h5>
+                        <span id="resultsCount" class="fw-bold text-dark">Hiển thị 0 sản phẩm</span>
+                    </div>
+                    <div>
+                        <select class="form-select d-inline-block w-auto" id="sortSelect">
+                            <option value="">Sắp xếp: Mặc định</option>
+                            <option value="created,desc">Mới nhất</option>
+                            <option value="sold,desc">Bán chạy nhất</option>
+                            <option value="name,asc">Tên (A-Z)</option>
+                            <option value="name,desc">Tên (Z-A)</option>
+                            <option value="price,desc">Giá (Cao -> Thấp)</option>
+                            <option value="price,asc">Giá (Thấp -> Cao)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner - Hiển thị ngay từ đầu -->
+                <div id="loadingSpinner" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="productsGrid" style="display: none;">
+                    <!-- Similar products will be loaded here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <h4>Không tìm thấy sản phẩm tương tự</h4>
+                    <p class="text-muted">Thử thay đổi bộ lọc hoặc tìm kiếm sản phẩm khác</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination at bottom -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <nav id="pagination" class="mt-4" style="display: none;">
+                    <ul class="pagination justify-content-center">
+                        <!-- Pagination will be generated here -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="user/layout/user-footer :: footer"></div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Hidden input for product ID -->
+    <input type="hidden" id="productId" th:value="${productId}">
+
+    <!-- Custom JavaScript -->
+    <script th:src="@{/user/js/main.js}"></script>
+    <script th:src="@{/user/js/similarproduct.js}"></script>
+    
+    <!-- Debug Script -->
+    <script>
+        console.log('🔍 HTML script loaded');
+        console.log('🔍 jQuery available:', typeof $ !== 'undefined');
+        console.log('🔍 Product ID:', document.getElementById('productId')?.value);
+        console.log('🔍 Elements check:', {
+            loadingSpinner: !!document.getElementById('loadingSpinner'),
+            emptyState: !!document.getElementById('emptyState'),
+            productsGrid: !!document.getElementById('productsGrid'),
+            resultsCount: !!document.getElementById('resultsCount'),
+            pagination: !!document.getElementById('pagination'),
+            brandFilters: !!document.getElementById('brandFilters')
+        });
+        
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 DOM ready - initializing similar products');
+            
+            // Wait a bit more for all scripts to load
+            setTimeout(function() {
+                console.log('🔍 SimilarProductsManager available:', typeof window.SimilarProductsManager !== 'undefined');
+                console.log('🔍 All window objects:', Object.keys(window).filter(key => key.includes('Similar') || key.includes('similar')));
+                
+                if (typeof window.SimilarProductsManager === 'undefined') {
+                    console.error('🔍 similarproduct.js not loaded properly');
+                    console.error('🔍 Available scripts:', Array.from(document.scripts).map(s => s.src));
+                    return;
+                }
+                
+                console.log('🔍 similarproduct.js loaded successfully');
+                
+                // Get product ID
+                const productId = document.getElementById('productId')?.value;
+                console.log('🔍 Product ID from input:', productId);
+                
+                if (productId && !window.similarProductsManager) {
+                    console.log('🔍 Creating SimilarProductsManager with productId:', productId);
+                    try {
+                        window.similarProductsManager = new window.SimilarProductsManager(productId);
+                        console.log('🔍 SimilarProductsManager created successfully');
+                        console.log('🔍 Manager instance:', window.similarProductsManager);
+                    } catch (error) {
+                        console.error('🔍 Error creating SimilarProductsManager:', error);
+                        console.error('🔍 Error stack:', error.stack);
+                    }
+                } else if (!productId) {
+                    console.error('🔍 No product ID found in hidden input');
+                } else {
+                    console.log('🔍 SimilarProductsManager already exists');
+                }
+            }, 2000); // Increased timeout
+        });
+    </script>
+</body>
+</html>

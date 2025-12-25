@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu đơn hàng - Liora</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+
+    <style>
+        .order-lookup-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .lookup-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #e9ecef;
+        }
+
+        .lookup-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .lookup-header h1 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .lookup-header p {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-lookup {
+            background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-lookup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.3);
+            background: linear-gradient(135deg, #c2185b 0%, #e91e63 100%);
+        }
+
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .info-section h6 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .info-section ul {
+            margin-bottom: 0;
+            padding-left: 1.2rem;
+        }
+
+        .info-section li {
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <div th:replace="user/layout/user-header :: header"></div>
+
+    <!-- Main Content -->
+    <main class="order-lookup-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="lookup-card">
+                        <div class="lookup-header">
+                            <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                            <h1>Tra cứu đơn hàng</h1>
+                            <p>Nhập mã đơn hàng và email để xem chi tiết đơn hàng của bạn</p>
+                        </div>
+
+                        <!-- Alert Messages -->
+                        <div id="alertContainer">
+                            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <span th:text="${error}"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </div>
+
+                        <form id="orderLookupForm">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="orderId" placeholder="Mã đơn hàng" required>
+                                <label for="orderId">
+                                    <i class="fas fa-receipt me-2"></i>Mã đơn hàng
+                                </label>
+                            </div>
+
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="guestEmail" placeholder="Email đặt hàng"
+                                    required>
+                                <label for="guestEmail">
+                                    <i class="fas fa-envelope me-2"></i>Email đặt hàng
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lookup">
+                                <i class="fas fa-search me-2"></i>Tra cứu đơn hàng
+                            </button>
+                        </form>
+
+                        <div class="info-section">
+                            <h6><i class="fas fa-info-circle me-2"></i>Hướng dẫn tra cứu</h6>
+                            <ul>
+                                <li>Nhập mã đơn hàng (số thứ tự đơn hàng)</li>
+                                <li>Nhập email đã sử dụng khi đặt hàng</li>
+                                <li>Hệ thống sẽ hiển thị chi tiết đơn hàng nếu thông tin chính xác</li>
+                                <li>Bạn có thể tra cứu đơn hàng bất kỳ lúc nào</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="user/layout/user-footer :: footer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script th:src="@{/user/js/main.js}"></script>
+    <script th:src="@{/user/js/auth.js}"></script>
+    <script th:src="@{/user/js/auth-interceptor.js}"></script>
+
+    <script>
+        class OrderLookup {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadOrderIdFromUrl();
+            }
+
+            bindEvents() {
+                document.getElementById('orderLookupForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleOrderLookup();
+                });
+            }
+
+            loadOrderIdFromUrl() {
+                // Tự động điền orderId nếu có trong URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('orderId');
+                if (orderId) {
+                    document.getElementById('orderId').value = orderId;
+                }
+            }
+
+            async handleOrderLookup() {
+                const orderId = document.getElementById('orderId').value.trim();
+                const guestEmail = document.getElementById('guestEmail').value.trim();
+
+                if (!orderId || !guestEmail) {
+                    this.showAlert('Vui lòng nhập đầy đủ thông tin', 'warning');
+                    return;
+                }
+
+                // Validate orderId is numeric
+                if (!/^\d+$/.test(orderId)) {
+                    this.showAlert('Mã đơn hàng phải là số', 'warning');
+                    return;
+                }
+
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(guestEmail)) {
+                    this.showAlert('Email không đúng định dạng', 'warning');
+                    return;
+                }
+
+                try {
+                    this.showLoading(true);
+
+                    // Gọi API tra cứu đơn hàng công khai
+                    const response = await fetch('/user/order-lookup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderId: parseInt(orderId),
+                            email: guestEmail
+                        })
+                    });
+
+                    if (response.ok) {
+                        // Redirect đến trang order detail với thông tin guest
+                        window.location.href = `/user/order-detail/${orderId}?guestEmail=${encodeURIComponent(guestEmail)}`;
+                    } else {
+                        const data = await response.json();
+                        this.showAlert(data.message || 'Không tìm thấy đơn hàng với thông tin đã nhập', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error looking up order:', error);
+                    this.showAlert('Có lỗi xảy ra khi tra cứu đơn hàng. Vui lòng thử lại!', 'danger');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            showAlert(message, type) {
+                const alertContainer = document.getElementById('alertContainer');
+                const alertId = 'alert-' + Date.now();
+
+                const alertHtml = `
+                    <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+                alertContainer.innerHTML = alertHtml;
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    const alert = document.getElementById(alertId);
+                    if (alert) {
+                        alert.remove();
+                    }
+                }, 5000);
+            }
+
+            showLoading(show) {
+                const submitBtn = document.querySelector('#orderLookupForm button[type="submit"]');
+                if (show) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tra cứu...';
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-search me-2"></i>Tra cứu đơn hàng';
+                }
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new OrderLookup();
+        });
+    </script>
+</body>
+
+</html>

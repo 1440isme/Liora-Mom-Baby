@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý Banner - Liora Admin')">
+    <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
+</head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-images text-primary me-2"></i>
+                            Quản lý Banner
+                        </h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/banners/add" class="btn btn-primary text-white">
+                                <i class="fas fa-plus me-2"></i>Thêm Banner Mới
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="get" class="row g-3" id="filterForm">
+                                        <div class="col-md-5">
+                                            <label class="form-label">Tìm kiếm</label>
+                                            <input type="text" class="form-control" name="search" id="searchInput"
+                                                th:value="${search}" placeholder="Nhập tiêu đề banner...">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select class="form-select" name="isActive" id="statusSelect">
+                                                <option value="">Tất cả</option>
+                                                <option value="true" th:selected="${isActive == true}">Hoạt động
+                                                </option>
+                                                <option value="false" th:selected="${isActive == false}">Tạm dừng
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">&nbsp;</label>
+                                            <div class="d-grid">
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    id="clearFiltersBtn">
+                                                    <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banner Management Container -->
+                    <div class="card banner-container">
+                        <div class="card-header bg-white border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-images text-primary me-2"></i>
+                                    <h5 class="mb-0 fw-bold">Quản lý Banner</h5>
+                                    <span class="badge bg-primary ms-2" th:text="${totalElements}">0</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">
+                                        <i class="fas fa-hand-paper me-1"></i>Kéo thả để sắp xếp
+                                    </span>
+                                    <button id="saveOrderBtn" class="btn btn-success btn-sm" style="display: none;">
+                                        <i class="fas fa-save me-1"></i>Lưu thứ tự
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0">
+
+                            <!-- Banner Grid Container -->
+                            <div class="banner-grid-container">
+                                <div th:if="${banners.content.size() > 0}" id="bannerList" class="banner-grid"
+                                    style="min-height: calc(100% / 2 * 3);">
+                                    <div th:each="banner : ${banners.content}" class="banner-item">
+                                        <div class="card banner-card h-100" th:data-id="${banner.id}">
+                                            <div class="position-relative">
+                                                <img th:src="${banner.imageUrl}" th:alt="${banner.title}"
+                                                    class="banner-thumbnail">
+                                                <div class="sort-order-badge" th:text="${banner.sortOrder}">1</div>
+                                                <div class="banner-actions">
+                                                    <div class="btn-group-vertical btn-group-sm">
+                                                        <button class="btn btn-outline-light btn-sm drag-handle"
+                                                            title="Kéo để sắp xếp">
+                                                            <i class="fas fa-grip-vertical">⋮⋮</i>
+                                                        </button>
+                                                        <a th:href="@{/admin/banners/edit/{id}(id=${banner.id})}"
+                                                            class="btn btn-outline-light btn-sm" title="Chỉnh sửa">
+                                                            <i class="fas fa-edit">✏</i>
+                                                        </a>
+                                                        <button class="btn btn-outline-light btn-sm delete-banner"
+                                                            th:data-id="${banner.id}" title="Xóa">
+                                                            <i class="fas fa-trash">🗑</i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="banner-info">
+                                                <div class="banner-header">
+                                                    <h6 class="banner-title" th:text="${banner.title}">Banner Title</h6>
+                                                    <p class="banner-link" th:text="${banner.targetLink}">Link đích</p>
+                                                </div>
+
+                                                <div class="banner-details">
+                                                    <div class="detail-row">
+                                                        <span class="detail-label">Bắt đầu:</span>
+                                                        <span class="detail-value" th:if="${banner.startDate != null}"
+                                                            th:text="${#temporals.format(banner.startDate, 'dd/MM/yyyy HH:mm')}">01/01/2025
+                                                            00:00</span>
+                                                        <span class="detail-value detail-value-null"
+                                                            th:if="${banner.startDate == null}">--/--/---- --:--</span>
+                                                    </div>
+                                                    <div class="detail-row">
+                                                        <span class="detail-label">Kết thúc:</span>
+                                                        <span class="detail-value" th:if="${banner.endDate != null}"
+                                                            th:text="${#temporals.format(banner.endDate, 'dd/MM/yyyy HH:mm')}">31/12/2025
+                                                            23:59</span>
+                                                        <span class="detail-value detail-value-null"
+                                                            th:if="${banner.endDate == null}">--/--/---- --:--</span>
+                                                    </div>
+                                                    <div class="detail-row">
+                                                        <span class="detail-label">Hoạt động:</span>
+                                                        <div class="status-toggle">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input toggle-active"
+                                                                    type="checkbox" th:data-id="${banner.id}"
+                                                                    th:checked="${banner.isActive}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Empty State -->
+                                <div th:if="${banners.content.size() == 0}" class="empty-state">
+                                    <i class="fas fa-images"></i>
+                                    <h5 class="text-muted">Chưa có banner nào</h5>
+                                    <p class="text-muted">Hãy thêm banner đầu tiên để bắt đầu</p>
+                                    <a href="/admin/banners/add" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Thêm Banner Mới
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div th:if="${banners.totalPages > 1}" class="row mt-4">
+                        <div class="col-12">
+                            <nav>
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:classappend="${banners.first} ? 'disabled'">
+                                        <a class="page-link"
+                                            th:href="@{/admin/banners(page=${banners.number - 1}, search=${search}, isActive=${isActive}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    <li th:each="i : ${#numbers.sequence(0, banners.totalPages - 1)}" class="page-item"
+                                        th:classappend="${i == banners.number} ? 'active'">
+                                        <a class="page-link"
+                                            th:href="@{/admin/banners(page=${i}, search=${search}, isActive=${isActive}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                                            th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${banners.last} ? 'disabled'">
+                                        <a class="page-link"
+                                            th:href="@{/admin/banners(page=${banners.number + 1}, search=${search}, isActive=${isActive}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Xác nhận xóa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa banner này không?</p>
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash me-1"></i>Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="bannerToast" class="toast admin-toast admin-toast-info" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">&times;</button>
+            </div>
+            <div class="toast-body">
+                <!-- Toast message will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="/admin/js/banner.js"></script>
+</body>
+
+</html>

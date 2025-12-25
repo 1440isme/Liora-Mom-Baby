@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Products</title>
+</head>
+
+<body>
+<!-- Top Products Card -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Sản phẩm bán chạy</h6>
+        <a href="/admin/products" class="btn btn-sm btn-primary">Xem tất cả</a>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Đã bán</th>
+                    <th>Doanh thu</th>
+                    <th>Đánh giá</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${topProducts}">
+                    <!-- ID -->
+                    <td>
+                        <span class="fw-bold text-primary" th:text="'#' + ${product.id}">#1001</span>
+                    </td>
+
+                    <!-- Tên -->
+                    <td class="fw-normal" th:text="${product.name}">Tên sản phẩm</td>
+
+                    <!-- Danh mục -->
+                    <td th:text="${product.categoryName}">Danh mục</td>
+
+                    <!-- Đã bán -->
+                    <td>
+                        <span class="fw-bold text-success" th:text="${product.soldQuantity}">150</span>
+                    </td>
+
+                    <!-- Doanh thu (BigDecimal) -->
+                    <td th:text="${#numbers.formatDecimal(product.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                        2,500,000 ₫
+                    </td>
+
+                    <!-- Đánh giá (BigDecimal) -->
+                    <td>
+                        <div class="d-flex align-items-center">
+                                    <span class="text-warning me-1">
+                                        <!-- Lặp sao đầy -->
+                                        <i class="fas fa-star"
+                                           th:each="i : ${#numbers.sequence(1, T(java.lang.Math).floor(product.rating))}"></i>
+                                        <!-- Sao rỗng -->
+                                        <i class="far fa-star"
+                                           th:each="i : ${#numbers.sequence(T(java.lang.Math).floor(product.rating) + 1, 5)}"></i>
+                                    </span>
+                            <!-- Hiển thị số -->
+                            <span class="fw-normal" th:text="${#numbers.formatDecimal(product.rating, 1, 'COMMA', 1, 'POINT')} + '/5'">
+                                4.5/5
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Không có dữ liệu -->
+                <tr th:if="${#lists.isEmpty(topProducts)}">
+                    <td colspan="6" class="text-center text-muted">Không có dữ liệu sản phẩm</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

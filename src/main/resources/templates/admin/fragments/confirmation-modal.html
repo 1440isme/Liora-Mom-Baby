@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation Modal</title>
+</head>
+
+<body>
+    <!-- Confirmation Modal Fragment -->
+
+    <!-- Standard Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">
+                        <i class="fas fa-question-circle text-warning me-2"></i>
+                        Xác nhận
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationModalBody">
+                    <p class="mb-0">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Hủy bỏ
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmationModalConfirm">
+                        <i class="fas fa-check me-1"></i>Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Xác nhận xóa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="deleteConfirmationModalBody">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
+                    </div>
+                    <p class="mb-0">Bạn có chắc chắn muốn xóa <strong id="deleteItemName">mục này</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Hủy bỏ
+                    </button>
+                    <button type="button" class="btn btn-danger" id="deleteConfirmationModalConfirm">
+                        <i class="fas fa-trash me-1"></i>Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Confirmation Modal -->
+    <div class="modal fade" id="saveConfirmationModal" tabindex="-1" aria-labelledby="saveConfirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="saveConfirmationModalLabel">
+                        <i class="fas fa-save me-2"></i>
+                        Xác nhận lưu
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="saveConfirmationModalBody">
+                    <p class="mb-0">Bạn có chắc chắn muốn lưu các thay đổi?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Hủy bỏ
+                    </button>
+                    <button type="button" class="btn btn-success" id="saveConfirmationModalConfirm">
+                        <i class="fas fa-save me-1"></i>Lưu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="modal fade" id="customConfirmationModal" tabindex="-1" aria-labelledby="customConfirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" id="customConfirmationModalHeader">
+                    <h5 class="modal-title" id="customConfirmationModalLabel">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Xác nhận
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="customConfirmationModalBody">
+                    <!-- Custom content will be inserted here -->
+                </div>
+                <div class="modal-footer" id="customConfirmationModalFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Hủy bỏ
+                    </button>
+                    <button type="button" class="btn btn-primary" id="customConfirmationModalConfirm">
+                        <i class="fas fa-check me-1"></i>Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Styles -->
+    <style>
+        .confirmation-modal-icon {
+            font-size: 1.2em;
+        }
+
+        .confirmation-modal-body {
+            font-size: 1.1em;
+        }
+
+        .confirmation-modal-footer .btn {
+            min-width: 100px;
+        }
+
+        .modal-header.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        .modal-header.bg-success {
+            background-color: #198754 !important;
+        }
+
+        .modal-header.bg-warning {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+        }
+
+        .modal-header.bg-info {
+            background-color: #0dcaf0 !important;
+            color: #000 !important;
+        }
+
+        .modal-header.bg-primary {
+            background-color: #0d6efd !important;
+        }
+    </style>
+
+    <!-- JavaScript for confirmation modal functionality -->
+    <script>
+        // Confirmation Modal utility functions
+        window.ConfirmationModal = {
+            // Show standard confirmation modal
+            show: function (title, message, confirmText = 'Xác nhận', cancelText = 'Hủy bỏ', callback) {
+                const modal = document.getElementById('confirmationModal');
+                const modalTitle = document.getElementById('confirmationModalLabel');
+                const modalBody = document.getElementById('confirmationModalBody');
+                const confirmBtn = document.getElementById('confirmationModalConfirm');
+                const cancelBtn = modal.querySelector('.btn-secondary');
+
+                modalTitle.innerHTML = `<i class="fas fa-question-circle text-warning me-2"></i>${title}`;
+                modalBody.innerHTML = `<p class="mb-0">${message}</p>`;
+                confirmBtn.innerHTML = `<i class="fas fa-check me-1"></i>${confirmText}`;
+                cancelBtn.innerHTML = `<i class="fas fa-times me-1"></i>${cancelText}`;
+
+                // Remove existing event listeners
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                // Add new event listener
+                newConfirmBtn.addEventListener('click', function () {
+                    if (callback) callback();
+                    bootstrap.Modal.getInstance(modal).hide();
+                });
+
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+            },
+
+            // Show delete confirmation modal
+            showDelete: function (itemName, callback) {
+                const modal = document.getElementById('deleteConfirmationModal');
+                const itemNameElement = document.getElementById('deleteItemName');
+                const confirmBtn = document.getElementById('deleteConfirmationModalConfirm');
+
+                itemNameElement.textContent = itemName;
+
+                // Remove existing event listeners
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                // Add new event listener
+                newConfirmBtn.addEventListener('click', function () {
+                    if (callback) callback();
+                    bootstrap.Modal.getInstance(modal).hide();
+                });
+
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+            },
+
+            // Show save confirmation modal
+            showSave: function (callback) {
+                const modal = document.getElementById('saveConfirmationModal');
+                const confirmBtn = document.getElementById('saveConfirmationModalConfirm');
+
+                // Remove existing event listeners
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                // Add new event listener
+                newConfirmBtn.addEventListener('click', function () {
+                    if (callback) callback();
+                    bootstrap.Modal.getInstance(modal).hide();
+                });
+
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+            },
+
+            // Show custom confirmation modal
+            showCustom: function (options) {
+                const modal = document.getElementById('customConfirmationModal');
+                const modalHeader = document.getElementById('customConfirmationModalHeader');
+                const modalTitle = document.getElementById('customConfirmationModalLabel');
+                const modalBody = document.getElementById('customConfirmationModalBody');
+                const modalFooter = document.getElementById('customConfirmationModalFooter');
+                const confirmBtn = document.getElementById('customConfirmationModalConfirm');
+
+                // Set header style
+                if (options.headerClass) {
+                    modalHeader.className = `modal-header ${options.headerClass}`;
+                } else {
+                    modalHeader.className = 'modal-header';
+                }
+
+                // Set title
+                modalTitle.innerHTML = `<i class="fas ${options.icon || 'fa-question-circle'} me-2"></i>${options.title || 'Xác nhận'}`;
+
+                // Set body content
+                modalBody.innerHTML = options.body || '<p class="mb-0">Bạn có chắc chắn muốn thực hiện hành động này?</p>';
+
+                // Set footer buttons
+                if (options.buttons) {
+                    modalFooter.innerHTML = '';
+                    options.buttons.forEach(button => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = `btn ${button.class || 'btn-secondary'}`;
+                        btn.innerHTML = `<i class="fas ${button.icon || 'fa-times'} me-1"></i>${button.text}`;
+
+                        if (button.action === 'close') {
+                            btn.setAttribute('data-bs-dismiss', 'modal');
+                        } else if (button.action === 'confirm') {
+                            btn.addEventListener('click', function () {
+                                if (options.callback) options.callback();
+                                bootstrap.Modal.getInstance(modal).hide();
+                            });
+                        } else if (button.callback) {
+                            btn.addEventListener('click', button.callback);
+                        }
+
+                        modalFooter.appendChild(btn);
+                    });
+                } else {
+                    // Default buttons
+                    modalFooter.innerHTML = `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Hủy bỏ
+                        </button>
+                        <button type="button" class="btn btn-primary" id="customConfirmationModalConfirm">
+                            <i class="fas fa-check me-1"></i>Xác nhận
+                        </button>
+                    `;
+
+                    const newConfirmBtn = modalFooter.querySelector('#customConfirmationModalConfirm');
+                    newConfirmBtn.addEventListener('click', function () {
+                        if (options.callback) options.callback();
+                        bootstrap.Modal.getInstance(modal).hide();
+                    });
+                }
+
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+            },
+
+            // Show confirmation with different types
+            showType: function (type, title, message, callback) {
+                const types = {
+                    'info': {
+                        icon: 'fa-info-circle',
+                        headerClass: 'bg-info text-dark',
+                        confirmClass: 'btn-info'
+                    },
+                    'warning': {
+                        icon: 'fa-exclamation-triangle',
+                        headerClass: 'bg-warning text-dark',
+                        confirmClass: 'btn-warning'
+                    },
+                    'danger': {
+                        icon: 'fa-exclamation-circle',
+                        headerClass: 'bg-danger text-white',
+                        confirmClass: 'btn-danger'
+                    },
+                    'success': {
+                        icon: 'fa-check-circle',
+                        headerClass: 'bg-success text-white',
+                        confirmClass: 'btn-success'
+                    }
+                };
+
+                const typeConfig = types[type] || types['info'];
+
+                this.showCustom({
+                    title: title,
+                    body: message,
+                    icon: typeConfig.icon,
+                    headerClass: typeConfig.headerClass,
+                    buttons: [
+                        {
+                            text: 'Hủy bỏ',
+                            class: 'btn-secondary',
+                            icon: 'fa-times',
+                            action: 'close'
+                        },
+                        {
+                            text: 'Xác nhận',
+                            class: typeConfig.confirmClass,
+                            icon: 'fa-check',
+                            action: 'confirm'
+                        }
+                    ],
+                    callback: callback
+                });
+            }
+        };
+
+        // Convenience functions
+        function confirmAction(title, message, callback) {
+            ConfirmationModal.show(title, message, 'Xác nhận', 'Hủy bỏ', callback);
+        }
+
+        function confirmDelete(itemName, callback) {
+            ConfirmationModal.showDelete(itemName, callback);
+        }
+
+        function confirmSave(callback) {
+            ConfirmationModal.showSave(callback);
+        }
+
+        function confirmInfo(title, message, callback) {
+            ConfirmationModal.showType('info', title, message, callback);
+        }
+
+        function confirmWarning(title, message, callback) {
+            ConfirmationModal.showType('warning', title, message, callback);
+        }
+
+        function confirmDanger(title, message, callback) {
+            ConfirmationModal.showType('danger', title, message, callback);
+        }
+
+        function confirmSuccess(title, message, callback) {
+            ConfirmationModal.showType('success', title, message, callback);
+        }
+
+        // Global confirmation for forms
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add confirmation to forms with data-confirm attribute
+            document.querySelectorAll('form[data-confirm]').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const message = this.getAttribute('data-confirm');
+                    const title = this.getAttribute('data-confirm-title') || 'Xác nhận';
+
+                    ConfirmationModal.show(title, message, 'Xác nhận', 'Hủy bỏ', () => {
+                        this.submit();
+                    });
+                });
+            });
+
+            // Add confirmation to buttons with data-confirm attribute
+            document.querySelectorAll('button[data-confirm], a[data-confirm]').forEach(element => {
+                element.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const message = this.getAttribute('data-confirm');
+                    const title = this.getAttribute('data-confirm-title') || 'Xác nhận';
+                    const href = this.getAttribute('href');
+                    const action = this.getAttribute('data-action');
+
+                    ConfirmationModal.show(title, message, 'Xác nhận', 'Hủy bỏ', () => {
+                        if (href) {
+                            window.location.href = href;
+                        } else if (action) {
+                            eval(action);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

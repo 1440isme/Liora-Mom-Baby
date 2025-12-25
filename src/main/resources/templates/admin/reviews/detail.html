@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Chi tiết đánh giá - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper">
+        <div th:replace="admin/layout/admin-navbar"></div>
+        <div th:replace="admin/layout/admin-sidebar"></div>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="d-none text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+
+                <!-- Page Header -->
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="mdi mdi-star me-2"></i>Chi tiết đánh giá <span id="pageReviewId">#...</span>
+                    </h1>
+                    <div class="btn-wrapper">
+                        <a href="/admin/reviews" class="btn btn-outline-dark me-2">
+                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                        </a>
+                        <button type="button" class="btn btn-outline-dark me-2" id="btnPrintReview">
+                            <i class="mdi mdi-printer"></i> In đánh giá
+                        </button>
+                        <button type="button" class="btn btn-primary text-white" id="btnUpdateVisibility">
+                            <i class="mdi mdi-eye"></i> Cập nhật trạng thái
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Review Content -->
+                    <div class="col-lg-8">
+                        <!-- Review Information -->
+                        <div class="card card-rounded mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash mb-4">
+                                    <i class="mdi mdi-star-outline me-2"></i>Nội dung đánh giá
+                                </h4>
+                                <div class="review-content">
+                                    <div class="mb-3">
+                                        <div class="star-rating mb-2" id="reviewStars">
+                                            <!-- Stars will be loaded here -->
+                                        </div>
+                                        <div class="rating-text">
+                                            <span class="fw-bold" id="ratingText">...</span>
+                                        </div>
+                                    </div>
+                                    <div class="review-text">
+                                        <p class="mb-0" id="reviewContent">Đang tải nội dung...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Information -->
+                        <div class="card card-rounded mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash mb-4">
+                                    <i class="mdi mdi-package-variant me-2"></i>Thông tin sản phẩm
+                                </h4>
+                                <div class="row h-100">
+                                    <div class="col-md-3">
+                                        <div class="product-image">
+                                            <img id="productImage" src="" alt="Sản phẩm" class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="product-info">
+                                            <div class="info-item mb-3"> <!-- Tăng margin-bottom -->
+                                                <label class="info-label">Tên sản phẩm:</label>
+                                                <div class="info-value" id="productName">Đang tải...</div>
+                                            </div>
+
+                                            <!-- Mã sản phẩm và Giá sản phẩm ngang hàng -->
+                                            <div class="row mb-4"> <!-- Tăng margin-bottom -->
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="info-label">Mã sản phẩm:</label>
+                                                        <div class="info-value" id="productId">...</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="info-label">Giá:</label>
+                                                        <div class="info-value" id="productPrice">...</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thương hiệu và Danh mục ngang hàng -->
+                                            <div class="row mb-3"> <!-- Tăng margin-bottom -->
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="info-label">Thương hiệu:</label>
+                                                        <div class="info-value" id="productBrand">...</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="info-item">
+                                                        <label class="info-label">Danh mục:</label>
+                                                        <div class="info-value" id="productCategory">...</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Thêm khoảng trống để cân bằng chiều cao -->
+                                            <div class="flex-grow-1"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Summary -->
+                    <div class="col-lg-4">
+                        <!-- Review Details -->
+                        <div class="card card-rounded mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash mb-4">
+                                    <i class="mdi mdi-information-outline me-2"></i>Thông tin đánh giá
+                                </h4>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td class="fw-medium">Mã đánh giá:</td>
+                                        <td id="reviewIdDetail">...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Ngày tạo:</td>
+                                        <td id="reviewCreatedAt">...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Cập nhật cuối:</td>
+                                        <td id="reviewUpdatedAt">...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Trạng thái:</td>
+                                        <td id="reviewStatus">...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Ẩn danh:</td>
+                                        <td id="reviewAnonymous">...</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- User Information -->
+                        <div class="card card-rounded mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash mb-4">
+                                    <i class="mdi mdi-account-outline me-2"></i>Thông tin người đánh giá
+                                </h4>
+                                <div class="user-info">
+                                    <div class="mb-3 text-center">
+                                        <div class="user-avatar">
+                                            <img id="userAvatar" src="" alt="Avatar" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                                        </div>
+                                    </div>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td class="fw-medium" width="40%">Tên:</td>
+                                            <td id="orderCustomerName">Đang tải...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Mã người dùng:</td>
+                                            <td id="userId">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Email:</td>
+                                            <td id="orderCustomerEmail">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Số điện thoại:</td>
+                                            <td id="orderCustomerPhone">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Địa chỉ:</td>
+                                            <td id="orderCustomerAddress">...</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Information -->
+                        <div class="card card-rounded">
+                            <div class="card-body">
+                                <h4 class="card-title card-title-dash mb-4">
+                                    <i class="mdi mdi-package-variant-closed me-2"></i>Thông tin đơn hàng
+                                </h4>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td class="fw-medium" width="40%">Mã đơn hàng:</td>
+                                        <td class="fw-bold text-primary" id="orderCode">...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Ngày đặt hàng:</td>
+                                        <td id="orderDate">...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Mã người dùng:</td>
+                                        <td id="orderUserId">...</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:replace="admin/layout/admin-footer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Visibility Modal -->
+<div class="modal fade" id="updateVisibilityModal" tabindex="-1" aria-labelledby="updateVisibilityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateVisibilityModalLabel">
+                    <i class="mdi mdi-eye me-2"></i>Cập nhật trạng thái hiển thị
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateVisibilityForm">
+                    <input type="hidden" id="updateReviewId" />
+                    <div class="mb-3">
+                        <label for="updateReviewVisibility" class="form-label">Trạng thái hiển thị</label>
+                        <select class="form-select" id="updateReviewVisibility" required>
+                            <option value="true">Hiển thị</option>
+                            <option value="false">Ẩn</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="mdi mdi-close me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveReviewVisibility()">
+                    <i class="mdi mdi-content-save me-2"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- CSS for styling -->
+    <style>
+        .review-content {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .star-rating {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+
+        .user-avatar img {
+            border: 3px solid #e3e6f0;
+        }
+
+        .card-title-dash {
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .card-title-dash::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: #007bff;
+        }
+
+        .order-info {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* Product info styling - Updated */
+        .product-info {
+            padding-left: 60px; /* Di chuyển văn bản qua phải */
+            margin-left: 0;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-left: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #5a5c69;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1rem;
+            word-wrap: break-word;
+            line-height: 1.4;
+            text-align: left;
+            width: 100%;
+        }
+
+        .product-image {
+            text-align: center;
+            padding-right: 0px;
+            transform: translateX(20px);
+        }
+
+        .product-image img {
+            border: 2px solid #e3e6f0;
+            border-radius: 8px;
+            width: 250px; /* Kích thước cố định */
+            height: 250px; /* Kích thước cố định */
+            object-fit: cover;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Ẩn ảnh nếu không có src */
+        .product-image img[src=""] {
+            display: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .product-info {
+                padding-left: 20px; /* Giảm padding trên mobile */
+            }
+
+            .product-image {
+                padding-right: 10px;
+            }
+        }
+
+        /* Order code link styling */
+        #orderCode a {
+            transition: all 0.2s ease;
+        }
+        
+        #orderCode a:hover {
+            color: #0056b3 !important;
+            text-decoration: underline !important;
+        }
+        
+        #orderCode a:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+        }
+        
+        /* Review content detail styles */
+        .review-content-detail {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fc;
+            border-radius: 8px;
+            line-height: 1.6;
+            font-size: 1rem; /* Increase font size */
+        }
+        
+        .review-content-detail p {
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 1rem; /* Text size */
+        }
+        
+        .review-content-detail img {
+            max-width: 100%;
+            max-height: 400px; /* Limit image height */
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            object-fit: contain; /* Maintain aspect ratio */
+        }
+        
+        .review-content-detail video {
+            max-width: 100%;
+            max-height: 400px; /* Limit video height */
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .review-content-detail figure {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .review-content-detail figure img {
+            max-width: 100%;
+            max-height: 400px; /* Consistent image size */
+            object-fit: contain;
+        }
+        
+        .review-content-detail strong {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        /* User images collapse styling */
+        .review-user-images-section {
+            margin-top: 12px;
+            padding-top: 12px;
+        }
+        
+        .review-show-images-btn {
+            color: #6c757d;
+            font-size: 0.875rem;
+            font-weight: 400;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        
+        .review-show-images-btn:hover {
+            color: #495057;
+            text-decoration: none;
+        }
+        
+        .review-show-images-btn i {
+            font-size: 1rem;
+        }
+        
+        .collapse-icon {
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+        
+        .review-show-images-btn[aria-expanded="true"] .collapse-icon {
+            transform: rotate(180deg);
+        }
+        
+        .review-user-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .review-user-image-item {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%; /* Square aspect ratio */
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .review-user-image-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        
+        .review-user-image-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Lightbox styling */
+        .review-image-lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .review-image-lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-container {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .review-image-lightbox img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+            cursor: default;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            z-index: 10001;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: #ff6b9d;
+        }
+        
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            z-index: 10001;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-btn.prev {
+            left: 20px;
+        }
+        
+        .nav-btn.next {
+            right: 20px;
+        }
+        
+        .image-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 10001;
+        }
+    </style>
+
+<!-- Scripts -->
+<script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+<script src="/admin/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+<script src="/admin/js/off-canvas.js"></script>
+<script src="/admin/js/hoverable-collapse.js"></script>
+<script src="/admin/js/template.js"></script>
+<script src="/admin/js/settings.js"></script>
+<script src="/admin/js/todolist.js"></script>
+
+<!-- Page specific script -->
+<script src="/admin/js/admin/review-detail.js"></script>
+
+<!-- Hidden data for JavaScript -->
+<script th:inline="javascript">
+    window.reviewIdFromServer = /*[[${reviewId}]]*/ null;
+</script>
+</body>
+
+</html>

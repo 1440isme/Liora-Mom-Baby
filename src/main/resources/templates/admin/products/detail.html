@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Chi tiết sản phẩm - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">Chi tiết sản phẩm</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/products">Sản phẩm</a></li>
+                                <li class="breadcrumb-item active">Chi tiết</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <!-- Product Detail Content -->
+                    <div class="row">
+                        <!-- Product Information - 8 columns (left) -->
+                        <div class="col-lg-8">
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h4 class="card-title card-title-dash mb-0">Thông tin sản phẩm</h4>
+                                        <div class="btn-group">
+                                            <a href="#" id="editProductBtn" class="btn btn-primary">
+                                                <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                            </a>
+                                            <button type="button" id="toggleStatusBtn" class="btn btn-warning">
+                                                <i class="mdi mdi-pause"></i> Tạm dừng
+                                            </button>
+                                            <button type="button" id="deleteProductBtn" class="btn btn-danger">
+                                                <i class="mdi mdi-delete"></i> Xóa
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h2 id="productName" class="text-primary">Đang tải...</h2>
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <h3 id="productPrice" class="text-success">Đang tải...</h3>
+                                            <p id="productStock" class="text-muted">Đang tải...</p>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5>Thông tin cơ bản</h5>
+                                            <table class="table table-borderless">
+                                                <tr>
+                                                    <td><strong>Danh mục:</strong></td>
+                                                    <td id="productCategory">Đang tải...</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Thương hiệu:</strong></td>
+                                                    <td id="productBrand">Đang tải...</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Trạng thái:</strong></td>
+                                                    <td id="productStatus">Đang tải...</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Ngày tạo:</strong></td>
+                                                    <td id="productCreatedDate">Đang tải...</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Thống kê bán hàng</h5>
+                                            <table class="table table-borderless">
+                                                <tr>
+                                                    <td><strong>Số lượng tồn kho:</strong></td>
+                                                    <td id="productStockDetail">Đang tải...</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Đã bán:</strong></td>
+                                                    <td id="productSoldCount">Đang tải...</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Khả dụng:</strong></td>
+                                                    <td id="productAvailable">Đang tải...</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    <h5>Mô tả chi tiết</h5>
+                                    <p id="productDescription" class="text-muted">Đang tải...</p>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Images - 4 columns (right) -->
+                        <div class="col-lg-4">
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Hình ảnh sản phẩm</h4>
+                                    <div id="productImages" class="text-center">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa sản phẩm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="/admin/js/admin/products/product-detail.js"></script>
+</body>
+
+</html>

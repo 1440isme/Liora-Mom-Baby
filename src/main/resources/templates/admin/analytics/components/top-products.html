@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm bán chạy & sắp hết hàng</title>
+</head>
+
+<body>
+<!-- ====================== SẢN PHẨM BÁN CHẠY ====================== -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white border-start border-4 border-primary">
+        <h6 class="m-0 fw-bold text-primary">🔥 Sản phẩm bán chạy</h6>
+        <a href="/admin/products"
+           class="btn btn-sm text-white"
+           style="background-color:#5ab2ff; border-color:#5ab2ff;">
+            Xem tất cả
+        </a>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle" width="100%" cellspacing="0">
+                <thead class="table-light">
+                <tr>
+                    <th style="width: 80px;" class="text-center">Mã sản phẩm</th>
+                    <th>Tên sản phẩm</th>
+                    <th style="width: 180px;">Danh mục</th>
+                    <th style="width: 150px;" class="text-center">Đã bán</th>
+                    <th style="width: 200px;">Doanh thu</th>
+                    <th style="width: 120px;" class="text-center">Đánh giá</th>
+                </tr>
+                </thead>
+                <tbody id="topProductsBody">
+                <tr th:each="product : ${topProducts}" th:if="${product.soldQuantity > 0}">
+                    <!-- Mã sản phẩm -->
+                    <td class="text-center"><span class="text-dark" th:text="${product.id}">1001</span></td>
+
+                    <!-- Tên -->
+                    <td><div class="fw-normal" th:text="${product.name}">Tên sản phẩm</div></td>
+
+                    <!-- Danh mục -->
+                    <td th:text="${product.categoryName}">Danh mục</td>
+
+                    <!-- Đã bán -->
+                    <td class="text-center"><span class="text-success fw-semibold" th:text="${product.soldQuantity}">150</span></td>
+
+                    <!-- Doanh thu -->
+                    <td th:text="${#numbers.formatDecimal(product.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">2,500,000 ₫</td>
+
+                    <!-- Đánh giá -->
+                    <td class="text-center">
+                        <span class="fw-normal"
+                               th:text="${#numbers.formatDecimal(product.rating, 1, 'COMMA', 1, 'POINT')} + '/5'">
+                            4.5/5
+                        </span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(topProducts)}">
+                    <td colspan="6" class="text-center text-muted">Không có dữ liệu sản phẩm bán chạy</td>
+                </tr>
+                <tr th:if="${!#lists.isEmpty(topProducts) and topProducts.?[soldQuantity > 0].isEmpty()}">
+                    <td colspan="6" class="text-center text-muted">Chưa có sản phẩm nào được bán</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

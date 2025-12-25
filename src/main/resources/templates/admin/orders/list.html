@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý đơn hàng - Liora Admin')"></head>
+
+<body class="with-welcome-text orders-page">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Alert Container -->
+                    <div id="alertContainer"></div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="d-none text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">
+                            <i class="mdi mdi-cart-outline me-2"></i>Quản lý đơn hàng
+                        </h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Date Filter -->
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-nowrap">Từ ngày:</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDateFrom"
+                                    style="width: 140px;">
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-nowrap">Đến ngày:</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDateTo"
+                                    style="width: 140px;">
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="btn-wrapper">
+                                <button type="button" class="btn btn-outline-success me-2" id="btnExportExcel">
+                                    <i class="mdi mdi-file-excel"></i> Xuất Excel
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btnPrintReport">
+                                    <i class="mdi mdi-printer"></i> In báo cáo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-primary">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                                Tổng đơn hàng
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="totalOrders">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-cart-outline mdi-36px text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-danger">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                                Đã hủy
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="paidOrders">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-close-circle-outline mdi-36px text-danger"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-warning">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                                Chờ xử lý
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="pendingOrders">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-clock-outline mdi-36px text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-info">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                                Tổng doanh thu
+                                            </div>
+                                            <div class="h6 mb-0 fw-bold" id="totalRevenue">0 ₫</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-cash-multiple mdi-36px text-info"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="card card-rounded mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="mdi mdi-filter-outline me-2"></i>Tìm kiếm và lọc
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Tìm kiếm</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="searchOrder"
+                                            placeholder="Mã đơn hàng, tên khách hàng...">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnSearch">
+                                            <i class="mdi mdi-magnify"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">Trạng thái đơn hàng</label>
+                                    <select class="form-select" id="filterOrderStatus">
+                                        <option value="">Tất cả</option>
+                                        <option value="PENDING">Chờ xử lý</option>
+                                        <option value="CONFIRMED">Đã xác nhận</option>
+                                        <option value="COMPLETED">Hoàn tất</option>
+                                        <option value="CANCELLED">Đã hủy</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">Trạng thái thanh toán</label>
+                                    <select class="form-select" id="filterPaymentStatus">
+                                        <option value="">Tất cả</option>
+                                        <option value="PENDING">Chờ thanh toán</option>
+                                        <option value="PAID">Đã thanh toán</option>
+                                        <option value="FAILED">Thất bại</option>
+                                        <option value="CANCELLED">Đã hủy</option>
+                                        <option value="REFUNDED">Hoàn tiền</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1 mb-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-secondary w-100" id="btnRefresh"
+                                        title="Làm mới">
+                                        <i class="mdi mdi-refresh"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="card card-rounded">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" width="4%"></th>
+                                            <th scope="col" width="10%">Mã đơn hàng</th>
+                                            <th scope="col" width="12%">Thời gian đặt</th>
+                                            <th scope="col" width="18%">Khách hàng</th>
+                                            <th scope="col" width="15%">Tổng tiền</th>
+                                            <th scope="col" width="15%">Thanh toán</th>
+                                            <th scope="col" width="15%">Trạng thái</th>
+                                            <th scope="col" width="11%">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderTableBody">
+                                        <!-- Orders will be loaded here via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span id="paginationInfo" class="text-muted">Hiển thị 0-0 trong tổng số 0 đơn
+                                        hàng</span>
+                                </div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0" id="pagination">
+                                        <!-- Pagination will be generated here -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailModalLabel">
+                        <i class="mdi mdi-cart-outline me-2"></i>Chi tiết đơn hàng <span id="modalOrderId"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Customer Information -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="mdi mdi-account me-2"></i>Thông tin khách hàng</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td class="fw-medium">Họ tên:</td>
+                                            <td id="modalCustomerName"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Email:</td>
+                                            <td id="modalCustomerEmail"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Điện thoại:</td>
+                                            <td id="modalCustomerPhone"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Địa chỉ giao hàng:</td>
+                                            <td id="modalShippingAddress"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Information -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="mdi mdi-information me-2"></i>Thông tin đơn hàng</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td class="fw-medium">Ngày đặt:</td>
+                                            <td id="modalOrderDate"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Tổng tiền:</td>
+                                            <td class="fw-bold text-primary" id="modalTotalAmount"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Trạng thái đơn hàng:</td>
+                                            <td id="modalOrderStatus"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Trạng thái thanh toán:</td>
+                                            <td id="modalPaymentStatus"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Phương thức thanh toán:</td>
+                                            <td id="modalPaymentMethod"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Ghi chú:</td>
+                                            <td id="modalNotes"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="mdi mdi-package-variant me-2"></i>Sản phẩm đã đặt</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="modalOrderItems">
+                                <!-- Order items will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Order Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStatusModalLabel">
+                        <i class="mdi mdi-pencil me-2"></i>Cập nhật trạng thái đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateStatusForm">
+                        <input type="hidden" id="updateOrderId">
+
+
+                        <div class="mb-3">
+                            <label for="updateOrderStatus" class="form-label">Trạng thái đơn hàng</label>
+                            <select class="form-select" id="updateOrderStatus" required>
+                                <option value="PENDING">Chờ xử lý</option>
+                                <option value="CONFIRMED">Đã xác nhận</option>
+                                <option value="COMPLETED">Hoàn tất</option>
+                                <option value="CANCELLED">Đã hủy</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="updatePaymentStatus" class="form-label">Trạng thái thanh toán</label>
+                            <select class="form-select" id="updatePaymentStatus" required>
+                                <option value="PENDING">Chờ thanh toán</option>
+                                <option value="PAID">Đã thanh toán</option>
+                                <option value="FAILED">Thất bại</option>
+                                <option value="CANCELLED">Đã hủy</option>
+                                <option value="REFUNDED">Hoàn tiền</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOrderStatus()">
+                        <i class="mdi mdi-content-save me-2"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script th:src="@{/admin/js/admin/orders.js}"></script>
+
+    <style>
+        .border-start-primary {
+            border-left: 4px solid #4e73df !important;
+        }
+
+        .border-start-success {
+            border-left: 4px solid #1cc88a !important;
+        }
+
+        .border-start-danger {
+            border-left: 4px solid #e74a3b !important;
+        }
+
+        .border-start-warning {
+            border-left: 4px solid #f6c23e !important;
+        }
+
+        .border-start-info {
+            border-left: 4px solid #36b9cc !important;
+        }
+
+        .card-rounded {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #5a5c69;
+        }
+
+        .orders-page .content-wrapper {
+            background-color: #f8f9fc;
+        }
+    </style>
+</body>
+
+</html>

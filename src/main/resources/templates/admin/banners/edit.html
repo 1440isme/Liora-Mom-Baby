@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Chỉnh sửa Banner - Liora Admin')">
+    <link rel="stylesheet" href="/admin/css/banner.css">
+</head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-edit text-primary me-2"></i>
+                            Chỉnh sửa Banner
+                        </h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/banners" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <div class="row">
+                        <div class="col-12">
+                            <form th:action="@{/admin/banners/edit/{id}(id=${bannerId})}" method="post"
+                                enctype="multipart/form-data" id="bannerForm">
+                                <div class="row">
+                                    <!-- Left Column - Image Upload -->
+                                    <div class="col-lg-4">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">
+                                                    <i class="fas fa-image me-2"></i>
+                                                    Hình ảnh Banner
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- Image Upload Area -->
+                                                <div class="upload-area" id="uploadArea">
+                                                    <div id="uploadPlaceholder"
+                                                        th:style="${bannerRequest.imageUrl != null} ? 'display: none;' : 'display: flex;'">
+                                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                                        <h6>Thay đổi ảnh</h6>
+                                                        <p class="text-muted small">Kéo thả ảnh mới vào đây</p>
+                                                        <p class="text-muted small">hoặc click để chọn file</p>
+                                                        <p class="text-muted small">JPG, PNG, GIF (tối đa 5MB)</p>
+                                                    </div>
+                                                    <div id="imagePreview"
+                                                        th:style="${bannerRequest.imageUrl != null} ? 'display: block;' : 'display: none;'">
+                                                        <div class="image-preview-container">
+                                                            <img id="previewImg" class="image-preview" alt="Preview"
+                                                                th:src="${bannerRequest.imageUrl}">
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                id="removeImage">
+                                                                <i class="fas fa-trash me-1"></i>Xóa ảnh
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input type="file" id="imageInput" name="image" accept="image/*"
+                                                    style="display: none;">
+
+                                                <!-- Image Requirements -->
+                                                <div class="mt-3">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Khuyến nghị: 1920x600px (tỷ lệ 16:5)
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column - Form Fields -->
+                                    <div class="col-lg-8">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">
+                                                    <i class="fas fa-edit me-2"></i>
+                                                    Thông tin Banner
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- Basic Information -->
+                                                <div class="form-section">
+                                                    <h6 class="section-title">Thông tin cơ bản</h6>
+
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <div class="mb-3">
+                                                                <label for="title" class="form-label">
+                                                                    Tiêu đề Banner <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control" id="title"
+                                                                    name="title" th:value="${bannerRequest.title}"
+                                                                    required placeholder="Nhập tiêu đề banner...">
+                                                                <div class="invalid-feedback">
+                                                                    Vui lòng nhập tiêu đề banner
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="mb-3">
+                                                                <label for="sortOrder" class="form-label">
+                                                                    Thứ tự hiển thị
+                                                                </label>
+                                                                <input type="number" class="form-control" id="sortOrder"
+                                                                    name="sortOrder"
+                                                                    th:value="${bannerRequest.sortOrder}" min="1"
+                                                                    placeholder="1">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="targetLink" class="form-label">
+                                                            Link đích
+                                                        </label>
+                                                        <input type="url" class="form-control" id="targetLink"
+                                                            name="targetLink" th:value="${bannerRequest.targetLink}"
+                                                            placeholder="https://example.com">
+                                                        <div class="form-text">
+                                                            URL sẽ được mở khi người dùng click vào banner
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Schedule Settings -->
+                                                <div class="form-section">
+                                                    <h6 class="section-title">Cài đặt lịch trình</h6>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="mb-3">
+                                                                <label for="startDate" class="form-label">
+                                                                    Ngày bắt đầu
+                                                                </label>
+                                                                <input type="datetime-local" class="form-control"
+                                                                    id="startDate" name="startDate"
+                                                                    th:value="${#temporals.format(bannerRequest.startDate, 'yyyy-MM-dd''T''HH:mm')}">
+                                                                <div class="form-text">
+                                                                    Để trống để hiển thị ngay lập tức
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="mb-3">
+                                                                <label for="endDate" class="form-label">
+                                                                    Ngày kết thúc
+                                                                </label>
+                                                                <input type="datetime-local" class="form-control"
+                                                                    id="endDate" name="endDate"
+                                                                    th:value="${#temporals.format(bannerRequest.endDate, 'yyyy-MM-dd''T''HH:mm')}">
+                                                                <div class="form-text">
+                                                                    Để trống để hiển thị vô thời hạn
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Status Settings -->
+                                                <div class="form-section">
+                                                    <h6 class="section-title">Trạng thái</h6>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-check form-switch mb-3">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    id="isActive" name="isActive"
+                                                                    th:checked="${bannerRequest.isActive}"
+                                                                    style="display: block; margin-left: 10px;">
+                                                                <label class="form-check-label" for="isActive"
+                                                                    style="display: block; margin-left: 50px;">
+
+                                                                    <strong>Kích hoạt banner</strong>
+                                                                    <div class="form-text">Banner sẽ hiển thị trên
+                                                                        website</div>
+                                                                </label>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <a href="/admin/banners" class="btn btn-outline-secondary">
+                                                        <i class="fas fa-times me-2"></i>Hủy bỏ
+                                                    </a>
+                                                    <div>
+                                                        <button type="button" class="btn btn-outline-primary me-2"
+                                                            id="previewBtn">
+                                                            <i class="fas fa-eye me-2"></i>Xem trước
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-save me-2"></i>Cập nhật Banner
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-eye me-2"></i>
+                        Xem trước Banner
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="banner-preview-container">
+                        <img id="previewModalImg" class="img-fluid" alt="Banner Preview">
+                        <div class="banner-preview-overlay">
+                            <h4 id="previewTitle">Tiêu đề Banner</h4>
+                            <p id="previewLink" class="text-muted">Link đích</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="/admin/js/banner.js"></script>
+</body>
+
+</html>

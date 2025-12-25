@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Tree</title>
+</head>
+
+<body>
+    <!-- Category Tree -->
+    <div class="category-tree">
+        <div th:if="${#lists.isEmpty(categories)}" class="text-center text-muted py-4">
+            <i class="fas fa-folder fa-3x mb-3"></i>
+            <p>Chưa có danh mục nào</p>
+            <a href="/admin/categories/add" class="btn btn-primary">Thêm danh mục đầu tiên</a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(categories)}" class="tree-container">
+            <div th:each="category : ${categories}" th:replace="admin/categories/components/category-tree-item"></div>
+        </div>
+    </div>
+
+    <!-- Category Actions Modal -->
+    <div class="modal fade" id="categoryActionsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thao tác danh mục</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-info" id="viewCategoryBtn">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </a>
+                        <a href="#" class="btn btn-warning" id="editCategoryBtn">
+                            <i class="fas fa-edit"></i> Chỉnh sửa
+                        </a>
+                        <a href="#" class="btn btn-success" id="addSubCategoryBtn">
+                            <i class="fas fa-plus"></i> Thêm danh mục con
+                        </a>
+                        <button type="button" class="btn btn-danger" id="deleteCategoryBtn">
+                            <i class="fas fa-trash"></i> Xóa danh mục
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa danh mục</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa danh mục <strong id="deleteCategoryName">Tên danh mục</strong>?</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Cảnh báo:</strong> Nếu danh mục có sản phẩm hoặc danh mục con, chúng sẽ được chuyển về
+                        danh mục gốc.
+                    </div>
+                    <p class="text-danger">Hành động này không thể hoàn tác!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <form id="deleteCategoryForm" method="post" class="d-inline">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Xóa danh mục</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCategoryId = null;
+
+        function showCategoryActions(categoryId, categoryName) {
+            currentCategoryId = categoryId;
+            document.getElementById('viewCategoryBtn').href = '/admin/categories/' + categoryId;
+            document.getElementById('editCategoryBtn').href = '/admin/categories/' + categoryId + '/edit';
+            document.getElementById('addSubCategoryBtn').href = '/admin/categories/add?parentId=' + categoryId;
+            new bootstrap.Modal(document.getElementById('categoryActionsModal')).show();
+        }
+
+        function deleteCategory(categoryId, categoryName) {
+            document.getElementById('deleteCategoryName').textContent = categoryName;
+            document.getElementById('deleteCategoryForm').action = '/admin/categories/' + categoryId;
+            new bootstrap.Modal(document.getElementById('deleteCategoryModal')).show();
+        }
+
+        function expandAll() {
+            $('.tree-toggle').each(function () {
+                if (!$(this).hasClass('expanded')) {
+                    $(this).click();
+                }
+            });
+        }
+
+        function collapseAll() {
+            $('.tree-toggle.expanded').each(function () {
+                $(this).click();
+            });
+        }
+
+        // Tree toggle functionality
+        $(document).ready(function () {
+            $('.tree-toggle').click(function (e) {
+                e.preventDefault();
+                const $this = $(this);
+                const $children = $this.siblings('.tree-children');
+
+                if ($this.hasClass('expanded')) {
+                    $children.slideUp();
+                    $this.removeClass('expanded');
+                    $this.find('i').removeClass('fa-folder-open').addClass('fa-folder');
+                } else {
+                    $children.slideDown();
+                    $this.addClass('expanded');
+                    $this.find('i').removeClass('fa-folder').addClass('fa-folder-open');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

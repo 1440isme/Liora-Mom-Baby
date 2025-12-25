@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Orders</title>
+</head>
+
+<body>
+    <!-- Recent Orders Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+            <a href="/admin/orders" class="btn btn-sm btn-primary">Xem tất cả</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="order : ${recentOrders}">
+                        <td th:text="${order.id}">#12345</td>
+                        <td th:text="${order.customerName}">Nguyễn Văn A</td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">1,500,000 ₫</td>
+                        <td>
+    <span class="fw-bold"
+          th:classappend="${order.status == 'PENDING' || order.status == 'PROCESSING'} ? 'text-warning' :
+                          (${order.status == 'SHIPPED' || order.status == 'CONFIRMED'} ? 'text-info' :
+                          (${order.status == 'DELIVERED' || order.status == 'COMPLETED'} ? 'text-success' :
+                          (${order.status == 'CANCELLED' || order.status == 'FAILED'} ? 'text-danger' : 'text-secondary')))"
+          th:text="${order.status == 'PENDING' ? 'Đang chờ' :
+                    order.status == 'PROCESSING' ? 'Đang xử lý' :
+                    order.status == 'CONFIRMED' ? 'Đã xác nhận' :
+                    order.status == 'SHIPPED' ? 'Đã vận chuyển' :
+                    order.status == 'DELIVERED' ? 'Đã giao hàng' :
+                    order.status == 'COMPLETED' ? 'Hoàn thành' :
+                    order.status == 'CANCELLED' ? 'Đã hủy' :
+                    order.status == 'FAILED' ? 'Thất bại' : order.status}">
+        Đang xử lý
+    </span>
+                        </td>
+
+                        <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 10:30</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

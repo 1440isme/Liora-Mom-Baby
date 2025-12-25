@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="admin-head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="${title}">Liora Admin</title>
+
+    <!-- StarAdmin CSS -->
+    <link rel="stylesheet" href="/admin/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/admin/vendors/css/vendor.bundle.base.css">
+    <!-- End plugins:css -->
+
+    <!-- Plugin css for page (optional) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <!-- End plugin css for page -->
+
+    <!-- inject:css (StarAdmin main style) -->
+    <link rel="stylesheet" href="/admin/css/style.css">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" th:href="@{/admin/css/admin-style.css}">
+    <link rel="stylesheet" th:href="@{/admin/css/banner.css}">
+    <link rel="shortcut icon" href="/admin/images/liora-bg.png" />
+</head>
+
+</html>

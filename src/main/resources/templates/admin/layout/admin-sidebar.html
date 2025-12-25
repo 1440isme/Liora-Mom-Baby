@@ -1,0 +1,171 @@
+<!-- StarAdmin Sidebar -->
+<nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="sidebar">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="/admin/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/admin/analytics">
+                <i class="mdi mdi-chart-bar menu-icon"></i>
+                <span class="menu-title">Thống kê</span>
+            </a>
+        </li>
+        <li class="nav-item nav-category">Quản lý</li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#products-menu" role="button" aria-expanded="false"
+                aria-controls="products-menu">
+                <i class="menu-icon mdi mdi-cube-outline"></i>
+                <span class="menu-title">Sản phẩm</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="products-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/products">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/products/add">Thêm mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#categories-menu" role="button" aria-expanded="false"
+                aria-controls="categories-menu">
+                <i class="menu-icon mdi mdi-tag-multiple"></i>
+                <span class="menu-title">Danh mục</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="categories-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/categories">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/categories/add">Thêm mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#brands-menu" role="button" aria-expanded="false"
+                aria-controls="brands-menu">
+                <i class="menu-icon mdi mdi-seal"></i>
+                <span class="menu-title">Thương hiệu</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="brands-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/brands">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/brands/add">Thêm mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#discounts-menu" role="button" aria-expanded="false"
+                aria-controls="discounts-menu">
+                <i class="menu-icon mdi mdi-percent"></i>
+                <span class="menu-title">Mã giảm giá</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="discounts-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/discounts">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/discounts/add">Thêm mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#orders-menu" role="button" aria-expanded="false"
+                aria-controls="orders-menu">
+                <i class="menu-icon mdi mdi-cart-outline"></i>
+                <span class="menu-title">Đơn hàng</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="orders-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/orders">Danh sách</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#reviews-menu" role="button" aria-expanded="false"
+                aria-controls="reviews-menu">
+                <i class="menu-icon mdi mdi-star"></i>
+                <span class="menu-title">Đánh giá</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="reviews-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/reviews">Danh sách</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#users-menu" role="button" aria-expanded="false"
+                aria-controls="users-menu">
+                <i class="menu-icon mdi mdi-account-group-outline"></i>
+                <span class="menu-title">Người dùng</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="users-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/users">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/users/add">Thêm mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#roles-menu" role="button" aria-expanded="false"
+                aria-controls="roles-menu">
+                <i class="menu-icon mdi mdi-account-check-outline"></i>
+                <span class="menu-title">Vai trò</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="roles-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/roles">Danh sách vai trò</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/permissions">Quyền hạn</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item nav-category">Nội dung & Giao diện</li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#banners-menu" role="button" aria-expanded="false"
+                aria-controls="banners-menu">
+                <i class="menu-icon mdi mdi-image-multiple"></i>
+                <span class="menu-title">Banner</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="banners-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/banners">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/banners/add">Thêm mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#static-pages-menu" role="button" aria-expanded="false"
+                aria-controls="static-pages-menu">
+                <i class="menu-icon mdi mdi-file-document-outline"></i>
+                <span class="menu-title">Trang nội dung</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="static-pages-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/static-pages">Danh sách</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/static-pages/add">Tạo mới</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#layout-menu" role="button" aria-expanded="false"
+                aria-controls="layout-menu">
+                <i class="menu-icon mdi mdi-palette"></i>
+                <span class="menu-title">Giao diện</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="layout-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/admin/header-bottom">Header tầng dưới</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/admin/footer">Footer</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</nav>

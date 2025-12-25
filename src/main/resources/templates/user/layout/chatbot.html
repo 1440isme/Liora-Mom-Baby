@@ -1,0 +1,314 @@
+<div th:fragment="chatbot-button">
+    <!-- 🌸 Floating Chatbot Button -->
+    <div class="chatbot-btn"
+         style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+        <button class="openChatbot btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                style="width: 60px; height: 60px; background-color: rgb(215, 141, 160); border: none;">
+            <i class="fas fa-comments fs-4 text-white"></i>
+        </button>
+    </div>
+
+    <!-- 🤖 Floating Chatbot Window -->
+    <div class="chatbot-window"
+         style="
+            display:none;
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 340px;
+            height: 460px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            z-index: 9999;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+         ">
+        <!-- Header -->
+        <div style="background-color:rgb(215, 141, 160); color:white; padding:12px 15px; font-weight:600;
+                    display:flex; align-items:center; justify-content:space-between;">
+            <div><i class="fas fa-spa me-1"></i>   Liora Beauty</div>
+            <button type="button"
+                    onclick="document.querySelector('.chatbot-window').style.display='none'"
+                    style="background:none;border:none;color:white;font-size:18px;">×</button>
+        </div>
+
+    <!-- Chat content -->
+        <div class="chat-content"
+             style="height:355px; overflow-y:auto; padding:12px; background:#f8f9fa;">
+        </div>
+
+        <!-- Input area -->
+        <div class="chat-input-area"
+             style="padding:8px 10px; border-top:1px solid #ddd; background:white; display:flex; align-items:center;">
+            <input class="chat-input form-control form-control-sm me-2 rounded-pill"
+                   placeholder="Nhập tin nhắn...">
+            <button class="send-btn btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                    style="background-color:rgb(215, 141, 160); width:36px; height:36px;"
+            >
+                <i class="fas fa-paper-plane text-white"></i>
+            </button>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes thinkingDots {
+            0%, 20% {
+                color: rgba(0,0,0,0);
+                text-shadow:
+                    .25em 0 0 rgba(0,0,0,0),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            40% {
+                color: #666;
+                text-shadow:
+                    .25em 0 0 rgba(0,0,0,0),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            60% {
+                text-shadow:
+                    .25em 0 0 #666,
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            80%, 100% {
+                text-shadow:
+                    .25em 0 0 #666,
+                    .5em 0 0 #666;
+            }
+        }
+        
+        .thinking .message-bubble {
+            animation: thinkingDots 1.4s infinite linear;
+            color: #666;
+        }
+        
+        .thinking .message-bubble::after {
+            content: '...';
+        }
+        
+        /* Avatar hover effect */
+        .chatbot-window img {
+            transition: transform 0.2s ease;
+        }
+        
+        .chatbot-window img:hover {
+            transform: scale(1.1);
+        }
+    </style>
+    
+    <script>
+        const GenAI_API_KEY = "AIzaSyBv4hDt6q_AiiSsXBc7XoEcyF1cH_topo4";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GenAI_API_KEY}`;
+
+        const openChatbotBtn = document.querySelector('.openChatbot');
+        const chatbotWindow = document.querySelector('.chatbot-window');
+        const chatContent = document.querySelector('.chat-content');
+        const chatInput = document.querySelector('.chat-input');
+        const sendBtn = document.querySelector('.send-btn');
+
+        const userData = {
+            name: "Khách",
+            age: 25,
+        };
+
+        const chatHistory = [];
+        let databaseData = null;
+
+        const initialInputHeight = chatContent.scrollHeight;
+
+        // Load database data when chatbot starts
+        async function loadDatabaseData() {
+            try {
+                const response = await fetch('/api/chatbot/data');
+                if (response.ok) {
+                    databaseData = await response.text();
+                    console.log('Database data loaded successfully');
+                } else {
+                    console.error('Failed to load database data');
+                }
+            } catch (error) {
+                console.error('Error loading database data:', error);
+            }
+        }
+
+        // Database will be loaded when chatbot is opened
+
+        // Create message element with dynamic classes and return it
+        const createMessageElement = (message, sender) => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `${sender}-message mb-2 d-flex ${sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`;
+            
+            if (sender === 'bot') {
+                msgDiv.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <img src="/uploads/users/2025/10/08/avatars/07ccb057-9d2e-4412-b574-17cabf3cbad6.png" 
+                             alt="Liora Avatar" 
+                             style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover;">
+                        <div class="message-bubble" style="
+                            display:inline-block;
+                            background-color:#e9ecef;
+                            color:black;
+                            padding:8px 12px;
+                            border-radius:15px;
+                            max-width:75%;
+                            word-wrap:break-word;
+                            text-align:left;
+                        ">${message}</div>
+                    </div>
+                `;
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="message-bubble" style="
+                        display:inline-block;
+                        background-color:#2196f3;
+                        color:white;
+                        padding:8px 12px;
+                        border-radius:15px;
+                        max-width:75%;
+                        word-wrap:break-word;
+                        text-align:left;
+                    ">${message}</div>
+                `;
+            }
+            return msgDiv;
+        };
+        // Generate AI response using Google Generative AI API
+        const generateBotResponse = async (userText, botMsgElement) => {
+            const messageElement = botMsgElement.querySelector('.message-bubble');
+
+            chatHistory.push({
+                role: 'user',
+                parts: [{ text: userText }]
+            });
+
+            try {
+                // Always use Gemini with database context
+                if (databaseData) {
+                    // Add database context to the conversation
+                    chatHistory.push({
+                        role: 'user',
+                        parts: [{ text: `Dữ liệu database Liora Beauty:\n${databaseData}\n\nDựa trên dữ liệu này, hãy trả lời câu hỏi: ${userText}` }]
+                    });
+                } else {
+                    // If database not loaded, try to load it first
+                    await loadDatabaseData();
+                    if (databaseData) {
+                        chatHistory.push({
+                            role: 'user',
+                            parts: [{ text: `Dữ liệu database Liora Beauty:\n${databaseData}\n\nDựa trên dữ liệu này, hãy trả lời câu hỏi: ${userText}` }]
+                        });
+                    } else {
+                        // Fallback without database
+                        chatHistory.push({
+                            role: 'user',
+                            parts: [{ text: userText }]
+                        });
+                    }
+                }
+
+                // Use Gemini AI for general conversation
+                const requestOptions = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: chatHistory,
+                        systemInstruction: {
+                            parts: [{ 
+                                text: "Bạn là Liora - nhân viên chăm sóc khách hàng của Liora Beauty. Bạn có quyền truy cập vào toàn bộ database sản phẩm, thông tin khách hàng và thống kê cửa hàng. Hãy trả lời dựa trên dữ liệu thực tế trong database. Bạn chuyên về skincare, makeup và nước hoa. Hãy trả lời một cách ngắn gọn, xúc tích và chuyên nghiệp như một nhân viên chăm sóc khách hàng. Luôn sử dụng emoji và giọng điệu thân thiện. Khi được hỏi về sản phẩm, hãy cung cấp thông tin chính xác từ database."
+                            }]
+                        }
+                    })
+                }
+
+                const response = await fetch(API_URL, requestOptions);
+                const data = await response.json();
+                if (!response.ok) {
+                    const apiErrorMessage = (data && data.error && data.error.message)
+                        ? data.error.message
+                        : (data && data.message ? data.message : `HTTP ${response.status}`);
+                    messageElement.innerText = apiErrorMessage;
+                    messageElement.style.color = "#ff0000";
+                    return;
+                }
+
+                // Extract and display bot's response text
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+                const apiResponseText = rawText.replace(/\*\*(.*?)\*\*/g, "$1").trim() || 'Xin lỗi, mình chưa có câu trả lời.';
+                messageElement.innerHTML = apiResponseText.replace(/\n/g, '<br>');
+                chatHistory.push({
+                    role: "model",
+                    parts: [{ text: apiResponseText }]
+                });
+            } catch (error) {
+                messageElement.innerText = error.message;
+                messageElement.style.color = "#ff0000";
+            } finally {
+                userData.file = {};
+                botMsgElement.classList.remove("thinking");
+                chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
+            }
+        };
+        // Handle outgoing user message
+        const handleOutgoingMessage = (e) => {
+            e.preventDefault();
+            const userText = chatInput.value.trim();
+            if (!userText) return;
+
+            // Display user message
+            const userMsgElement = createMessageElement(userText, 'user');
+            chatContent.appendChild(userMsgElement);
+            chatInput.value = '';
+            chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
+
+            // Display bot thinking indicator
+            const botMsgElement = createMessageElement('', 'bot');
+            botMsgElement.classList.add('thinking');
+            chatContent.appendChild(botMsgElement);
+            chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
+
+            // Generate and display bot response
+            generateBotResponse(userText, botMsgElement);
+        };
+
+        // Handle Enter key press for sending messages
+        chatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                handleOutgoingMessage(e);
+            }
+        });
+        // Handle send button click
+        sendBtn.addEventListener("click", handleOutgoingMessage);
+        // Toggle chatbot window on button click
+        openChatbotBtn.addEventListener("click", async () => {
+            if (chatbotWindow.style.display === 'none' || chatbotWindow.style.display === '') {
+                // Open chatbot
+                chatbotWindow.style.display = 'block';
+                chatInput.focus();
+                
+                // Auto-load database when opening chatbot
+                if (!databaseData) {
+                    const loadingMsg = createMessageElement('🔄 Đang tải dữ liệu database...', 'bot');
+                    //chatContent.appendChild(loadingMsg);
+                    chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
+                    
+                    await loadDatabaseData();
+                    
+                    if (databaseData) {
+                        const successMsg = createMessageElement('🌸 Chào bạn! Mình là Liora - nhân viên chăm sóc khách hàng của Liora Beauty 🌸 Hôm nay bạn ghé Liora Beauty để tìm gì nè - skincare, makeup hay nước hoa ạ?', 'bot');
+                        chatContent.appendChild(successMsg);
+                        chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
+                    } else {
+                        const errorMsg = createMessageElement('❌ Không thể tải dữ liệu database. Mình vẫn có thể hỗ trợ bạn với thông tin chung!', 'bot');
+                        chatContent.appendChild(errorMsg);
+                        chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
+                    }
+                }
+            } else {
+                // Close chatbot
+                chatbotWindow.style.display = 'none';
+            }
+        });
+
+
+    </script>
+</div>

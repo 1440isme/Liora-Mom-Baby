@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Chỉnh sửa danh mục - Liora Admin')"></head>
+
+<body class="with-welcome-text categories-page">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">Chỉnh sửa danh mục</h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/categories" class="btn btn-outline-secondary me-2">
+                                <i class="mdi mdi-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Thông tin danh mục</h4>
+                                    <!-- Sửa form để sử dụng Thymeleaf data -->
+                                    <form id="categoryForm" data-category-id="" th:data-category-id="${category?.categoryId}" th:data-parent-category-id="${category?.parentCategoryId}">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="name" name="name" 
+                                                   th:value="${category?.name}" required>
+                                        </div>
+
+                                        <!-- Hiển thị danh mục cha hiện tại -->
+                                        <div class="mb-3" id="currentParentInfo">
+                                            <label class="form-label">Danh mục cha hiện tại</label>
+                                            <div class="alert alert-info d-flex align-items-center">
+                                                <i class="mdi mdi-folder me-2"></i>
+                                                <span id="currentParentName">Đang tải...</span>
+                                                <span class="badge bg-secondary ms-2" id="currentParentStatus">-</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="parentCategoryId" class="form-label">Thay đổi danh mục cha</label>
+                                            <select class="form-select" id="parentCategoryId" name="parentCategoryId">
+                                                <option value="">-- Chọn danh mục cha (để trống nếu là danh mục gốc) --</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check ms-3">
+                                                    <input class="form-check-input" type="checkbox" id="isParent" name="isParent"
+                                                           th:checked="${category?.isParent}">
+                                                    <label class="form-check-label" for="isParent">
+                                                        Là danh mục cha
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check ms-3">
+                                                    <input class="form-check-input" type="checkbox" id="isActive" name="isActive"
+                                                           th:checked="${category?.isActive}">
+                                                    <label class="form-check-label" for="isActive">
+                                                        Kích hoạt danh mục
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex gap-2 mt-4">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="mdi mdi-content-save"></i> Cập nhật danh mục
+                                            </button>
+                                            <a href="/admin/categories" class="btn btn-secondary">
+                                                <i class="mdi mdi-close"></i> Hủy bỏ
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Hướng dẫn</h4>
+                                    <div class="alert alert-info">
+                                        <h6><i class="mdi mdi-information"></i> Lưu ý:</h6>
+                                        <ul class="mb-0">
+                                            <li>Tên danh mục là bắt buộc</li>
+                                            <li>Danh mục cha có thể chứa danh mục con</li>
+                                            <li>Chỉ danh mục gốc mới có thể là danh mục cha</li>
+                                            <li>Deactivate danh mục cha sẽ ẩn tất cả danh mục con</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="/admin/js/admin/admin-ajax.js"></script>
+    <script src="/admin/js/admin/categories.js"></script>
+</body>
+
+</html>

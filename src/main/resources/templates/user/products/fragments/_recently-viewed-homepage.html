@@ -1,0 +1,148 @@
+<link rel="stylesheet" th:href="@{/user/css/similar-products.css}">
+
+<div th:fragment="recentlyViewedHomepageSection" class="similar-products-section">
+    <div class="container">
+        <div class="product-related-wrap">
+            <!-- Section Header with Navigation -->
+            <div class="section-header">
+                <h2 class="section-title fw-bold text-uppercase">SẢN PHẨM ĐÃ XEM GẦN ĐÂY</h2>
+                <div class="navigation-buttons hidden" id="recentlyViewedNavButtons">
+                    <button class="nav-btn" id="recentlyViewedPrevBtn" title="Xem sản phẩm trước">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-btn" id="recentlyViewedNextBtn" title="Xem sản phẩm tiếp theo">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Loading state -->
+            <div id="recentlyViewedLoading" class="text-center d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Đang tải sản phẩm đã xem gần đây...</p>
+            </div>
+            
+            <!-- No products state -->
+            <div id="recentlyViewedEmpty" class="text-center d-none">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Chưa có sản phẩm nào được xem gần đây</h5>
+                <p class="text-muted">Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!</p>
+            </div>
+            
+            <!-- Products grid -->
+            <div id="recentlyViewedGrid">
+                <!-- Sản phẩm sẽ được render vào đây bởi JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recently Viewed Modal -->
+<div class="modal fade" id="recentlyViewedModal" tabindex="-1" aria-labelledby="recentlyViewedModalLabel" aria-hidden="true">
+    <div class="modal-dialog recently-viewed-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recentlyViewedModalLabel">
+                    <i class="fas fa-history me-2"></i>
+                    Sản phẩm đã xem gần đây
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="recentlyViewedModalGrid">
+                    <!-- Sản phẩm sẽ được render vào đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" onclick="if(window.recentlyViewedManager) { window.recentlyViewedManager.clearHistory(); } closeRecentlyViewedModal();">
+                    <i class="fas fa-trash me-1"></i>
+                    Xóa tất cả lịch sử
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show recently viewed modal
+function showRecentlyViewedModal() {
+    const modal = new bootstrap.Modal(document.getElementById('recentlyViewedModal'));
+    
+    // Check if manager exists
+    if (!window.recentlyViewedManager) {
+        console.error('❌ [ERROR] recentlyViewedManager not found');
+        const modalGrid = document.getElementById('recentlyViewedModalGrid');
+        modalGrid.innerHTML = `
+            <div class="recently-viewed-empty text-center py-4">
+                <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Lỗi tải dữ liệu</h5>
+                <p class="text-muted">Vui lòng thử lại sau</p>
+            </div>
+        `;
+        modal.show();
+        return;
+    }
+    
+    // Load data for modal
+    const recentlyViewed = window.recentlyViewedManager.getRecentlyViewed(20);
+    const modalGrid = document.getElementById('recentlyViewedModalGrid');
+    
+    if (recentlyViewed.length === 0) {
+        modalGrid.innerHTML = `
+            <div class="recently-viewed-empty text-center py-4">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Chưa có sản phẩm nào được xem gần đây</h5>
+                <p class="text-muted">Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!</p>
+            </div>
+        `;
+    } else {
+        modalGrid.innerHTML = window.recentlyViewedManager.getRecentlyViewedHTML(recentlyViewed);
+        window.recentlyViewedManager.setupUIEventListeners(modalGrid);
+    }
+    
+    modal.show();
+}
+
+// Close recently viewed modal
+function closeRecentlyViewedModal() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('recentlyViewedModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+// Carousel navigation for recently viewed products
+function slideRecentlyViewed(direction) {
+    if (window.recentlyViewedManager) {
+        window.recentlyViewedManager.slideCarousel(direction);
+    }
+}
+
+function updateRecentlyViewedButtons(totalCards, maxVisibleCards) {
+    if (window.recentlyViewedManager) {
+        window.recentlyViewedManager.updateNavigationButtons(totalCards, maxVisibleCards);
+    }
+}
+
+// Initialize carousel buttons
+function initRecentlyViewedCarousel() {
+    const prevBtn = document.getElementById('recentlyViewedPrevBtn');
+    const nextBtn = document.getElementById('recentlyViewedNextBtn');
+    
+    if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => slideRecentlyViewed('prev'));
+        nextBtn.addEventListener('click', () => slideRecentlyViewed('next'));
+    }
+}
+
+// Auto-init will be handled by product-detail.js
+document.addEventListener('DOMContentLoaded', function() {
+    initRecentlyViewedCarousel();
+});
+</script>

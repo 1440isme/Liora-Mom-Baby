@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - Liora</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/user/css/style.css}">
+    <link rel="stylesheet" th:href="@{/user/css/cart.css}">
+    <link rel="stylesheet" th:href="@{/user/css/bestseller-products.css}">
+</head>
+
+<body>
+<!-- Navigation -->
+<div th:replace="user/layout/user-header :: header"></div>
+
+<!-- Main Content -->
+<main class="cart-main">
+    <!-- Breadcrumb -->
+    <section class="breadcrumb-section py-3">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="/" class="breadcrumb-link">
+                            <span>Trang chủ</span>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        <span>Giỏ hàng</span>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Cart Content -->
+    <section class="cart-content ">
+        <div class="container">
+            <!-- Empty Cart State - Căn giữa màn hình -->
+            <div class="row" id="cart-empty-row" style="display: none;">
+                <div class="col-lg-8 offset-lg-2 col-md-8 offset-md-2">
+                    <div id="cart-empty" class="cart-empty-state text-center mb-0">
+                        <div class="empty-cart-icon">
+                            <i class="mdi mdi-cart-outline"></i>
+                        </div>
+                        <h3>Giỏ hàng trống</h3>
+                        <p>Bạn chưa thêm sản phẩm nào vào giỏ hàng.<br>
+                            Hãy khám phá những sản phẩm tuyệt vời của chúng tôi!</p>
+                        <a href="/" class="btn btn-continue-shopping">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Items - Ẩn khi giỏ hàng trống -->
+            <div class="row" id="cart-items-row" style="display: none;">
+                <div class="col-lg-8">
+                    <!-- Cart Items Container -->
+                    <div id="cart-items-container" class="cart-items-container">
+                        <!-- Cart Title and Select All Row -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h1 class="cart-title-inline mb-0">
+                                <i class="mdi mdi-cart-outline me-2"></i>
+                                Giỏ hàng
+                            </h1>
+                            <!-- Select all section on the right -->
+                            <div class="d-flex align-items-center">
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="checkbox" id="selectAllItems">
+                                    <label class="form-check-label fw-semibold" for="selectAllItems">
+                                        Chọn tất cả
+                                    </label>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm" id="deleteSelectedBtn" disabled>
+                                    <i class="fas fa-trash me-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Cart Items List -->
+                        <div id="cart-items">
+                            <!-- Cart items will be loaded dynamically from API -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="col-lg-4">
+                    <div id="cart-summary" class="cart-summary">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0 fw-bold">
+                                    <i class="mdi mdi-calculator me-2"></i>
+                                    Tóm tắt đơn hàng
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="summary-row">
+                                    <span>Tạm tính (<span id="selected-count">0</span> sản phẩm):</span>
+                                    <span id="subtotal" class="fw-medium">0đ</span>
+                                </div>
+                                <div class="summary-row" style="display: none;">
+                                    <span>Giảm giá:</span>
+                                    <span id="discount" class="fw-medium text-success">0đ</span>
+                                </div>
+                             
+                                <div class="summary-row">
+                                    <span class="fw-bold">Tổng cộng:</span>
+                                    <span id="total" class="fw-bold">0đ</span>
+                                </div>
+
+                                <button class="btn btn-checkout w-100 mt-4" id="checkoutBtn">
+                                    <i class="fas fa-credit-card me-2"></i>
+                                    Thanh toán ngay
+                                </button>
+
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-shield-alt me-1"></i>
+                                        Thanh toán an toàn & bảo mật 100%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Promo Code -->
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h6 class="card-title fw-bold mb-3">
+                                    <i class="fas fa-tag me-2"></i>
+                                    Mã giảm giá
+                                </h6>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="promoCode"
+                                           placeholder="Nhập mã giảm giá">
+                                    <button class="btn btn-outline-pink" type="button" id="applyPromoBtn">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Nhập mã để được giảm giá thêm
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bestseller Products Section -->
+            <div class="row mt-0">
+                <div class="col-12">
+                    <!-- Include Bestseller Products Section -->
+                    <div th:replace="user/products/fragments/_bestseller-products :: bestsellerProductsSection"></div>
+                </div>
+            </div>
+
+            
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="user/layout/user-footer :: footer"></div>
+
+
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer">
+    <!-- Toasts will be added here dynamically -->
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <div class="spinner-border" role="status"></div>
+        <div class="loading-text">Đang xử lý...</div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script th:src="@{/user/js/main.js}"></script>
+<script th:src="@{/user/js/product-rating-utils.js}"></script>
+<script th:src="@{/user/js/cart-utils.js}"></script>
+<script th:src="@{/user/js/cart.js}"></script>
+<script th:src="@{/user/js/bestseller-products.js}"></script>
+
+<!-- Demo Script for Frontend Display -->
+<script>
+    // Initialize banner slider when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.BannerSlider) {
+            new BannerSlider();
+        }
+        
+        // Initialize bestseller products
+        if (window.bestsellerProductsManager) {
+            console.log('BestsellerProductsManager found, initializing...');
+            window.bestsellerProductsManager.loadBestsellerProducts();
+        } else {
+            console.log('BestsellerProductsManager not found, creating new instance...');
+            window.bestsellerProductsManager = new BestsellerProductsManager();
+        }
+    });
+</script>
+
+<!-- Cart Button Handler -->
+<script>
+    $(document).ready(function() {
+        // Handle cart button click - chuyển đến trang giỏ hàng
+        $('.btn-cart').click(function(e) {
+            e.preventDefault();
+            window.location.href = '/cart';
+        });
+
+        // Always show suggested products section
+        $('.suggested-products').show();
+    });
+</script>
+
+</body>
+
+</html>

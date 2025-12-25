@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý mã giảm giá - Liora Admin')"></head>
+
+<body class="with-welcome-text discounts-page">
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper">
+        <div th:replace="admin/layout/admin-navbar"></div>
+        <div th:replace="admin/layout/admin-sidebar"></div>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="d-none text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+
+                <!-- Page Header -->
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="mdi mdi-percent me-2"></i>Quản lý mã giảm giá
+                    </h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Action Buttons -->
+                        <div class="btn-wrapper">
+                            <a href="/admin/discounts/add" class="btn btn-success me-2">
+                                <i class="mdi mdi-plus"></i> Thêm mới
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-primary">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                            Tổng mã giảm giá
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="totalDiscounts">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-percent mdi-36px text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-success">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                            Đang hoạt động
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="activeDiscounts">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-check-circle-outline mdi-36px text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-warning">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                            Sắp diễn ra
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="expiringDiscounts">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-clock-alert-outline mdi-36px text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card card-rounded h-100 py-2 border-start-danger">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                            Đã hết hạn
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold" id="expiredDiscounts">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="mdi mdi-close-circle-outline mdi-36px text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="card card-rounded mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="mdi mdi-filter-outline me-2"></i>Tìm kiếm và lọc
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tìm kiếm</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="searchDiscount"
+                                           placeholder="Tên mã giảm giá, mô tả...">
+<!--                                    <button class="btn btn-outline-secondary" type="button" id="btnSearch">-->
+<!--                                        <i class="mdi mdi-magnify"></i>-->
+<!--                                    </button>-->
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Trạng thái</label>
+                                <select class="form-select" id="filterDiscountStatus">
+                                    <option value="">Tất cả</option>
+                                    <option value="active">Đang hoạt động</option>
+                                    <option value="inactive">Ngưng hoạt động</option>
+                                    <option value="expired">Đã hết hạn</option>
+                                    <option value="upcoming">Sắp diễn ra</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Từ ngày</label>
+                                <input type="date" class="form-control" id="filterDateFrom">
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Đến ngày</label>
+                                <input type="date" class="form-control" id="filterDateTo">
+                            </div>
+
+                            <div class="col-md-1 mb-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="btnRefresh" title="Làm mới">
+                                    <i class="mdi mdi-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discounts Table -->
+                <div class="card card-rounded">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">STT</th>
+                                    <th class="text-center sortable" data-sort="name">Tên mã giảm giá <i class="mdi mdi-sort sort-icon"></i></th>
+                                    <th class="text-center sortable" data-sort="discountValue">Giá trị giảm <i class="mdi mdi-sort sort-icon"></i></th>
+                                    <th class="text-center sortable" data-sort="startDate">Thời gian <i class="mdi mdi-sort sort-icon"></i></th>
+                                    <th class="text-center sortable" data-sort="usedCount">Lượt sử dụng <i class="mdi mdi-sort sort-icon"></i></th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center sortable" data-sort="createdAt">Ngày tạo <i class="mdi mdi-sort sort-icon"></i></th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody id="discountTableBody">
+                                <!-- Discounts will be loaded here via AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <span id="paginationInfo" class="text-muted">Hiển thị tất cả <span id="totalCount">0</span> mã giảm giá</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:replace="admin/layout/admin-footer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Discount Detail Modal -->
+<div class="modal fade" id="discountDetailModal" tabindex="-1" aria-labelledby="discountDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="discountDetailModalLabel">
+                    <i class="mdi mdi-percent me-2"></i>Chi tiết mã giảm giá
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Discount Information -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="mdi mdi-information me-2"></i>Thông tin cơ bản</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-medium">Tên:</td>
+                                        <td id="modalDiscountName"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Mô tả:</td>
+                                        <td id="modalDiscountDescription"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Giá trị giảm:</td>
+                                        <td class="fw-bold text-primary" id="modalDiscountValue"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Đơn hàng tối thiểu:</td>
+                                        <td id="modalMinOrderValue"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Giảm tối đa:</td>
+                                        <td id="modalMaxDiscountAmount"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Information -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="mdi mdi-chart-line me-2"></i>Thông tin sử dụng</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-medium">Ngày bắt đầu:</td>
+                                        <td id="modalStartDate"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Ngày kết thúc:</td>
+                                        <td id="modalEndDate"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Lượt sử dụng:</td>
+                                        <td id="modalUsedCount"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Giới hạn sử dụng:</td>
+                                        <td id="modalUsageLimit"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-medium">Trạng thái:</td>
+                                        <td id="modalDiscountStatus"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Discount Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">
+                    <i class="mdi mdi-pencil me-2"></i>Cập nhật trạng thái mã giảm giá
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStatusForm">
+                    <input type="hidden" id="updateDiscountId">
+                    <div class="mb-3">
+                        <label for="updateDiscountStatus" class="form-label">Trạng thái mã giảm giá</label>
+                        <select class="form-select" id="updateDiscountStatus" required>
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Ngưng hoạt động</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="saveDiscountStatus()">
+                    <i class="mdi mdi-content-save me-2"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="mdi mdi-delete me-2"></i>Xác nhận xóa
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa mã giảm giá <strong id="deleteDiscountName"></strong>?</p>
+                <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteDiscount()">
+                    <i class="mdi mdi-delete me-2"></i>Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+<script th:src="@{/admin/js/admin/discounts.js}"></script>
+
+<style>
+    .border-start-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    .border-start-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    .border-start-danger {
+        border-left: 4px solid #e74a3b !important;
+    }
+    .border-start-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+    .border-start-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    .card-rounded {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #5a5c69;
+    }
+    .discounts-page .content-wrapper {
+        background-color: #f8f9fc;
+    }
+</style>
+</body>
+
+</html>

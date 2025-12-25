@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Tạo Trang Nội dung Mới - Liora Admin')">
+    <style>
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .slug-preview {
+            background-color: #e9ecef;
+            color: #495057;
+            font-family: monospace;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+        }
+
+        .editor-container {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            width: 100%;
+            min-height: 600px;
+            overflow: hidden;
+        }
+
+        /* CKEditor sizing */
+        .editor-container .ck-editor,
+        .editor-container .ck-editor__main,
+        .editor-container .ck-content {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .editor-container .ck-content {
+            min-height: 700px;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+                'Noto Sans', 'Liberation Sans', 'Apple Color Emoji', 'Segoe UI Emoji',
+                'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-plus text-primary me-2"></i>
+                            Tạo Trang Nội dung Mới
+                        </h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/static-pages" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <div class="row">
+                        <div class="col-12">
+                            <form th:action="@{/admin/static-pages/add}" method="post" id="pageForm">
+                                <div class="row">
+                                    <!-- Left Column - Basic Info -->
+                                    <div class="col-lg-3">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    Thông tin cơ bản
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- Title -->
+                                                <div class="mb-3">
+                                                    <label for="title" class="form-label">
+                                                        Tiêu đề trang <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="title" name="title"
+                                                        th:value="${staticPageRequest?.title}" required
+                                                        placeholder="Nhập tiêu đề trang...">
+                                                    <div class="invalid-feedback">
+                                                        Vui lòng nhập tiêu đề trang
+                                                    </div>
+                                                </div>
+
+                                                <!-- Slug -->
+                                                <div class="mb-3">
+                                                    <label for="slug" class="form-label">
+                                                        URL Slug <span class="text-danger">*</span>
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">/</span>
+                                                        <input type="text" class="form-control" id="slug" name="slug"
+                                                            th:value="${staticPageRequest?.slug}" required
+                                                            placeholder="url-slug">
+                                                    </div>
+                                                    <div class="form-text">
+                                                        URL sẽ là: <span class="slug-preview"
+                                                            id="slugPreview">/url-slug</span>
+                                                    </div>
+                                                    <div class="invalid-feedback">
+                                                        Vui lòng nhập URL slug hợp lệ
+                                                    </div>
+                                                </div>
+
+                                                <!-- Status Settings -->
+                                                <div class="form-section">
+                                                    <h6 class="section-title">Trạng thái</h6>
+
+                                                    <div class="mb-3">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                id="isActive" name="isActive" value="true"
+                                                                th:checked="${staticPageRequest != null ? staticPageRequest.isActive : true}">
+                                                            <input type="hidden" name="isActive" value="false">
+                                                            <label class="form-check-label" for="isActive">
+                                                                <strong>Kích hoạt trang</strong>
+                                                                <div class="form-text">Trang sẽ hiển thị trên website
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                id="isPublished" name="isPublished" value="true"
+                                                                th:checked="${staticPageRequest != null ? staticPageRequest.isPublished : false}">
+                                                            <input type="hidden" name="isPublished" value="false">
+                                                            <label class="form-check-label" for="isPublished">
+                                                                <strong>Xuất bản ngay</strong>
+                                                                <div class="form-text">Đánh dấu là đã xuất bản</div>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Group Settings -->
+                                                <div class="form-section">
+                                                    <h6 class="section-title">Nhóm bài (tùy chọn)</h6>
+                                                    <div class="mb-3">
+                                                        <label for="sectionSlug" class="form-label">Section slug</label>
+                                                        <input type="text" class="form-control" id="sectionSlug"
+                                                            name="sectionSlug"
+                                                            th:value="${staticPageRequest?.sectionSlug}"
+                                                            placeholder="ví dụ: blog-tips">
+                                                        <div class="form-text">Dùng để gom nhiều trang tĩnh vào một
+                                                            nhóm. Trang tổng hợp sẽ là /content/list/{sectionSlug}.
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- SEO Settings -->
+                                                <div class="form-section">
+                                                    <h6 class="section-title">SEO</h6>
+
+                                                    <div class="mb-3">
+                                                        <label for="seoTitle" class="form-label">
+                                                            SEO Title
+                                                        </label>
+                                                        <input type="text" class="form-control" id="seoTitle"
+                                                            name="seoTitle" th:value="${staticPageRequest?.seoTitle}"
+                                                            placeholder="Tiêu đề SEO (tùy chọn)">
+                                                        <div class="form-text">
+                                                            Để trống sẽ dùng tiêu đề trang
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="seoDescription" class="form-label">
+                                                            SEO Description
+                                                        </label>
+                                                        <textarea class="form-control" id="seoDescription"
+                                                            name="seoDescription" rows="3"
+                                                            placeholder="Mô tả SEO (tùy chọn)"
+                                                            th:text="${staticPageRequest?.seoDescription}"></textarea>
+                                                        <div class="form-text">
+                                                            Mô tả ngắn cho công cụ tìm kiếm
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column - Content Editor -->
+                                    <div class="col-lg-9">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">
+                                                    <i class="fas fa-edit me-2"></i>
+                                                    Nội dung trang
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-0">
+                                                    <label for="content" class="form-label">
+                                                        Nội dung <span class="text-danger">*</span>
+                                                    </label>
+                                                    <div class="editor-container">
+                                                        <textarea id="content" name="content"
+                                                            th:text="${staticPageRequest?.content}"></textarea>
+                                                    </div>
+                                                    <div class="invalid-feedback">
+                                                        Vui lòng nhập nội dung trang
+                                                    </div>
+                                                </div>
+
+                                                <!-- Editor Toolbar Info -->
+                                                <div class="alert alert-info">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Hướng dẫn sử dụng:</strong>
+                                                    <ul class="mb-0 mt-2">
+                                                        <li>Sử dụng thanh công cụ để định dạng văn bản</li>
+                                                        <li>Chèn hình ảnh bằng nút "Image" trên thanh công cụ</li>
+                                                        <li>Tạo bảng bằng nút "Table"</li>
+                                                        <li>Xem trước bằng nút "Preview"</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <a href="/admin/static-pages" class="btn btn-outline-secondary">
+                                                        <i class="fas fa-times me-2"></i>Hủy bỏ
+                                                    </a>
+                                                    <div>
+                                                        <button type="button" class="btn btn-outline-primary me-2"
+                                                            id="previewBtn">
+                                                            <i class="fas fa-eye me-2"></i>Xem trước
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-save me-2"></i>Tạo Trang
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-eye me-2"></i>
+                        Xem trước Trang
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-content">
+                        <h1 id="previewTitle">Tiêu đề Trang</h1>
+                        <div id="previewContent">Nội dung trang...</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+    <script>
+        let editorInstance;
+        class UploadAdapter {
+            constructor(loader) { this.loader = loader; }
+            upload() {
+                return this.loader.file.then(file => new Promise((resolve, reject) => {
+                    const formData = new FormData();
+                    formData.append('file', file, file.name);
+                    fetch('/admin/api/upload/image', { method: 'POST', body: formData })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data && data.success && data.url) resolve({ default: data.url });
+                            else reject(data && data.message ? data.message : 'Upload failed');
+                        })
+                        .catch(err => reject(err));
+                }));
+            }
+            abort() { }
+        }
+        function UploadAdapterPlugin(editor) {
+            editor.plugins.get('FileRepository').createUploadAdapter = loader => new UploadAdapter(loader);
+        }
+
+        ClassicEditor.create(document.querySelector('#content'), {
+            extraPlugins: [UploadAdapterPlugin],
+            toolbar: {
+                items: [
+                    'undo', 'redo', '|', 'heading', '|', 'bold', 'italic', 'link', '|',
+                    'bulletedList', 'numberedList', 'outdent', 'indent', '|', 'insertTable', 'imageUpload', 'mediaEmbed', 'blockQuote'
+                ]
+            }
+        }).then(editor => { editorInstance = editor; }).catch(err => console.error(err));
+
+        // Auto-generate slug from title
+        document.getElementById('title').addEventListener('input', function () {
+            const title = this.value;
+            const slug = title
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/-+/g, '-') // Replace multiple hyphens with single
+                .trim();
+
+            document.getElementById('slug').value = slug;
+            updateSlugPreview();
+        });
+
+        // Update slug preview
+        document.getElementById('slug').addEventListener('input', function () {
+            updateSlugPreview();
+        });
+
+        function updateSlugPreview() {
+            const slug = document.getElementById('slug').value;
+            const preview = document.getElementById('slugPreview');
+            preview.textContent = '/' + (slug || 'url-slug');
+        }
+
+        // Preview functionality
+        document.getElementById('previewBtn').addEventListener('click', function () {
+            const title = document.getElementById('title').value || 'Tiêu đề Trang';
+            const content = (editorInstance && editorInstance.getData()) || 'Nội dung trang...';
+
+            if (!content || content.trim() === '') {
+                showAlert('warning', 'Vui lòng nhập nội dung trước khi xem trước');
+                return;
+            }
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewContent').innerHTML = content;
+
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        });
+
+        // Form validation & sync editor content to textarea before submit
+        document.getElementById('pageForm').addEventListener('submit', function (e) {
+            const title = document.getElementById('title').value.trim();
+            const slug = document.getElementById('slug').value.trim();
+            const editorHtml = (editorInstance && editorInstance.getData()) || '';
+            const content = editorHtml.trim();
+            // Sync editor data back to textarea so Spring binds it
+            const contentTextarea = document.getElementById('content');
+            if (contentTextarea) {
+                contentTextarea.value = editorHtml;
+            }
+
+            let isValid = true;
+
+            if (!title) {
+                document.getElementById('title').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!slug) {
+                document.getElementById('slug').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!content) {
+                showAlert('danger', 'Vui lòng nhập nội dung trang');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                showAlert('danger', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+                return;
+            }
+
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tạo...';
+            submitBtn.disabled = true;
+        });
+
+        // Clear validation on input
+        document.getElementById('title').addEventListener('input', function () {
+            this.classList.remove('is-invalid');
+        });
+
+        document.getElementById('slug').addEventListener('input', function () {
+            this.classList.remove('is-invalid');
+        });
+
+        // Show alert function
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const container = document.querySelector('.content-wrapper');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize slug preview
+        updateSlugPreview();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý Header Tầng Dưới - Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <style>
+                        .header-preview {
+                            background: #f8f9fa;
+                            border: 1px solid #dee2e6;
+                            border-radius: 8px;
+                            padding: 20px;
+                            margin-bottom: 20px;
+                        }
+
+                        .bottom-header {
+                            background: #f8f9fa;
+                            padding: 15px 0;
+                            border-top: 1px solid #dee2e6;
+                        }
+
+                        .btn-categories {
+                            background: #e91e63;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                        }
+
+                        .nav-list {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+                            display: flex;
+                            gap: 20px;
+                        }
+
+                        .nav-link {
+                            color: #333;
+                            text-decoration: none;
+                            font-weight: 500;
+                        }
+
+                        .nav-link:hover {
+                            color: #e91e63;
+                        }
+
+                        .navigation-item {
+                            border: 1px solid #dee2e6;
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-bottom: 15px;
+                            background: #fff;
+                        }
+                    </style>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="page-header">
+                                <h1 class="h3 mb-0">
+                                    <i class="fas fa-file-alt text-primary me-2"></i>
+                                    Quản lý Header Tầng Dưới
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Modal -->
+                    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="previewModalLabel">
+                                        <i class="mdi mdi-eye me-2"></i>Xem trước Header
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-0">
+                                    <div id="form-preview-content">
+                                        <!-- Preview content will be loaded here -->
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toast Container -->
+                    <div class="toast-container">
+                        <div id="headerToast" class="toast admin-toast admin-toast-info" role="alert"
+                            aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Thông báo</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast">&times;</button>
+                            </div>
+                            <div class="toast-body">
+                                <!-- Toast message will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div id="preview-section">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="mdi mdi-eye me-2"></i>
+                                            Header hiện tại
+                                        </h5>
+                                        <div>
+                                            <a href="/admin/header-bottom/init" class="btn btn-warning me-2">
+                                                <i class="mdi mdi-database-plus me-1"></i>Khởi tạo dữ liệu mẫu
+                                            </a>
+                                            <button type="button" class="btn btn-primary" onclick="loadHeaderData()">
+                                                <i class="mdi mdi-pencil me-1"></i>Chỉnh sửa
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="header-preview">
+                                            <!-- Header preview will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Form Section (Hidden by default) -->
+                    <div id="edit-section" style="display: none;">
+                        <form id="header-form" th:action="@{/admin/header-bottom/save}" method="post"
+                            onsubmit="return validateForm()">
+                            <div class="row">
+
+                                <!-- Navigation Items -->
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="card-title mb-0">
+                                                <i class="mdi mdi-menu me-2"></i>
+                                                Mục điều hướng (Có thể chỉnh sửa)
+                                            </h5>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-primary btn-sm"
+                                                    onclick="addNavigationItem()">
+                                                    <i class="mdi mdi-plus me-1"></i>Thêm mục
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                <i class="mdi mdi-information me-2"></i>
+                                                <strong>Hướng dẫn:</strong>
+                                                <ul class="mb-0 mt-2">
+                                                    <li><strong>Danh mục:</strong> Chọn danh mục sản phẩm, có thể thêm
+                                                        danh mục con</li>
+                                                    <li><strong>Trang tĩnh:</strong> Chọn từ các trang tĩnh đã tạo trong
+                                                        quản lý nội dung</li>
+                                                    <li><strong>Link bên ngoài:</strong> Nhập URL bên ngoài
+                                                        (https://example.com)</li>
+                                                </ul>
+                                            </div>
+
+                                            <div id="navigation-items-container">
+                                                <!-- Navigation items will be added here dynamically -->
+                                                <div class="navigation-item"
+                                                    style="border-left: 4px solid #007bff; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);">
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Tiêu đề</label>
+                                                            <input type="text" class="form-control"
+                                                                name="navigationItems[0].title"
+                                                                placeholder="Nhập tiêu đề" value="Test Header">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">URL</label>
+                                                            <input type="text" class="form-control"
+                                                                name="navigationItems[0].url" placeholder="Nhập URL"
+                                                                value="/test">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Loại link</label>
+                                                            <select class="form-select"
+                                                                name="navigationItems[0].linkType"
+                                                                onchange="toggleLinkOptions(0)"
+                                                                style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                                                                <option value="PAGE">Trang tĩnh</option>
+                                                                <option value="PAGE_LIST">Danh sách trang tĩnh</option>
+                                                                <option value="EXTERNAL">Link bên ngoài
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Thứ tự</label>
+                                                            <input type="number" class="form-control"
+                                                                name="navigationItems[0].itemOrder" value="0">
+                                                        </div>
+                                                    </div>
+                                                    <!-- Hidden inputs for required fields -->
+                                                    <input type="hidden" name="navigationItems[0].isCategoryParent"
+                                                        value="true">
+                                                    <input type="hidden" name="navigationItems[0].categoryId" value="">
+                                                    <input type="hidden" name="navigationItems[0].staticPageId"
+                                                        value="">
+                                                    <input type="hidden" name="navigationItems[0].parentItemId"
+                                                        value="">
+
+                                                    <!-- Sub-items container for PARENT_CATEGORY -->
+                                                    <div class="row mt-3" id="sub-items-0" style="display: block;">
+                                                        <div class="col-12">
+                                                            <div class="border rounded p-3"
+                                                                style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center mb-3">
+                                                                    <h6 class="mb-0 text-primary">
+                                                                        <i
+                                                                            class="mdi mdi-format-list-bulleted me-2"></i>Danh
+                                                                        mục con
+                                                                    </h6>
+                                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                                        onclick="addSubItem(0)">
+                                                                        <i class="mdi mdi-plus me-1"></i>Thêm danh mục
+                                                                        con
+                                                                    </button>
+                                                                </div>
+                                                                <div id="sub-items-container-0">
+                                                                    <!-- Sub items will be added here -->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-secondary" onclick="showPreview()">
+                                            <i class="mdi mdi-arrow-left me-1"></i>Quay lại
+                                        </button>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-primary me-2"
+                                                onclick="previewFormData()" data-bs-toggle="modal"
+                                                data-bs-target="#previewModal">
+                                                <i class="mdi mdi-eye me-1"></i>Xem trước
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="mdi mdi-content-save me-1"></i>Lưu thay đổi
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="admin/fragments/admin-scripts :: admin-scripts"></th:block>
+
+    <script th:inline="javascript">
+        // Global variables
+        let navItemIndex = 0;
+        let currentHeaderData = null;
+        const parentCategories = /*[[${parentCategories}]]*/[];
+        const staticPages = /*[[${staticPages}]]*/[];
+
+        // Build unique sectionSlug list from staticPages
+        function getUniqueSectionSlugs() {
+            const slugs = new Set();
+            if (Array.isArray(staticPages)) {
+                staticPages.forEach(p => {
+                    if (p && p.sectionSlug && p.sectionSlug.trim() !== '') {
+                        slugs.add(p.sectionSlug.trim());
+                    }
+                });
+            }
+            return Array.from(slugs).sort((a, b) => a.localeCompare(b));
+        }
+
+        function buildSectionSlugSelect(nameAttr, selectedValue) {
+            const options = getUniqueSectionSlugs();
+            let html = `<select class="form-select" name="${nameAttr}" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">`;
+            html += `<option value="">Chọn section</option>`;
+            options.forEach(slug => {
+                const sel = (selectedValue === slug) ? 'selected' : '';
+                html += `<option value="${slug}" ${sel}>${slug}</option>`;
+            });
+            html += `</select>`;
+            return html;
+        }
+
+        // Toast notification function
+        function showToast(type, message) {
+            const toast = document.getElementById('headerToast');
+            const toastBody = toast.querySelector('.toast-body');
+            const toastIcon = toast.querySelector('.mdi');
+
+            // Update icon based on type
+            toastIcon.className = 'mdi me-2';
+            switch (type) {
+                case 'success':
+                    toastIcon.classList.add('mdi-check-circle', 'text-success');
+                    break;
+                case 'error':
+                case 'danger':
+                    toastIcon.classList.add('mdi-alert-circle', 'text-danger');
+                    break;
+                case 'warning':
+                    toastIcon.classList.add('mdi-alert', 'text-warning');
+                    break;
+                default:
+                    toastIcon.classList.add('mdi-information', 'text-primary');
+            }
+
+            toastBody.textContent = message;
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Load header data from API
+        async function loadHeaderData() {
+            try {
+                const response = await fetch('/content/api/header-bottom');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentHeaderData = data;
+
+                // Load sub-items for each parent item
+                if (data.navigationItems && data.navigationItems.length > 0) {
+                    for (let i = 0; i < data.navigationItems.length; i++) {
+                        const item = data.navigationItems[i];
+                        if (item.id) {
+                            try {
+                                const subResponse = await fetch(`/content/api/header-bottom/sub-items/${item.id}`);
+                                const subData = await subResponse.json();
+                                item.subItems = subData || [];
+                            } catch (subError) {
+                                console.error('Error loading sub-items for', item.title, ':', subError);
+                                item.subItems = [];
+                            }
+                        }
+                    }
+                }
+
+                // Populate form with data
+                populateForm(data);
+
+                // Show edit section
+                showEditSection();
+
+            } catch (error) {
+                console.error('Error loading header data:', error);
+                showToast('error', 'Lỗi khi tải dữ liệu header!');
+            }
+        }
+
+        // Populate form with data
+        function populateForm(data) {
+            // Clear existing navigation items
+            const container = document.getElementById('navigation-items-container');
+            container.innerHTML = '';
+            navItemIndex = 0;
+
+            // Add navigation items
+            if (data.navigationItems && Array.isArray(data.navigationItems)) {
+                // Filter parent items only
+                const parentItems = data.navigationItems.filter(item => item.isCategoryParent === true || item.parentItemId === null);
+
+                parentItems.forEach(item => {
+                    addNavigationItem(
+                        item.title || '',
+                        item.url || '',
+                        item.linkType || 'INTERNAL',
+                        item.itemOrder || 0,
+                        item.category ? item.category.id : '',
+                        item.staticPage ? item.staticPage.id : ''
+                    );
+
+                    // Add sub items if any
+                    if (item.subItems && item.subItems.length > 0) {
+                        const currentIndex = navItemIndex - 1;
+                        item.subItems.forEach((subItem, subIndex) => {
+                            addSubItem(currentIndex);
+                            // Set values for the sub item
+                            const subContainer = document.getElementById(`sub-items-container-${currentIndex}`);
+                            const subItems = subContainer.querySelectorAll('.sub-item');
+                            const lastSubItem = subItems[subItems.length - 1];
+                            if (lastSubItem) {
+                                const titleInput = lastSubItem.querySelector('input[name*="title"]');
+                                const orderInput = lastSubItem.querySelector('input[name*="itemOrder"]');
+                                const linkTypeSelect = lastSubItem.querySelector('select[name*="linkType"]');
+
+                                if (titleInput) titleInput.value = subItem.title || '';
+                                if (orderInput) orderInput.value = subItem.itemOrder || (subIndex + 1);
+
+                                if (linkTypeSelect) {
+                                    linkTypeSelect.value = subItem.linkType || 'PAGE';
+                                    // Cập nhật UI theo linkType trước
+                                    toggleSubItemLinkOptions(currentIndex, subItems.length - 1);
+
+                                    // Sau khi UI đã cập nhật, gán giá trị đúng theo link type
+                                    if (subItem.linkType === 'PAGE') {
+                                        const staticPageSelect = lastSubItem.querySelector('select[name*="staticPageId"]');
+                                        if (staticPageSelect && subItem.staticPage) {
+                                            staticPageSelect.value = subItem.staticPage.id || '';
+                                        }
+                                    } else if (subItem.linkType === 'PAGE_LIST') {
+                                        // set selected section in combobox
+                                        const sectionSelect = lastSubItem.querySelector('select[name*="url"]');
+                                        if (sectionSelect) {
+                                            const sectionSlug = (subItem.url || '').toString()
+                                                .replace(/^\/content\/list\//, '')
+                                                .replace(/^\//, '');
+                                            sectionSelect.value = sectionSlug;
+                                        }
+                                    } else {
+                                        const urlInput = lastSubItem.querySelector('input[name*="url"]');
+                                        if (urlInput) urlInput.value = subItem.url || '';
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // Show edit section
+        function showEditSection() {
+            document.getElementById('preview-section').style.display = 'none';
+            document.getElementById('edit-section').style.display = 'block';
+        }
+
+        // Show preview section
+        function showPreview() {
+            document.getElementById('edit-section').style.display = 'none';
+            document.getElementById('preview-section').style.display = 'block';
+        }
+
+        // Preview header from form data
+        function previewHeader() {
+            // Build preview data from form
+            const previewData = {
+                navigationItems: []
+            };
+
+            // Collect navigation items
+            const navItems = document.querySelectorAll('.navigation-item');
+            navItems.forEach((item, index) => {
+                const title = item.querySelector(`input[name*="title"]`)?.value;
+                const url = item.querySelector(`input[name*="url"]`)?.value;
+                const linkType = item.querySelector(`select[name*="linkType"]`)?.value;
+
+                if (title && title.trim()) {
+                    previewData.navigationItems.push({
+                        title: title,
+                        url: url || '#',
+                        linkType: linkType || 'INTERNAL'
+                    });
+                }
+            });
+
+            // Update preview
+            updateHeaderPreview(previewData);
+        }
+
+        // Preview form data in modal
+        function previewFormData() {
+            // Build preview data from form
+            const previewData = {
+                navigationItems: []
+            };
+
+            // Collect navigation items from form
+            const navItems = document.querySelectorAll('.navigation-item');
+            navItems.forEach((item, index) => {
+                const title = item.querySelector(`input[name*="title"]`)?.value;
+                const url = item.querySelector(`input[name*="url"]`)?.value;
+                const linkType = item.querySelector(`select[name*="linkType"]`)?.value;
+                const itemOrder = item.querySelector(`input[name*="itemOrder"]`)?.value;
+                const categoryId = item.querySelector(`select[name*="categoryId"]`)?.value;
+                const staticPageId = item.querySelector(`select[name*="staticPageId"]`)?.value;
+
+                if (title && title.trim() !== '') {
+                    const navItem = {
+                        title: title,
+                        url: url || '#',
+                        linkType: linkType || 'INTERNAL',
+                        itemOrder: parseInt(itemOrder) || 0,
+                        isCategoryParent: linkType === 'PARENT_CATEGORY',
+                        subItems: []
+                    };
+
+                    // Collect sub-items for this parent item
+                    const subItemsContainer = document.getElementById(`sub-items-container-${index}`);
+                    if (subItemsContainer) {
+                        const subItems = subItemsContainer.querySelectorAll('.sub-item');
+                        subItems.forEach((subItem, subIndex) => {
+                            const subTitle = subItem.querySelector(`input[name*="title"]`)?.value;
+                            const subUrl = subItem.querySelector(`input[name*="url"]`)?.value;
+                            const subOrder = subItem.querySelector(`input[name*="itemOrder"]`)?.value;
+                            const subLinkType = subItem.querySelector(`select[name*="linkType"]`)?.value;
+                            const subStaticPageId = subItem.querySelector(`select[name*="staticPageId"]`)?.value;
+
+                            if (subTitle && subTitle.trim() !== '') {
+                                navItem.subItems.push({
+                                    title: subTitle,
+                                    url: subUrl || '#',
+                                    linkType: subLinkType || 'PAGE',
+                                    itemOrder: parseInt(subOrder) || (subIndex + 1),
+                                    staticPageId: subStaticPageId || null
+                                });
+                            }
+                        });
+                    }
+
+                    previewData.navigationItems.push(navItem);
+                }
+            });
+
+            // Update modal preview
+            updateModalPreview(previewData);
+        }
+
+        // Update header preview
+        async function updateHeaderPreview(data) {
+            const previewContainer = document.getElementById('header-preview');
+
+            // Load sub-items for each parent item
+            if (data.navigationItems && data.navigationItems.length > 0) {
+                for (let i = 0; i < data.navigationItems.length; i++) {
+                    const item = data.navigationItems[i];
+                    if (item.id) {
+                        try {
+                            const subResponse = await fetch(`/content/api/header-bottom/sub-items/${item.id}`);
+                            const subData = await subResponse.json();
+                            item.subItems = subData || [];
+                        } catch (subError) {
+                            console.error('Error loading sub-items for preview:', subError);
+                            item.subItems = [];
+                        }
+                    }
+                }
+            }
+
+            let previewHtml = `
+                <div class="header-preview">
+                    <div class="bottom-header" style="background: #f8f9fa; padding: 15px 0; border-top: 1px solid #dee2e6;">
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <nav class="main-nav">
+                                        <ul class="nav-list" style="display: flex; align-items: center; gap: 2rem; margin: 0; padding: 0; list-style: none;">
+            `;
+
+            if (data.navigationItems && data.navigationItems.length > 0) {
+                data.navigationItems.forEach(item => {
+                    if (item.linkType === 'PARENT_CATEGORY' || item.isCategoryParent) {
+                        // Create dropdown for categories
+                        const dropdownId = `preview-category-dropdown-${Math.random().toString(36).substr(2, 9)}`;
+                        previewHtml += `
+                            <li class="nav-item" style="position: relative;">
+                                <div class="nav-dropdown" style="position: relative;">
+                                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="${dropdownId}" 
+                                       style="color: #333 !important; text-decoration: none !important; font-weight: 800 !important; font-size: 16px !important; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 20px; border-radius: 4px; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+                                        ${item.title.toUpperCase()}
+                                        </a>
+                                    <ul class="dropdown-menu category-dropdown-menu" aria-labelledby="${dropdownId}" 
+                                        style="position: absolute; top: 100%; left: 0; min-width: 200px; background: white; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-radius: 8px; padding: 8px 0; margin-top: 0; display: none; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; z-index: 1000;">
+                        `;
+
+                        // Add sub-items
+                        if (item.subItems && item.subItems.length > 0) {
+                            item.subItems.forEach(subItem => {
+                                previewHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${subItem.url || '#'}" 
+                                           style="color: #333; font-size: 16px; font-weight: 400; text-transform: uppercase; padding: 10px 16px; transition: all 0.3s ease; text-decoration: none; display: block;">
+                                            ${subItem.title.toUpperCase()}
+                                        </a>
+                                    </li>
+                                `;
+                            });
+                        } else {
+                            previewHtml += `
+                                <li>
+                                    <a class="dropdown-item" href="#" 
+                                       style="color: #999; font-size: 14px; padding: 10px 16px; text-decoration: none; display: block;">
+                                        Không có danh mục con
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        previewHtml += `
+                                    </ul>
+                                </div>
+                            </li>
+                        `;
+                    } else {
+                        // Create regular button for other items
+                        let href = '#';
+                        if (item.linkType === 'EXTERNAL') {
+                            href = item.url || '#';
+                        } else if (item.linkType === 'INTERNAL' || item.linkType === 'PAGE' || item.linkType === 'PAGE_LIST') {
+                            href = item.url || '#';
+                        }
+
+                        previewHtml += `
+                            <li class="nav-item" style="position: relative;">
+                                <a href="${href}" class="nav-link nav-button" 
+                                   style="color: #333 !important; text-decoration: none !important; font-weight: 800 !important; font-size: 16px !important; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 20px; border-radius: 4px; transition: all 0.3s ease; position: relative;">
+                                    ${item.title.toUpperCase()}
+                                </a>
+                            </li>
+                        `;
+                    }
+                });
+            }
+
+            previewHtml += `
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                    .header-preview .nav-dropdown:hover .category-dropdown-menu {
+                        display: block !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: translateY(0) !important;
+                    }
+                    .header-preview .nav-dropdown .category-dropdown-menu:hover {
+                        display: block !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: translateY(0) !important;
+                    }
+                    .header-preview .nav-button:hover {
+                        color: #e91e63 !important;
+                    }
+                    .header-preview .nav-dropdown .dropdown-toggle:hover {
+                        color: #e91e63 !important;
+                    }
+                    .header-preview .category-dropdown-menu .dropdown-item:hover {
+                        background-color: #f8f9fa;
+                        color: #e91e63;
+                        text-decoration: none;
+                    }
+                </style>
+            `;
+
+            previewContainer.innerHTML = previewHtml;
+        }
+
+        // Update modal preview
+        function updateModalPreview(data) {
+            const previewContainer = document.getElementById('form-preview-content');
+
+            let previewHtml = `
+                <div class="header-preview">
+                    <div class="bottom-header" style="background: #f8f9fa; padding: 15px 0; border-top: 1px solid #dee2e6;">
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <nav class="main-nav">
+                                        <ul class="nav-list" style="display: flex; align-items: center; gap: 2rem; margin: 0; padding: 0; list-style: none;">
+            `;
+
+            if (data.navigationItems && data.navigationItems.length > 0) {
+                data.navigationItems.forEach(item => {
+                    if (item.linkType === 'PARENT_CATEGORY' || item.isCategoryParent) {
+                        // Create dropdown for categories
+                        const dropdownId = `modal-category-dropdown-${Math.random().toString(36).substr(2, 9)}`;
+                        previewHtml += `
+                            <li class="nav-item" style="position: relative;">
+                                <div class="nav-dropdown" style="position: relative;">
+                                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="${dropdownId}" 
+                                       style="color: #333 !important; text-decoration: none !important; font-weight: 800 !important; font-size: 16px !important; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 20px; border-radius: 4px; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+                                        ${item.title.toUpperCase()}
+                                    </a>
+                                    <ul class="dropdown-menu category-dropdown-menu" aria-labelledby="${dropdownId}" 
+                                        style="position: absolute; top: 100%; left: 0; min-width: 200px; background: white; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-radius: 8px; padding: 8px 0; margin-top: 0; display: none; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; z-index: 1000;">
+                        `;
+
+                        // Add sub-items
+                        if (item.subItems && item.subItems.length > 0) {
+                            item.subItems.forEach(subItem => {
+                                previewHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${subItem.url || '#'}" 
+                                           style="color: #333; font-size: 16px; font-weight: 400; text-transform: uppercase; padding: 10px 16px; transition: all 0.3s ease; text-decoration: none; display: block;">
+                                            ${subItem.title.toUpperCase()}
+                                        </a>
+                                    </li>
+                                `;
+                            });
+                        } else {
+                            previewHtml += `
+                                <li>
+                                    <a class="dropdown-item" href="#" 
+                                       style="color: #999; font-size: 14px; padding: 10px 16px; text-decoration: none; display: block;">
+                                        Không có danh mục con
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        previewHtml += `
+                                    </ul>
+                                </div>
+                            </li>
+                        `;
+                    } else {
+                        // Create regular button for other items
+                        let href = '#';
+                        if (item.linkType === 'EXTERNAL') {
+                            href = item.url || '#';
+                        } else if (item.linkType === 'INTERNAL' || item.linkType === 'PAGE' || item.linkType === 'PAGE_LIST') {
+                            href = item.url || '#';
+                        }
+
+                        previewHtml += `
+                            <li class="nav-item" style="position: relative;">
+                                <a href="${href}" class="nav-link nav-button" 
+                                   style="color: #333 !important; text-decoration: none !important; font-weight: 800 !important; font-size: 16px !important; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 20px; border-radius: 4px; transition: all 0.3s ease; position: relative;">
+                                    ${item.title.toUpperCase()}
+                                </a>
+                            </li>
+                        `;
+                    }
+                });
+            }
+
+            previewHtml += `
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                    .header-preview .nav-dropdown:hover .category-dropdown-menu {
+                        display: block !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: translateY(0) !important;
+                    }
+                    .header-preview .nav-dropdown .category-dropdown-menu:hover {
+                        display: block !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: translateY(0) !important;
+                    }
+                    .header-preview .nav-button:hover {
+                        color: #e91e63 !important;
+                    }
+                    .header-preview .nav-dropdown .dropdown-toggle:hover {
+                        color: #e91e63 !important;
+                    }
+                    .header-preview .category-dropdown-menu .dropdown-item:hover {
+                        background-color: #f8f9fa;
+                        color: #e91e63;
+                        text-decoration: none;
+                    }
+                </style>
+            `;
+
+            previewContainer.innerHTML = previewHtml;
+        }
+
+        // Load header preview on page load
+        async function loadHeaderPreview() {
+            try {
+                const response = await fetch('/content/api/header-bottom');
+                const data = await response.json();
+
+
+                if (data.navigationItems && data.navigationItems.length > 0) {
+                    updateHeaderPreview(data);
+                } else {
+                    document.getElementById('header-preview').innerHTML =
+                        '<div class="alert alert-info"><i class="mdi mdi-information me-2"></i>Chưa có dữ liệu header. Vui lòng khởi tạo dữ liệu mẫu hoặc tạo mới.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading header preview:', error);
+                document.getElementById('header-preview').innerHTML =
+                    '<div class="alert alert-danger"><i class="mdi mdi-alert-circle me-2"></i>Lỗi khi tải dữ liệu header!</div>';
+            }
+        }
+
+        // Check URL parameters for success/error messages
+        function checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Check for success parameter
+            if (urlParams.has('success')) {
+                const successType = urlParams.get('success');
+                let message = '';
+
+                switch (successType) {
+                    case 'true':
+                    case 'update':
+                        message = 'Cập nhật header thành công!';
+                        break;
+                    case 'init':
+                        message = 'Khởi tạo dữ liệu mẫu thành công!';
+                        break;
+                    default:
+                        message = 'Thao tác thành công!';
+                }
+
+                showToast('success', message);
+
+                // Clean URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+
+            // Check for error parameter
+            if (urlParams.has('error')) {
+                const errorType = urlParams.get('error');
+                let message = '';
+
+                switch (errorType) {
+                    case 'true':
+                    case 'save':
+                        message = 'Lỗi khi lưu header!';
+                        break;
+                    case 'init':
+                        message = 'Lỗi khi khởi tạo dữ liệu mẫu!';
+                        break;
+                    default:
+                        message = 'Đã xảy ra lỗi!';
+                }
+
+                showToast('danger', message);
+
+                // Clean URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+
+            // Check for nochange parameter
+            if (urlParams.has('nochange')) {
+                showToast('info', 'Không có thay đổi nào để lưu!');
+
+                // Clean URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+
+        // Add navigation item function - ensure global scope
+        window.addNavigationItem = function (title = '', url = '', linkType = 'PARENT_CATEGORY', itemOrder = null, categoryId = '', staticPageId = '') {
+            // Set default values
+            title = title || '';
+            url = url || '';
+            linkType = linkType || 'PARENT_CATEGORY';
+            itemOrder = itemOrder || (navItemIndex + 1);
+            categoryId = categoryId || '';
+            staticPageId = staticPageId || '';
+
+            const container = document.getElementById('navigation-items-container');
+            const currentIndex = navItemIndex;
+            const orderValue = itemOrder;
+
+            // Build category options
+            let categoryOptions = '<option value="">Chọn danh mục</option>';
+            if (parentCategories && parentCategories.length > 0) {
+                parentCategories.forEach(function (category) {
+                    const selected = categoryId == category.id ? 'selected' : '';
+                    categoryOptions += `<option value="${category.id}" ${selected}>${category.name}</option>`;
+                });
+            }
+
+            // Build static page options
+            let staticPageOptions = '<option value="">Chọn trang tĩnh</option>';
+            if (staticPages && staticPages.length > 0) {
+                staticPages.forEach(function (page) {
+                    const selected = staticPageId == page.id ? 'selected' : '';
+                    staticPageOptions += `<option value="${page.id}" ${selected}>${page.title}</option>`;
+                });
+            }
+
+            // Determine initial input type based on linkType
+            let initialLabel = 'URL';
+            let initialInput = `<input type="text" class="form-control" name="navigationItems[${currentIndex}].url" 
+                value="${url}" placeholder="https://example.com">`;
+
+            if (linkType === 'PARENT_CATEGORY') {
+                initialLabel = 'Danh mục';
+                initialInput = `<select class="form-select" name="navigationItems[${currentIndex}].categoryId" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                    ${categoryOptions}
+                </select>`;
+            } else if (linkType === 'PAGE') {
+                initialLabel = 'Trang tĩnh';
+                initialInput = `<select class="form-select" name="navigationItems[${currentIndex}].staticPageId" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                    ${staticPageOptions}
+                </select>`;
+            } else if (linkType === 'PAGE_LIST') {
+                initialLabel = 'Section';
+                const sectionSlug = (url || '').toString().replace(/^\/content\/list\//, '').replace(/^\//, '');
+                initialInput = buildSectionSlugSelect(`navigationItems[${currentIndex}].url`, sectionSlug);
+            } else if (linkType === 'EXTERNAL') {
+                initialLabel = 'URL';
+                initialInput = `<input type="text" class="form-control" name="navigationItems[${currentIndex}].url" 
+                    value="${url}" placeholder="https://example.com">`;
+            }
+
+            const navItemHtml = `
+                                                <div class="navigation-item" style="border-left: 4px solid #007bff; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Tiêu đề</label>
+                            <input type="text" class="form-control" name="navigationItems[${currentIndex}].title" 
+                                   value="${title}" placeholder="Về chúng tôi, Liên hệ, Hỗ trợ">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" id="label-${currentIndex}">${initialLabel}</label>
+                            <div id="input-${currentIndex}">
+                                ${initialInput}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Loại link</label>
+                            <select class="form-select" name="navigationItems[${currentIndex}].linkType" onchange="toggleLinkOptions(${currentIndex})" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                                <option value="PARENT_CATEGORY" ${linkType === 'PARENT_CATEGORY' ? 'selected' : ''}>Danh mục cha</option>
+                                <option value="PAGE" ${linkType === 'PAGE' ? 'selected' : ''}>Trang tĩnh</option>
+                                <option value="PAGE_LIST" ${linkType === 'PAGE_LIST' ? 'selected' : ''}>Danh sách trang tĩnh</option>
+                                <option value="EXTERNAL" ${linkType === 'EXTERNAL' ? 'selected' : ''}>Link bên ngoài</option>
+                            </select>
+                            <input type="hidden" name="navigationItems[${currentIndex}].isCategoryParent" id="is-parent-${currentIndex}" value="${linkType === 'PARENT_CATEGORY'}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Thứ tự</label>
+                            <input type="number" class="form-control" name="navigationItems[${currentIndex}].itemOrder" 
+                                   value="${orderValue}">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeNavigationItem(this)">
+                                <i class="mdi mdi-delete"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-3" id="sub-items-${currentIndex}" style="display: ${linkType === 'PARENT_CATEGORY' ? 'block' : 'none'};">
+                        <div class="col-12">
+                            <div class="border rounded p-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0 text-primary">
+                                        <i class="mdi mdi-format-list-bulleted me-2"></i>Danh mục con
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="addSubItem(${currentIndex})">
+                                        <i class="mdi mdi-plus me-1"></i>Thêm danh mục con
+                                    </button>
+                                </div>
+                                <div id="sub-items-container-${currentIndex}">
+                                    <!-- Sub items will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', navItemHtml);
+            navItemIndex++;
+        }
+
+        // Remove navigation item function - ensure global scope
+        window.removeNavigationItem = function (button) {
+            button.closest('.navigation-item').remove();
+        };
+
+        // Load child categories when selecting a parent category
+        window.onParentCategoryChange = async function (index, parentId) {
+            const container = document.getElementById(`sub-items-container-${index}`);
+            const section = document.getElementById(`sub-items-${index}`);
+            if (!container || !section) return;
+            // Only show sub items when parent category mode
+            const linkType = document.querySelector(`select[name="navigationItems[${index}].linkType"]`)?.value;
+            if (linkType !== 'PARENT_CATEGORY') {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = 'block';
+            container.innerHTML = '<div class="text-muted">Đang tải danh mục con...</div>';
+
+            try {
+                const res = await fetch(`/api/categories/children/${parentId}`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const children = await res.json();
+                if (!Array.isArray(children) || children.length === 0) {
+                    container.innerHTML = '<div class="text-muted">Không có danh mục con</div>';
+                    return;
+                }
+                container.innerHTML = '';
+                children.forEach((cat, idx) => {
+                    const subItemHtml = `
+                        <div class=\"sub-item mb-2 p-2 border rounded bg-white\" style=\"border-left: 4px solid #e91e63 !important; border-radius: 6px; background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%) !important;\">
+                            <div class=\"row align-items-end\">
+                                <div class=\"col-md-6\">
+                                    <label class=\"form-label\">Danh mục con</label>
+                                    <input type=\"text\" class=\"form-control\" value=\"${cat.name}\" readonly>
+                                    <input type=\"hidden\" name=\"navigationItems[${index}].subItems[${idx}].title\" value=\"${cat.name}\">
+                                    <input type=\"hidden\" name=\"navigationItems[${index}].subItems[${idx}].categoryId\" value=\"${cat.categoryId}\">
+                                </div>
+                                <div class=\"col-md-3\">
+                                    <label class=\"form-label\">Thứ tự</label>
+                                    <input type=\"number\" class=\"form-control\" name=\"navigationItems[${index}].subItems[${idx}].itemOrder\" value=\"${idx + 1}\">
+                                </div>
+                                <div class=\"col-md-3\">
+                                    <label class=\"form-label\">URL</label>
+                                    <input type=\"text\" class=\"form-control\" name=\"navigationItems[${index}].subItems[${idx}].url\" value=\"/categories/${cat.categoryId}\">
+                                </div>
+                            </div>
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', subItemHtml);
+                });
+            } catch (e) {
+                container.innerHTML = '<div class="text-danger">Lỗi tải danh mục con</div>';
+            }
+        }
+        // Add sub item function - ensure global scope
+        window.addSubItem = function (parentIndex) {
+            const container = document.getElementById(`sub-items-container-${parentIndex}`);
+            const subItemIndex = container.children.length;
+
+            // Generate static page options
+            let staticPageOptions = '<option value="">Chọn trang tĩnh</option>';
+            if (staticPages && staticPages.length > 0) {
+                staticPages.forEach(function (page) {
+                    staticPageOptions += `<option value="${page.id}">${page.title}</option>`;
+                });
+            }
+
+            const subItemHtml = `
+                <div class="sub-item mb-2 p-2 border rounded bg-white" style="border-left: 4px solid #e91e63 !important; border-radius: 6px; background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%) !important;">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Tiêu đề</label>
+                            <input type="text" class="form-control" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].title" 
+                                   placeholder="Tên danh mục con">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Loại link</label>
+                            <select class="form-select" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].linkType" 
+                                    onchange="toggleSubItemLinkOptions(${parentIndex}, ${subItemIndex})" 
+                                    style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                                <option value="PAGE">Trang tĩnh</option>
+                                <option value="PAGE_LIST">Danh sách trang tĩnh</option>
+                                <option value="EXTERNAL">Link bên ngoài</option>
+                                <option value="INTERNAL">Link nội bộ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" id="sub-item-input-${parentIndex}-${subItemIndex}">
+                            <label class="form-label" id="sub-item-label-${parentIndex}-${subItemIndex}">Trang tĩnh</label>
+                            <select class="form-select" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].staticPageId" 
+                                    style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                                <option value="">Chọn trang tĩnh</option>
+                                ${staticPageOptions}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Thứ tự</label>
+                            <input type="number" class="form-control" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].itemOrder" 
+                                   value="${subItemIndex + 1}">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSubItem(this)">
+                                <i class="mdi mdi-delete"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', subItemHtml);
+        };
+
+        // Remove sub item function - ensure global scope
+        window.removeSubItem = function (button) {
+            button.closest('.sub-item').remove();
+        };
+
+        // Toggle link options function - ensure global scope
+        window.toggleLinkOptions = function (index) {
+            const linkType = document.querySelector(`select[name="navigationItems[${index}].linkType"]`).value;
+            const labelElement = document.getElementById(`label-${index}`);
+            const inputContainer = document.getElementById(`input-${index}`);
+
+            // Build category options
+            let categoryOptions = '<option value="">Chọn danh mục</option>';
+            if (parentCategories && parentCategories.length > 0) {
+                parentCategories.forEach(function (category) {
+                    categoryOptions += `<option value="${category.id}">${category.name}</option>`;
+                });
+            }
+
+            // Build static page options
+            let staticPageOptions = '<option value="">Chọn trang tĩnh</option>';
+            if (staticPages && staticPages.length > 0) {
+                staticPages.forEach(function (page) {
+                    staticPageOptions += `<option value="${page.id}">${page.title}</option>`;
+                });
+            }
+
+            let newLabel = '';
+            let newInput = '';
+
+            if (linkType === 'PARENT_CATEGORY') {
+                newLabel = 'Danh mục cha';
+                newInput = `<select class="form-select" name="navigationItems[${index}].categoryId" onchange="onParentCategoryChange(${index}, this.value)" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                    ${categoryOptions}
+                </select>`;
+            } else if (linkType === 'PAGE') {
+                newLabel = 'Trang tĩnh';
+                newInput = `<select class="form-select" name="navigationItems[${index}].staticPageId" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                    ${staticPageOptions}
+                </select>`;
+            } else if (linkType === 'PAGE_LIST') {
+                newLabel = 'Section';
+                newInput = buildSectionSlugSelect(`navigationItems[${index}].url`, '');
+            } else if (linkType === 'EXTERNAL') {
+                newLabel = 'URL';
+                newInput = `<input type="text" class="form-control" name="navigationItems[${index}].url" 
+                    placeholder="https://example.com">`;
+            } else {
+                newLabel = 'URL';
+                newInput = `<input type="text" class="form-control" name="navigationItems[${index}].url" 
+                    placeholder="https://example.com">`;
+            }
+
+            // Update label and input
+            labelElement.textContent = newLabel;
+            inputContainer.innerHTML = newInput;
+
+            // Show/hide sub-items section based on link type
+            const subItemsSection = document.getElementById(`sub-items-${index}`);
+            if (subItemsSection) {
+                // Only PARENT_CATEGORY shows sub-items section
+                document.getElementById(`is-parent-${index}`)?.setAttribute('value', linkType === 'PARENT_CATEGORY');
+                if (linkType === 'PARENT_CATEGORY') {
+                    subItemsSection.style.display = 'block';
+                } else {
+                    subItemsSection.style.display = 'none';
+                }
+            }
+        };
+
+        // Toggle sub-item link options function
+        window.toggleSubItemLinkOptions = function (parentIndex, subItemIndex) {
+            const linkTypeSelect = document.querySelector(`select[name="navigationItems[${parentIndex}].subItems[${subItemIndex}].linkType"]`);
+            const inputContainer = document.getElementById(`sub-item-input-${parentIndex}-${subItemIndex}`);
+            const labelElement = document.getElementById(`sub-item-label-${parentIndex}-${subItemIndex}`);
+
+            if (!linkTypeSelect || !inputContainer || !labelElement) return;
+
+            const linkType = linkTypeSelect.value;
+            let newLabel = '';
+            let newInput = '';
+
+            if (linkType === 'PAGE') {
+                // Generate static page options
+                let staticPageOptions = '<option value="">Chọn trang tĩnh</option>';
+                if (staticPages && staticPages.length > 0) {
+                    staticPages.forEach(function (page) {
+                        staticPageOptions += `<option value="${page.id}">${page.title}</option>`;
+                    });
+                }
+
+                newLabel = 'Trang tĩnh';
+                newInput = `<select class="form-select" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].staticPageId" style="opacity: 1 !important; background-color: #fff !important; border: 1px solid #ced4da !important;">
+                    ${staticPageOptions}
+                </select>`;
+            } else if (linkType === 'PAGE_LIST') {
+                newLabel = 'Section';
+                newInput = buildSectionSlugSelect(`navigationItems[${parentIndex}].subItems[${subItemIndex}].url`, '');
+            } else if (linkType === 'EXTERNAL') {
+                newLabel = 'URL';
+                newInput = `<input type="text" class="form-control" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].url" 
+                    placeholder="https://example.com">`;
+            } else if (linkType === 'INTERNAL') {
+                newLabel = 'URL';
+                newInput = `<input type="text" class="form-control" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].url" 
+                    placeholder="/path/to/page">`;
+            } else {
+                newLabel = 'URL';
+                newInput = `<input type="text" class="form-control" name="navigationItems[${parentIndex}].subItems[${subItemIndex}].url" 
+                    placeholder="https://example.com">`;
+            }
+
+            // Update label and input
+            labelElement.textContent = newLabel;
+            inputContainer.innerHTML = newInput;
+        };
+
+        // Form validation function
+        window.validateForm = function () {
+            // Check navigation items
+            const navItems = document.querySelectorAll('.navigation-item');
+            let hasValidItem = false;
+
+            navItems.forEach(function (item) {
+                const title = item.querySelector('input[name*="title"]').value;
+                if (title && title.trim() !== '') {
+                    hasValidItem = true;
+                }
+            });
+
+            if (!hasValidItem) {
+                alert('Vui lòng thêm ít nhất một mục điều hướng');
+                return false;
+            }
+
+            // Collect form data and prepare for submission
+            collectFormData();
+
+            return true;
+        };
+
+        // Collect form data for submission
+        function collectFormData() {
+            // Don't clear existing inputs - just let the form submit normally
+            const navItems = document.querySelectorAll('.navigation-item');
+
+            // Just validate that we have data
+            let hasValidData = false;
+            navItems.forEach(function (item) {
+                const titleInput = item.querySelector('input[name*="title"]');
+                if (titleInput && titleInput.value && titleInput.value.trim() !== '') {
+                    hasValidData = true;
+                }
+            });
+
+            if (!hasValidData) {
+                alert('Vui lòng nhập ít nhất một tiêu đề');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Helper function to add hidden inputs
+        function addHiddenInput(form, name, value) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            checkUrlParameters();
+            loadHeaderPreview();
+
+            // Auto-load header data if in edit mode
+            if (document.getElementById('edit-section').style.display !== 'none') {
+                loadHeaderData();
+            }
+
+            // Add form submission handler
+            const form = document.getElementById('header-form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    // Show toast for form submission
+                    showToast('info', 'Đang lưu header...');
+                });
+            }
+
+            // Event delegation: phản ứng ngay khi đổi linkType của sub-item
+            document.addEventListener('change', function (e) {
+                const target = e.target;
+                if (!(target instanceof HTMLSelectElement)) return;
+                // Khớp select linkType của sub-item: navigationItems[<p>].subItems[<s>].linkType
+                const m = target.name && target.name.match(/navigationItems\[(\d+)\]\.subItems\[(\d+)\]\.linkType/);
+                if (m) {
+                    const parentIdx = parseInt(m[1], 10);
+                    const subIdx = parseInt(m[2], 10);
+                    // Cập nhật UI ngay lập tức cho sub-item tương ứng
+                    toggleSubItemLinkOptions(parentIdx, subIdx);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

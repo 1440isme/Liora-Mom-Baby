@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý Footer - Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <style>
+                        .footer-preview {
+                            background: #343a40;
+                            color: white;
+                            padding: 40px 0;
+                            border-radius: 8px;
+                        }
+
+                        .text-pink-primary {
+                            color: #e91e63 !important;
+                        }
+
+                        .text-light-muted {
+                            color: #adb5bd !important;
+                        }
+
+                        .footer-link {
+                            color: #adb5bd;
+                            text-decoration: none;
+                        }
+
+                        .footer-link:hover {
+                            color: #e91e63;
+                        }
+                    </style>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="page-header">
+                                <h1 class="h3 mb-0">
+                                    <i class="fas fa-file-alt text-primary me-2"></i>
+                                    Quản lý Footer
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toast Container -->
+                    <div class="toast-container">
+                        <div id="footerToast" class="toast admin-toast admin-toast-info" role="alert"
+                            aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Thông báo</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast">&times;</button>
+                            </div>
+                            <div class="toast-body">
+                                <!-- Toast message will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div id="preview-section">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="mdi mdi-eye me-2"></i>
+                                            Footer hiện tại
+                                        </h5>
+                                        <div>
+                                            <a href="/admin/footer/init" class="btn btn-warning me-2">
+                                                <i class="mdi mdi-database-plus me-1"></i>Khởi tạo dữ liệu mẫu
+                                            </a>
+                                            <button type="button" class="btn btn-primary" onclick="loadFooterData()">
+                                                <i class="mdi mdi-pencil me-1"></i>Chỉnh sửa
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="footer-preview">
+                                            <!-- Footer preview will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Form Section (Hidden by default) -->
+                    <div id="edit-section" style="display: none;">
+                        <form th:action="@{/admin/footer/save}" method="post" th:object="${footerRequest}"
+                            id="footer-form">
+                            <div class="row">
+                                <!-- Brand Information -->
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">
+                                                <i class="mdi mdi-information-outline me-2"></i>
+                                                Thông tin thương hiệu
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Tên thương hiệu</label>
+                                                <input type="text" class="form-control" th:field="*{brandName}"
+                                                    required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Mô tả thương hiệu</label>
+                                                <textarea class="form-control" rows="4"
+                                                    th:field="*{brandDescription}"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Social Links -->
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">
+                                                <i class="mdi mdi-share-variant me-2"></i>
+                                                Liên kết mạng xã hội
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="social-links-container">
+                                                <!-- Social links will be loaded here -->
+                                            </div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                                onclick="addSocialLink()">
+                                                <i class="mdi mdi-plus me-1"></i>Thêm liên kết
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer Columns -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="card-title mb-0">
+                                                <i class="mdi mdi-format-list-bulleted me-2"></i>
+                                                Cột footer
+                                            </h5>
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                onclick="addFooterColumn()">
+                                                <i class="mdi mdi-plus me-1"></i>Thêm cột
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="footer-columns-container">
+                                                <!-- Footer columns will be added here dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-secondary" onclick="showPreview()">
+                                            <i class="mdi mdi-arrow-left me-1"></i>Quay lại xem trước
+                                        </button>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-primary me-2"
+                                                onclick="previewFooter()">
+                                                <i class="mdi mdi-eye me-1"></i>Xem trước
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="mdi mdi-content-save me-1"></i>Lưu thay đổi
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="admin/fragments/admin-scripts :: admin-scripts"></th:block>
+
+    <script th:inline="javascript">
+        let columnIndex = 0;
+        let itemIndex = 0;
+        let currentFooterData = null;
+
+        // Load footer data from API
+        async function loadFooterData() {
+            try {
+                const response = await fetch('/content/api/footer');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.footer) {
+                    currentFooterData = data;
+                    populateEditForm(data);
+                    showEditSection();
+                } else {
+                    showToast('warning', 'Chưa có dữ liệu footer. Vui lòng khởi tạo dữ liệu mẫu trước.');
+                }
+            } catch (error) {
+                console.error('Error loading footer data:', error);
+                showToast('danger', 'Lỗi khi tải dữ liệu footer: ' + error.message);
+            }
+        }
+
+        // Populate edit form with current data
+        function populateEditForm(data) {
+            // Populate brand information
+            const brandNameInput = document.querySelector('input[name="brandName"]');
+            const brandDescTextarea = document.querySelector('textarea[name="brandDescription"]');
+
+            if (brandNameInput) {
+                brandNameInput.value = data.footer.brandName || '';
+            }
+            if (brandDescTextarea) {
+                brandDescTextarea.value = data.footer.brandDescription || '';
+            }
+
+            // Populate social links
+            const socialContainer = document.getElementById('social-links-container');
+            socialContainer.innerHTML = '';
+
+            if (data.socialLinks && data.socialLinks.length > 0) {
+                data.socialLinks.forEach((link, index) => {
+                    addSocialLinkToForm(link, index);
+                });
+            } else {
+                addSocialLinkToForm(null, 0);
+            }
+
+            // Populate footer columns
+            const columnsContainer = document.getElementById('footer-columns-container');
+            columnsContainer.innerHTML = '';
+            columnIndex = 0;
+            itemIndex = 0;
+
+            if (data.columns && data.columns.length > 0) {
+                data.columns.forEach((column, index) => {
+                    addFooterColumnToForm(column, index);
+                });
+            } else {
+                addFooterColumnToForm(null, 0);
+            }
+        }
+
+        // Add social link to form
+        function addSocialLinkToForm(linkData, index) {
+            const container = document.getElementById('social-links-container');
+            const socialLinkHtml =
+                '<div class="social-link-item mb-3 p-3 border rounded">' +
+                '<div class="row">' +
+                '<div class="col-md-4">' +
+                '<label class="form-label">Nền tảng</label>' +
+                '<input type="text" class="form-control" name="socialLinks[' + index + '].platform" ' +
+                'value="' + (linkData ? linkData.platform : '') + '" placeholder="instagram, facebook, tiktok, youtube">' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                '<label class="form-label">URL</label>' +
+                '<input type="url" class="form-control" name="socialLinks[' + index + '].url" ' +
+                'value="' + (linkData && linkData.url ? linkData.url : '') + '" placeholder="https://instagram.com/yourpage">' +
+                '</div>' +
+                '<div class="col-md-3">' +
+                '<label class="form-label">Icon</label>' +
+                '<select class="form-select" name="socialLinks[' + index + '].iconClass">' +
+                '<option value="fab fa-instagram" ' + (linkData && linkData.iconClass === 'fab fa-instagram' ? 'selected' : '') + '>Instagram</option>' +
+                '<option value="fab fa-facebook" ' + (linkData && linkData.iconClass === 'fab fa-facebook' ? 'selected' : '') + '>Facebook</option>' +
+                '<option value="fab fa-tiktok" ' + (linkData && linkData.iconClass === 'fab fa-tiktok' ? 'selected' : '') + '>TikTok</option>' +
+                '<option value="fab fa-youtube" ' + (linkData && linkData.iconClass === 'fab fa-youtube' ? 'selected' : '') + '>YouTube</option>' +
+                '<option value="fab fa-twitter" ' + (linkData && linkData.iconClass === 'fab fa-twitter' ? 'selected' : '') + '>Twitter</option>' +
+                '<option value="fab fa-linkedin" ' + (linkData && linkData.iconClass === 'fab fa-linkedin' ? 'selected' : '') + '>LinkedIn</option>' +
+                '<option value="fab fa-pinterest" ' + (linkData && linkData.iconClass === 'fab fa-pinterest' ? 'selected' : '') + '>Pinterest</option>' +
+                '<option value="fab fa-snapchat" ' + (linkData && linkData.iconClass === 'fab fa-snapchat' ? 'selected' : '') + '>Snapchat</option>' +
+                '</select>' +
+                '</div>' +
+                '<div class="col-md-1">' +
+                '<label class="form-label">Thứ tự</label>' +
+                '<input type="number" class="form-control" name="socialLinks[' + index + '].displayOrder" ' +
+                'value="' + (linkData ? linkData.sortOrder : index + 1) + '">' +
+                '</div>' +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeSocialLink(this)">' +
+                '<i class="mdi mdi-delete me-1"></i>Xóa' +
+                '</button>' +
+                '</div>';
+            container.insertAdjacentHTML('beforeend', socialLinkHtml);
+        }
+
+        // Add footer column to form
+        function addFooterColumnToForm(columnData, index) {
+            const container = document.getElementById('footer-columns-container');
+
+            let itemsHtml = '';
+            if (columnData && columnData.items) {
+                columnData.items.forEach((item, itemIndex) => {
+                    itemsHtml +=
+                        '<div class="footer-item mb-2 p-2 border rounded">' +
+                        '<div class="row">' +
+                        '<div class="col-md-4">' +
+                        '<input type="text" class="form-control form-control-sm" ' +
+                        'name="columns[' + index + '].items[' + itemIndex + '].title" ' +
+                        'value="' + (item.title || '') + '" placeholder="Tên mục">' +
+                        '</div>' +
+                        '<div class="col-md-4">' +
+                        // URL or static page select will be rendered below via JS after insert
+                        '<div class="footer-item-url" data-initial-url="' + (item.url || '') + '"></div>' +
+                        '</div>' +
+                        '<div class="col-md-3">' +
+                        '<select class="form-select form-select-sm footer-link-type" ' +
+                        'name="columns[' + index + '].items[' + itemIndex + '].linkType" data-index="' + index + '" data-item-index="' + itemIndex + '">' +
+                        '<option value="PARENT_CATEGORY" ' + (item.linkType === 'PARENT_CATEGORY' ? 'selected' : '') + '>Danh mục</option>' +
+                        '<option value="PAGE" ' + (item.linkType === 'PAGE' ? 'selected' : '') + '>Trang</option>' +
+                        '<option value="INTERNAL" ' + (item.linkType === 'INTERNAL' ? 'selected' : '') + '>Nội bộ</option>' +
+                        '<option value="EXTERNAL" ' + (item.linkType === 'EXTERNAL' ? 'selected' : '') + '>Ngoài</option>' +
+                        '</select>' +
+                        '</div>' +
+                        '<div class="col-md-1">' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger" ' +
+                        'onclick="removeFooterItem(this)">' +
+                        '<i class="mdi mdi-delete"></i>' +
+                        '</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+            }
+
+            const columnHtml =
+                '<div class="footer-column-item mb-4 p-3 border rounded">' +
+                '<div class="row">' +
+                '<div class="col-md-3">' +
+                '<label class="form-label">Tiêu đề cột</label>' +
+                '<input type="text" class="form-control" name="columns[' + index + '].title" ' +
+                'value="' + (columnData && columnData.title ? columnData.title : '') + '" placeholder="Shop, Support, About">' +
+                '</div>' +
+                '<div class="col-md-2">' +
+                '<label class="form-label">Thứ tự</label>' +
+                '<input type="number" class="form-control" name="columns[' + index + '].columnOrder" ' +
+                'value="' + (columnData ? columnData.sortOrder : index + 1) + '">' +
+                '</div>' +
+                '<div class="col-md-7">' +
+                '<label class="form-label">Mục trong cột</label>' +
+                '<div class="footer-items-container">' +
+                itemsHtml +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-outline-primary" ' +
+                'onclick="addFooterItem(' + index + ')">' +
+                '<i class="mdi mdi-plus me-1"></i>Thêm mục' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeFooterColumn(this)">' +
+                '<i class="mdi mdi-delete me-1"></i>Xóa cột' +
+                '</button>' +
+                '</div>';
+            container.insertAdjacentHTML('beforeend', columnHtml);
+            // After insert items, initialize URL/static page selects
+            setTimeout(() => initFooterItemInputs(document.getElementById('footer-columns-container')), 0);
+        }
+
+        // Show edit section
+        function showEditSection() {
+            document.getElementById('preview-section').style.display = 'none';
+            document.getElementById('edit-section').style.display = 'block';
+        }
+
+        // Show preview section
+        function showPreview() {
+            document.getElementById('edit-section').style.display = 'none';
+            document.getElementById('preview-section').style.display = 'block';
+        }
+
+        // Add social link
+        function addSocialLink() {
+            const container = document.getElementById('social-links-container');
+            const index = container.children.length;
+            addSocialLinkToForm(null, index);
+        }
+
+        // Remove social link
+        function removeSocialLink(button) {
+            button.closest('.social-link-item').remove();
+        }
+
+        // Add footer column
+        function addFooterColumn() {
+            const container = document.getElementById('footer-columns-container');
+            const index = container.children.length;
+            addFooterColumnToForm(null, index);
+        }
+
+        // Remove footer column
+        function removeFooterColumn(button) {
+            button.closest('.footer-column-item').remove();
+        }
+
+        // Add footer item
+        function addFooterItem(columnIndex) {
+            const container = document.querySelector('[name="columns[' + columnIndex + '].title"]').closest('.footer-column-item').querySelector('.footer-items-container');
+            const itemIndex = container.children.length;
+
+            const itemHtml =
+                '<div class="footer-item mb-2 p-2 border rounded">' +
+                '<div class="row">' +
+                '<div class="col-md-4">' +
+                '<input type="text" class="form-control form-control-sm" ' +
+                'name="columns[' + columnIndex + '].items[' + itemIndex + '].title" ' +
+                'placeholder="Tên mục">' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                '<div class="footer-item-url"></div>' +
+                '</div>' +
+                '<div class="col-md-3">' +
+                '<select class="form-select form-select-sm footer-link-type" ' +
+                'name="columns[' + columnIndex + '].items[' + itemIndex + '].linkType" data-index="' + columnIndex + '" data-item-index="' + itemIndex + '">' +
+                '<option value="PARENT_CATEGORY">Danh mục</option>' +
+                '<option value="PAGE">Trang</option>' +
+                '<option value="INTERNAL">Nội bộ</option>' +
+                '<option value="EXTERNAL">Ngoài</option>' +
+                '</select>' +
+                '</div>' +
+                '<div class="col-md-1">' +
+                '<button type="button" class="btn btn-sm btn-outline-danger" ' +
+                'onclick="removeFooterItem(this)">' +
+                '<i class="mdi mdi-delete"></i>' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            container.insertAdjacentHTML('beforeend', itemHtml);
+            initFooterItemInputs(container);
+        }
+
+        // Remove footer item
+        function removeFooterItem(button) {
+            button.closest('.footer-item').remove();
+        }
+
+        // Initialize URL/static-page input renderers for footer items
+        function initFooterItemInputs(scopeEl) {
+            const root = scopeEl || document;
+            const typeSelects = root.querySelectorAll('.footer-link-type');
+            const pages = /*[[${staticPages}]]*/[];
+            typeSelects.forEach(select => {
+                const colIndex = select.getAttribute('data-index');
+                const itemIndex = select.getAttribute('data-item-index');
+                const row = select.closest('.row');
+                const urlContainer = row.querySelector('.footer-item-url');
+                const initialUrl = urlContainer.getAttribute('data-initial-url') || '';
+
+                const render = () => {
+                    const type = select.value;
+                    if (type === 'PAGE') {
+                        // Build select for static pages and preselect based on URL slug
+                        const currentSlug = initialUrl
+                            .toString()
+                            .replace(/^\/content\/page\//, '')
+                            .replace(/^\//, '');
+                        let options = '<option value="">Chọn trang tĩnh</option>';
+                        pages.forEach(p => {
+                            const selected = (p.slug === currentSlug) ? 'selected' : '';
+                            options += `<option value="${p.id}" ${selected}>${p.title}</option>`;
+                        });
+                        urlContainer.innerHTML = `
+                            <select class="form-select form-select-sm" name="columns[${colIndex}].items[${itemIndex}].staticPageId">
+                                ${options}
+                            </select>
+                            <input type="hidden" name="columns[${colIndex}].items[${itemIndex}].url" value="${initialUrl}">
+                        `;
+                        // When choose a page, update hidden URL to normalized path
+                        const pageSelect = urlContainer.querySelector('select');
+                        pageSelect.addEventListener('change', () => {
+                            const selectedId = pageSelect.value;
+                            const page = pages.find(p => String(p.id) === String(selectedId));
+                            const normalized = page ? `/content/page/${page.slug}` : '';
+                            const hidden = urlContainer.querySelector(`input[name="columns[${colIndex}].items[${itemIndex}].url"]`);
+                            hidden.value = normalized;
+                        });
+                    } else {
+                        // Render plain URL input
+                        urlContainer.innerHTML = `
+                            <input type="text" class="form-control form-control-sm" 
+                                   name="columns[${colIndex}].items[${itemIndex}].url" 
+                                   value="${initialUrl}" placeholder="URL">
+                        `;
+                    }
+                };
+                render();
+                select.addEventListener('change', render);
+            });
+        }
+
+        // Preview footer from form data
+        function previewFooter() {
+            // Get form data
+            const form = document.getElementById('footer-form');
+            const formData = new FormData(form);
+
+            // Build preview data from form
+            const previewData = {
+                footer: {
+                    brandName: formData.get('brandName') || 'Liora ✨',
+                    brandDescription: formData.get('brandDescription') || 'Your trusted destination for authentic Korean beauty products.'
+                },
+                socialLinks: [],
+                columns: []
+            };
+
+            // Collect social links
+            const socialLinks = document.querySelectorAll('.social-link-item');
+            socialLinks.forEach((link, index) => {
+                const platform = link.querySelector(`input[name="socialLinks[${index}].platform"]`)?.value;
+                const url = link.querySelector(`input[name="socialLinks[${index}].url"]`)?.value;
+                const iconClass = link.querySelector(`select[name="socialLinks[${index}].iconClass"]`)?.value;
+
+                if (platform && platform.trim()) {
+                    previewData.socialLinks.push({
+                        platform: platform,
+                        url: url || '#',
+                        iconClass: iconClass || 'fab fa-facebook'
+                    });
+                }
+            });
+
+            // Collect columns
+            const columns = document.querySelectorAll('.footer-column-item');
+            columns.forEach((column, columnIndex) => {
+                const title = column.querySelector(`input[name="columns[${columnIndex}].title"]`)?.value;
+
+                if (title && title.trim()) {
+                    const columnData = {
+                        title: title,
+                        items: []
+                    };
+
+                    // Collect items for this column
+                    const items = column.querySelectorAll('.footer-item');
+                    items.forEach((item, itemIndex) => {
+                        const itemTitle = item.querySelector(`input[name="columns[${columnIndex}].items[${itemIndex}].title"]`)?.value;
+                        const itemUrl = item.querySelector(`input[name="columns[${columnIndex}].items[${itemIndex}].url"]`)?.value;
+
+                        if (itemTitle && itemTitle.trim()) {
+                            columnData.items.push({
+                                title: itemTitle,
+                                url: itemUrl || '#'
+                            });
+                        }
+                    });
+
+                    previewData.columns.push(columnData);
+                }
+            });
+
+            // Show preview in modal or new window
+            showPreviewModal(previewData);
+        }
+
+        // Show preview modal
+        function showPreviewModal(data) {
+            // Create modal HTML
+            const modalHtml = `
+                <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="previewModalLabel">
+                                    <i class="mdi mdi-eye me-2"></i>Xem trước Footer
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div id="modal-footer-preview"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Remove existing modal if any
+            const existingModal = document.getElementById('previewModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Generate preview HTML
+            const previewHtml = generatePreviewHtml(data);
+            document.getElementById('modal-footer-preview').innerHTML = previewHtml;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        }
+
+        // Generate preview HTML
+        function generatePreviewHtml(data) {
+            let previewHtml = `
+                <div class="footer-preview">
+                    <div class="container">
+                        <div class="row g-4">
+                            <!-- Brand Section -->
+                            <div class="col-lg-4">
+                                <h5 class="fw-bold mb-3 text-pink-primary">${data.footer.brandName || 'Liora ✨'}</h5>
+                                <p class="text-light-muted">${data.footer.brandDescription || 'Your trusted destination for authentic Korean beauty products.'}</p>
+                                <div class="social-links d-flex gap-3">
+            `;
+
+            if (data.socialLinks && data.socialLinks.length > 0) {
+                data.socialLinks.forEach(link => {
+                    previewHtml += `<a href="${link.url || '#'}" class="text-pink-primary fs-5"><i class="${link.iconClass || 'fab fa-facebook'}"></i></a>`;
+                });
+            }
+
+            previewHtml += `
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Columns -->
+                            <div class="col-lg-8">
+                                <div class="row">
+            `;
+
+            if (data.columns && data.columns.length > 0) {
+                // Tính toán class Bootstrap dựa trên số lượng cột
+                let columnClass = '';
+                if (data.columns.length === 1) {
+                    columnClass = 'col-lg-12 col-md-6';
+                } else if (data.columns.length === 2) {
+                    columnClass = 'col-lg-6 col-md-6';
+                } else if (data.columns.length === 3) {
+                    columnClass = 'col-lg-4 col-md-6';
+                } else if (data.columns.length === 4) {
+                    columnClass = 'col-lg-3 col-md-6';
+                } else {
+                    // Nếu nhiều hơn 4 cột, chia đều
+                    columnClass = 'col-lg-2 col-md-6';
+                }
+
+                data.columns.forEach(column => {
+                    previewHtml += `
+                        <div class="${columnClass}">
+                            <h6 class="fw-semibold mb-3">${column.title}</h6>
+                            <ul class="list-unstyled">
+                    `;
+
+                    if (column.items && column.items.length > 0) {
+                        column.items.forEach(item => {
+                            previewHtml += `
+                                <li class="mb-2">
+                                    <a href="${item.url || '#'}" class="text-light-muted footer-link text-decoration-none">${item.title}</a>
+                                </li>
+                            `;
+                        });
+                    }
+
+                    previewHtml += `
+                            </ul>
+                        </div>
+                    `;
+                });
+            }
+
+            previewHtml += `
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 border-secondary">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <p class="text-light-muted mb-0">© 2025 Liora. All rights reserved.</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                <div class="payment-methods d-flex justify-content-md-end gap-2 mt-2 mt-md-0"
+                    id="footer-payment-methods">
+                    <i class="fab fa-cc-visa fs-4 text-light-muted"></i>
+                    <i class="fab fa-cc-mastercard fs-4 text-light-muted"></i>
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" alt="VNPAY"
+                        class="payment-logo" style="height: 24px;" title="VNPAY">
+                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MOMO"
+                        class="payment-logo" style="height: 24px;" title="MOMO">
+                </div>
+            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return previewHtml;
+        }
+
+        // Check URL parameters for success/error messages
+        function checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Check for success parameter
+            if (urlParams.has('success')) {
+                const successType = urlParams.get('success');
+                let message = '';
+
+                switch (successType) {
+                    case 'update':
+                        message = 'Cập nhật footer thành công!';
+                        break;
+                    case 'init':
+                        message = 'Khởi tạo dữ liệu mẫu thành công!';
+                        break;
+                    default:
+                        message = 'Thao tác thành công!';
+                }
+
+                showToast('success', message);
+
+                // Clean URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+
+            // Check for error parameter
+            if (urlParams.has('error')) {
+                const errorType = urlParams.get('error');
+                let message = '';
+
+                switch (errorType) {
+                    case 'save':
+                        message = 'Lỗi khi lưu footer!';
+                        break;
+                    case 'init':
+                        message = 'Lỗi khi khởi tạo dữ liệu mẫu!';
+                        break;
+                    default:
+                        message = 'Đã xảy ra lỗi!';
+                }
+
+                showToast('danger', message);
+
+                // Clean URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+
+        // Load preview on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            checkUrlParameters();
+            loadFooterPreview();
+
+            // Add form submission handler
+            const form = document.getElementById('footer-form');
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    // Show toast for form submission
+                    showToast('info', 'Đang lưu footer...');
+                });
+            }
+        });
+
+        // Load footer preview
+        async function loadFooterPreview() {
+            try {
+                const response = await fetch('/content/api/footer');
+                const data = await response.json();
+
+                if (data.footer) {
+                    displayFooterPreview(data);
+                } else {
+                    document.getElementById('footer-preview').innerHTML = `
+                        <div class="text-center text-muted py-5">
+                            <i class="mdi mdi-information-outline fs-1 mb-3"></i>
+                            <h5>Chưa có dữ liệu footer</h5>
+                            <p>Vui lòng khởi tạo dữ liệu mẫu để bắt đầu.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading footer preview:', error);
+                document.getElementById('footer-preview').innerHTML = `
+                    <div class="text-center text-danger py-5">
+                        <i class="mdi mdi-alert-circle fs-1 mb-3"></i>
+                        <h5>Lỗi khi tải dữ liệu</h5>
+                        <p>Không thể tải dữ liệu footer.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display footer preview
+        function displayFooterPreview(data) {
+            let previewHtml = `
+                <div class="footer-preview">
+                    <div class="container">
+                        <div class="row g-4">
+                            <!-- Brand Section -->
+                            <div class="col-lg-4">
+                                <h5 class="fw-bold mb-3 text-pink-primary">${data.footer.brandName || 'Liora ✨'}</h5>
+                                <p class="text-light-muted">${data.footer.brandDescription || 'Your trusted destination for authentic Korean beauty products.'}</p>
+                                <div class="social-links d-flex gap-3">
+            `;
+
+            if (data.socialLinks && data.socialLinks.length > 0) {
+                data.socialLinks.forEach(link => {
+                    previewHtml += `<a href="${link.url || '#'}" class="text-pink-primary fs-5"><i class="${link.iconClass || 'fab fa-facebook'}"></i></a>`;
+                });
+            }
+
+            previewHtml += `
+                                </div>
+                            </div>
+                            <!-- Dynamic Columns -->
+                            <div class="col-lg-8">
+                                <div class="row">
+            `;
+
+            if (data.columns && data.columns.length > 0) {
+                // Tính toán class Bootstrap dựa trên số lượng cột
+                let columnClass = '';
+                if (data.columns.length === 1) {
+                    columnClass = 'col-lg-12 col-md-6';
+                } else if (data.columns.length === 2) {
+                    columnClass = 'col-lg-6 col-md-6';
+                } else if (data.columns.length === 3) {
+                    columnClass = 'col-lg-4 col-md-6';
+                } else if (data.columns.length === 4) {
+                    columnClass = 'col-lg-3 col-md-6';
+                } else {
+                    // Nếu nhiều hơn 4 cột, chia đều
+                    columnClass = 'col-lg-2 col-md-6';
+                }
+
+                data.columns.forEach(column => {
+                    previewHtml += `
+                        <div class="${columnClass}">
+                            <h6 class="fw-semibold mb-3">${column.title}</h6>
+                            <ul class="list-unstyled">
+                    `;
+
+                    if (column.items && column.items.length > 0) {
+                        column.items.forEach(item => {
+                            previewHtml += `
+                                <li class="mb-2">
+                                    <a href="${item.url || '#'}" class="text-light-muted footer-link text-decoration-none">${item.title}</a>
+                                </li>
+                            `;
+                        });
+                    }
+
+                    previewHtml += `
+                            </ul>
+                        </div>
+                    `;
+                });
+            }
+
+            previewHtml += `
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 border-secondary">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <p class="text-light-muted mb-0">© 2025 Liora. All rights reserved.</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                <div class="payment-methods d-flex justify-content-md-end gap-2 mt-2 mt-md-0"
+                    id="footer-payment-methods">
+                    <i class="fab fa-cc-visa fs-4 text-light-muted"></i>
+                    <i class="fab fa-cc-mastercard fs-4 text-light-muted"></i>
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" alt="VNPAY"
+                        class="payment-logo" style="height: 24px;" title="VNPAY">
+                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MOMO"
+                        class="payment-logo" style="height: 24px;" title="MOMO">
+                </div>
+            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('footer-preview').innerHTML = previewHtml;
+        }
+
+        // Show toast notification
+        function showToast(type, message) {
+            const toast = document.getElementById('footerToast');
+            const toastHeader = toast.querySelector('.toast-header');
+            const toastBody = toast.querySelector('.toast-body');
+            const icon = toastHeader.querySelector('.fas');
+
+            // Set icon and color based on type
+            let iconClass, textClass;
+            switch (type) {
+                case 'success':
+                    iconClass = 'check-circle';
+                    textClass = 'text-success';
+                    break;
+                case 'danger':
+                case 'error':
+                    iconClass = 'exclamation-circle';
+                    textClass = 'text-danger';
+                    break;
+                case 'warning':
+                    iconClass = 'exclamation-triangle';
+                    textClass = 'text-warning';
+                    break;
+                case 'info':
+                    iconClass = 'info-circle';
+                    textClass = 'text-info';
+                    break;
+                default:
+                    iconClass = 'info-circle';
+                    textClass = 'text-info';
+            }
+
+            // Update icon and color
+            icon.className = `fas fa-${iconClass} ${textClass} me-2`;
+
+            // Update message
+            toastBody.textContent = message;
+
+            // Show toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 4000
+            });
+
+            bsToast.show();
+        }
+    </script>
+</body>
+
+</html>

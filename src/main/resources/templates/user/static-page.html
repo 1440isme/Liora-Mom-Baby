@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${staticPage.seoTitle ?: staticPage.title}">Trang nội dung - Liora</title>
+    <meta name="description" th:content="${staticPage.seoDescription}">
+    <meta name="keywords" th:content="${staticPage.seoKeywords}">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" th:content="${staticPage.seoTitle ?: staticPage.title}">
+    <meta property="og:description" th:content="${staticPage.seoDescription}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${pageUrl}">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" th:content="${staticPage.seoTitle ?: staticPage.title}">
+    <meta name="twitter:description" th:content="${staticPage.seoDescription}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/user/css/style.css" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        .page-header {
+            background: none;
+            color: #000;
+            padding: 1rem 0;
+            font-weight: normal;
+        }
+
+        .page-content {
+            padding: 3rem 0;
+        }
+
+        .page-content h1,
+        .page-content h2,
+        .page-content h3,
+        .page-content h4,
+        .page-content h5,
+        .page-content h6 {
+            color: #2c3e50;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: normal;
+        }
+
+        .page-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .page-content h2 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .page-content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            color: #555;
+        }
+
+        .page-content ul,
+        .page-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .page-content li {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        .page-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        .page-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: #666;
+        }
+
+        .page-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .page-content table th,
+        .page-content table td {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .page-content table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .breadcrumb-line {
+            font-size: 0.875rem;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+            color: #000;
+        }
+
+        .page-meta {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .page-meta .meta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .page-meta .meta-item:last-child {
+            border-bottom: none;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .meta-value {
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div th:replace="~{user/layout/user-header :: header}"></div>
+
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="breadcrumb-line text-uppercase">
+                            <a th:href="@{/}" class="text-decoration-none text-reset">Trang chủ</a>
+                            <span class="mx-1">/</span>
+                            <span th:text="${staticPage.title}">Trang nội dung</span>
+                        </div>
+                        <h1 class="h2 fw-normal mb-1 mt-2" th:text="${staticPage.title}">Tiêu đề trang</h1>
+                        <div class="text-muted small mb-2">
+                            <span
+                                th:text="${staticPage.publishedAt != null ? #temporals.format(staticPage.publishedAt, 'dd/MM/yyyy') : (#temporals.format(staticPage.createdAt, 'dd/MM/yyyy'))}">11/12/2023</span>
+                        </div>
+                        <p class="mb-0 text-body" th:if="${staticPage.seoDescription}"
+                            th:text="${staticPage.seoDescription}">Mô tả trang</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="container">
+                <div class="col-lg-12">
+                    <div class="page-content-body">
+                        <div th:utext="${staticPage.content}">
+                            <p>Nội dung trang sẽ hiển thị ở đây...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{user/layout/user-footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/user/js/main.js"></script>
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json" th:inline="javascript">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": [[${staticPage.title}]],
+        "description": [[${staticPage.seoDescription}]],
+        "url": [[${pageUrl}]],
+        "datePublished": [[${staticPage.publishedAt} != null ? ${#temporals.format(staticPage.publishedAt, 'yyyy-MM-dd')} : '']],
+        "dateModified": [[${staticPage.updatedAt} != null ? ${#temporals.format(staticPage.updatedAt, 'yyyy-MM-dd')} : '']],
+        "publisher": {
+            "@type": "Organization",
+            "name": "Liora",
+            "url": "https://liora.com"
+        }
+    }
+    </script>
+</body>
+
+</html>

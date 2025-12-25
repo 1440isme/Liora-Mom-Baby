@@ -1,0 +1,156 @@
+<!--  Footer -->
+<footer class="footer bg-dark text-light py-5" th:fragment="footer" id="dynamic-footer">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Brand Section -->
+            <div class="col-lg-4">
+                <h5 class="fw-bold mb-3 text-pink-primary" id="footer-brand-name">Liora ✨</h5>
+                <p class="text-light-muted" id="footer-brand-description">
+                    Your trusted destination for authentic Korean beauty products.
+                    Discover the secret to radiant, healthy skin with our curated K-beauty collection.
+                </p>
+                <div class="social-links d-flex gap-3" id="footer-social-links">
+                    <a href="#" class="text-pink-primary fs-5"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-pink-primary fs-5"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" class="text-pink-primary fs-5"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="text-pink-primary fs-5"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+
+            <!-- Dynamic Columns -->
+            <div class="col-lg-8">
+                <div class="row" id="footer-columns">
+                    <!-- Columns will be loaded here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4 border-secondary">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="text-light-muted mb-0" id="footer-copyright">
+                    © 2025 Liora. All rights reserved.
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="payment-methods d-flex justify-content-md-end gap-2 mt-2 mt-md-0"
+                    id="footer-payment-methods">
+                    <i class="fab fa-cc-visa fs-4 text-light-muted"></i>
+                    <i class="fab fa-cc-mastercard fs-4 text-light-muted"></i>
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" alt="VNPAY"
+                        class="payment-logo" style="height: 24px;" title="VNPAY">
+                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MOMO"
+                        class="payment-logo" style="height: 24px;" title="MOMO">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Loading Script -->
+    <script>
+        function initFooter() {
+            try {
+                loadFooterContent();
+            } catch (e) {
+                console.error('Footer init error:', e);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFooter);
+        } else {
+            initFooter();
+        }
+
+        async function loadFooterContent() {
+            try {
+                const response = await fetch('/content/api/footer');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.footer) {
+                    // Update brand information
+                    const brandNameEl = document.getElementById('footer-brand-name');
+                    const brandDescEl = document.getElementById('footer-brand-description');
+                    const copyrightEl = document.getElementById('footer-copyright');
+
+                    if (brandNameEl) brandNameEl.textContent = data.footer.brandName || 'Liora ✨';
+                    if (brandDescEl) brandDescEl.textContent = data.footer.brandDescription || 'Your trusted destination for authentic Korean beauty products.';
+                    if (copyrightEl) copyrightEl.textContent = '© 2025 Liora. All rights reserved.';
+                }
+
+                // Update social links
+                if (data.socialLinks && data.socialLinks.length > 0) {
+                    const socialContainer = document.getElementById('footer-social-links');
+
+                    if (socialContainer) {
+                        socialContainer.innerHTML = '';
+                        data.socialLinks.forEach(link => {
+                            const socialLink = document.createElement('a');
+                            socialLink.href = link.url;
+                            socialLink.className = 'text-pink-primary fs-5';
+                            socialLink.title = link.platform;
+                            socialLink.innerHTML = `<i class="${link.iconClass}"></i>`;
+                            socialContainer.appendChild(socialLink);
+                        });
+                    }
+                }
+
+                // Update footer columns
+                if (data.columns && data.columns.length > 0) {
+                    const columnsContainer = document.getElementById('footer-columns');
+
+                    if (columnsContainer) {
+                        columnsContainer.innerHTML = '';
+
+                        // Tính toán class Bootstrap dựa trên số lượng cột
+                        let columnClass = '';
+                        if (data.columns.length === 1) {
+                            columnClass = 'col-lg-12 col-md-6';
+                        } else if (data.columns.length === 2) {
+                            columnClass = 'col-lg-6 col-md-6';
+                        } else if (data.columns.length === 3) {
+                            columnClass = 'col-lg-4 col-md-6';
+                        } else if (data.columns.length === 4) {
+                            columnClass = 'col-lg-3 col-md-6';
+                        } else {
+                            // Nếu nhiều hơn 4 cột, chia đều
+                            columnClass = 'col-lg-2 col-md-6';
+                        }
+
+                        data.columns.forEach(column => {
+                            const columnDiv = document.createElement('div');
+                            columnDiv.className = columnClass;
+
+                            let columnHtml = `
+                                <h6 class="fw-semibold mb-3">${column.title}</h6>
+                                <ul class="list-unstyled">
+                            `;
+
+                            if (column.items && column.items.length > 0) {
+                                column.items.forEach(item => {
+                                    columnHtml += `
+                                        <li class="mb-2">
+                                            <a href="${item.url}" class="text-light-muted footer-link text-decoration-none">${item.title}</a>
+                                        </li>
+                                    `;
+                                });
+                            }
+
+                            columnHtml += '</ul>';
+                            columnDiv.innerHTML = columnHtml;
+                            columnsContainer.appendChild(columnDiv);
+                        });
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error loading footer content:', error);
+            }
+        }
+    </script>
+</footer>

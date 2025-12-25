@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý quyền hạn - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0" id="pageTitle">Thêm quyền hạn mới</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/roles">Vai trò</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/permissions">Quyền hạn</a></li>
+                                <li class="breadcrumb-item active" id="breadcrumbAction">Thêm mới</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8 grid-margin stretch-card">
+                            <div class="card card-rounded w-100">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash" id="formTitle">Thông tin quyền hạn</h4>
+                                    <form id="permissionForm" method="post">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Tên quyền hạn <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="name" name="name" required
+                                                placeholder="Ví dụ: CREATE_USER, READ_PRODUCT">
+                                            <div class="invalid-feedback" id="nameError"></div>
+                                            <small class="form-text text-muted">Sử dụng định dạng UPPER_CASE với dấu
+                                                gạch dưới</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Mô tả</label>
+                                            <textarea class="form-control" id="description" name="description" rows="3"
+                                                placeholder="Mô tả chi tiết về quyền hạn này"></textarea>
+                                        </div>
+                                        <div class="mt-4">
+                                            <button type="submit" class="btn btn-primary text-white me-2">
+                                                <i class="mdi mdi-content-save"></i> Lưu quyền hạn
+                                            </button>
+                                            <a href="/admin/permissions" class="btn btn-outline-dark">
+                                                <i class="mdi mdi-close"></i> Hủy bỏ
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 grid-margin stretch-card">
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Hướng dẫn</h4>
+                                    <div class="alert alert-info">
+                                        <h6><i class="mdi mdi-information"></i> Lưu ý:</h6>
+                                        <ul class="mb-0">
+                                            <li>Tên quyền hạn là duy nhất và không thể thay đổi sau khi tạo.</li>
+                                            <li>Mô tả giúp dễ dàng nhận biết chức năng của quyền hạn.</li>
+                                            <li>Nên đặt tên theo quy ước: <code>ACTION_RESOURCE</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash">Ví dụ quyền hạn</h4>
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>CREATE_USER</strong>
+                                                <p class="mb-0 text-muted small">Tạo người dùng mới</p>
+                                            </div>
+                                            <span class="badge bg-primary">Người dùng</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>READ_PRODUCT</strong>
+                                                <p class="mb-0 text-muted small">Xem danh sách sản phẩm</p>
+                                            </div>
+                                            <span class="badge bg-success">Sản phẩm</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>UPDATE_ORDER</strong>
+                                                <p class="mb-0 text-muted small">Cập nhật đơn hàng</p>
+                                            </div>
+                                            <span class="badge bg-warning">Đơn hàng</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>DELETE_CATEGORY</strong>
+                                                <p class="mb-0 text-muted small">Xóa danh mục</p>
+                                            </div>
+                                            <span class="badge bg-danger">Danh mục</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script>
+        // Inlined Permission Manage JS
+        class PermissionManage {
+            constructor() {
+                this.isEditMode = false;
+                this.currentPermissionId = null;
+                this.init();
+            }
+
+            init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const permissionId = urlParams.get('id');
+
+                if (permissionId) {
+                    this.isEditMode = true;
+                    this.currentPermissionId = permissionId;
+                    this.loadPermissionData(permissionId);
+                    this.updateUIForEditMode();
+                }
+
+                this.attachEventListeners();
+            }
+
+            updateUIForEditMode() {
+                document.getElementById('pageTitle').textContent = 'Chỉnh sửa quyền hạn';
+                document.getElementById('breadcrumbAction').textContent = 'Chỉnh sửa';
+                document.getElementById('formTitle').textContent = 'Thông tin quyền hạn';
+
+                const nameField = document.getElementById('name');
+                nameField.disabled = true;
+                nameField.classList.add('bg-light');
+
+                const helpText = document.createElement('small');
+                helpText.className = 'form-text text-warning';
+                helpText.innerHTML = '<i class="mdi mdi-information"></i> Tên quyền hạn không thể thay đổi (khóa chính)';
+                nameField.parentElement.appendChild(helpText);
+            }
+
+            async loadPermissionData(permissionId) {
+                try {
+                    const response = await adminAjax.get(`/permissions/${permissionId}`);
+                    const permission = response.result;
+
+                    document.getElementById('name').value = permission.name || '';
+                    document.getElementById('description').value = permission.description || '';
+                } catch (error) {
+                    console.error('Error loading permission:', error);
+                    AdminUtils.showError('Không thể tải thông tin quyền hạn');
+                    setTimeout(() => { window.location.href = '/admin/permissions'; }, 2000);
+                }
+            }
+
+            attachEventListeners() {
+                const form = document.getElementById('permissionForm');
+                if (form) form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+                const nameField = document.getElementById('name');
+                if (nameField && !this.isEditMode) {
+                    nameField.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z_]/g, '');
+                    });
+                }
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    description: document.getElementById('description').value.trim()
+                };
+
+                if (!formData.name) {
+                    AdminUtils.showError('Vui lòng nhập tên quyền hạn');
+                    document.getElementById('name').focus();
+                    return;
+                }
+
+                try {
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+                    submitBtn.disabled = true;
+
+                    if (this.isEditMode) {
+                        await adminAjax.put(`/permissions/${this.currentPermissionId}`, formData);
+                        AdminUtils.showSuccess('Đã cập nhật quyền hạn thành công');
+                    } else {
+                        await adminAjax.post('/permissions', formData);
+                        AdminUtils.showSuccess('Đã thêm quyền hạn thành công');
+                    }
+
+                    setTimeout(() => { window.location.href = '/admin/permissions'; }, 1500);
+                } catch (error) {
+                    console.error('Error saving permission:', error);
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<i class="mdi mdi-content-save"></i> Lưu quyền hạn';
+                    submitBtn.disabled = false;
+
+                    if (error.message) {
+                        AdminUtils.showError(error.message);
+                    } else {
+                        AdminUtils.showError(this.isEditMode ? 'Không thể cập nhật quyền hạn' : 'Không thể thêm quyền hạn');
+                    }
+
+                    if (error.code === 1002 || error.message?.includes('existed')) {
+                        document.getElementById('nameError').textContent = 'Quyền hạn này đã tồn tại';
+                        document.getElementById('name').classList.add('is-invalid');
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { new PermissionManage(); });
+    </script>
+</body>
+
+</html>

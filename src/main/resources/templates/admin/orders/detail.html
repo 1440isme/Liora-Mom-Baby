@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Chi tiết đơn hàng - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Alert Container -->
+                    <div id="alertContainer"></div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="d-none text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">
+                            <i class="mdi mdi-cart-outline me-2"></i>Chi tiết đơn hàng <span
+                                id="pageOrderId">#...</span>
+                        </h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/orders" class="btn btn-outline-dark me-2">
+                                <i class="mdi mdi-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="button" class="btn btn-outline-dark me-2" id="btnPrintOrder">
+                                <i class="mdi mdi-printer"></i> In đơn hàng
+                            </button>
+                            <button type="button" class="btn btn-primary text-white" id="btnUpdateStatus">
+                                <i class="mdi mdi-pencil"></i> Cập nhật trạng thái
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Order Information -->
+                        <div class="col-lg-8">
+                            <!-- Customer Information -->
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash mb-4">
+                                        <i class="mdi mdi-account-outline me-2"></i>Thông tin giao hàng
+                                    </h4>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="customer-info">
+                                                <table class="table table-sm table-borderless">
+                                                    <tr>
+                                                        <td class="fw-medium" width="20%">Tên người nhận:</td>
+                                                        <td id="customerName">Đang tải...</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium" width="20%">Email:</td>
+                                                        <td id="customerEmail">...</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Điện thoại:</td>
+                                                        <td id="customerPhone">...</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Địa chỉ:</td>
+                                                        <td id="customerAddress">...</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Order Items -->
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash mb-4">
+                                        <i class="mdi mdi-package-variant me-2"></i>Danh sách sản phẩm
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th scope="col" width="10%">Hình ảnh</th>
+                                                    <th scope="col" width="35%">Tên sản phẩm</th>
+                                                    <th scope="col" width="20%" class="text-center">Đơn giá</th>
+                                                    <th scope="col" width="15%" class="text-center">Số lượng</th>
+                                                    <th scope="col" width="20%" class="text-center">Thành tiền</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="orderItemsTable">
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4">
+                                                        <div class="spinner-border spinner-border-sm text-primary"
+                                                            role="status">
+                                                            <span class="visually-hidden">Đang tải...</span>
+                                                        </div>
+                                                        <p class="mt-2 mb-0 text-muted">Đang tải danh sách sản phẩm...
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="col-lg-4">
+                            <!-- Order Details -->
+                            <div class="card card-rounded mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash mb-4">
+                                        <i class="mdi mdi-information-outline me-2"></i>Thông tin đơn hàng
+                                    </h4>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td class="fw-medium">Mã đơn hàng:</td>
+                                            <td id="orderIdDetail">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Ngày đặt hàng:</td>
+                                            <td id="orderDateTime">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Phương thức:</td>
+                                            <td id="paymentMethod">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Trạng thái đơn hàng:</td>
+                                            <td id="orderStatus">...</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Trạng thái thanh toán:</td>
+                                            <td id="paymentStatus">...</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Order Summary -->
+                            <div class="card card-rounded">
+                                <div class="card-body">
+                                    <h4 class="card-title card-title-dash mb-4">
+                                        <i class="mdi mdi-calculator me-2"></i>Tổng kết đơn hàng
+                                    </h4>
+                                    <div class="order-summary">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Tạm tính:</span>
+                                            <span id="subtotal">...</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Phí vận chuyển:</span>
+                                            <span id="summaryShippingFee">...</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Giảm giá:</span>
+                                            <span class="text-success" id="summaryDiscount">...</span>
+                                        </div>
+                                        <!-- Thêm dòng hiển thị mã giảm giá -->
+                                        <div class="d-flex justify-content-between mb-2" id="discountCodeRow"
+                                            style="display: none;">
+                                            <span class="text-muted small">Mã giảm giá:</span>
+                                            <span class="text-muted small" id="discountCode">...</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2" id="discountPercentRow"
+                                            style="display: none;">
+                                            <span class="text-muted small">Tỷ lệ giảm:</span>
+                                            <span class="text-muted small" id="discountPercent">...</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between fw-bold fs-5">
+                                            <span>Tổng cộng:</span>
+                                            <span class="text-primary" id="summaryTotal">...</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <h6>Ghi chú đơn hàng:</h6>
+                                        <div class="bg-light p-3 rounded">
+                                            <p class="mb-0 small" id="orderNotes">...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStatusModalLabel">
+                        <i class="mdi mdi-pencil me-2"></i>Cập nhật trạng thái đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateStatusForm">
+                        <input type="hidden" id="updateOrderId" />
+
+                        <div class="mb-3">
+                            <label for="updateOrderStatus" class="form-label">Trạng thái đơn hàng</label>
+                            <select class="form-select" id="updateOrderStatus" required>
+                                <option value="PENDING">Chờ xử lý</option>
+                                <option value="CONFIRMED">Đã xác nhận</option>
+                                <option value="COMPLETED">Hoàn tất</option>
+                                <option value="CANCELLED">Đã hủy</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="mdi mdi-close me-1"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveOrderStatus()">
+                        <i class="mdi mdi-content-save me-2"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSS for styling -->
+    <style>
+        .order-summary {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .customer-info img {
+            object-fit: cover;
+        }
+
+        .shipping-address {
+            border-left: 4px solid #007bff;
+        }
+
+        .card-title-dash {
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .card-title-dash::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: #007bff;
+        }
+    </style>
+
+    <!-- Scripts -->
+    <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/admin/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <script src="/admin/js/off-canvas.js"></script>
+    <script src="/admin/js/hoverable-collapse.js"></script>
+    <script src="/admin/js/template.js"></script>
+    <script src="/admin/js/settings.js"></script>
+    <script src="/admin/js/todolist.js"></script>
+
+    <!-- Page specific script -->
+    <script src="/admin/js/admin/order-detail.js"></script>
+
+    <!-- Hidden data for JavaScript -->
+    <script th:inline="javascript">
+        window.orderIdFromServer = /*[[${orderId}]]*/ null;
+    </script>
+</body>
+
+</html>

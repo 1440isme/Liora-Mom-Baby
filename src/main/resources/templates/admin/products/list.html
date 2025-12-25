@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Danh sách sản phẩm - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <h1 class="h3 mb-0">Quản lý sản phẩm</h1>
+                        <div class="btn-wrapper">
+                            <a href="/admin/products/add" class="btn btn-primary text-white me-2"><i
+                                    class="mdi mdi-plus"></i> Thêm sản phẩm</a>
+                            <button type="button" id="exportExcelBtn" class="btn btn-otline-dark"><i class="mdi mdi-file-excel"></i> Xuất
+                                Excel</button>
+                        </div>
+                    </div>
+
+                    <div class="card card-rounded mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title card-title-dash">Bộ lọc</h4>
+                            <form method="get" action="/admin/products">
+                                <div class="row">
+                                    <div class="col" style="flex: 0 0 28%;">
+                                        <label for="search" class="form-label">Tìm kiếm</label>
+                                        <input type="text" class="form-control" id="search" name="search"
+                                            th:value="${param.search}" placeholder="Tên sản phẩm, SKU...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="category" class="form-label">Danh mục</label>
+                                        <select class="form-select" id="category" name="category">
+                                            <option value="">Tất cả danh mục</option>
+                                            <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                                th:text="${cat.name}"
+                                                th:selected="${param.category != null and param.category == cat.id}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="brand" class="form-label">Thương hiệu</label>
+                                        <select class="form-select" id="brand" name="brand">
+                                            <option value="">Tất cả thương hiệu</option>
+                                            <option th:each="brand : ${brands}" th:value="${brand.id}"
+                                                th:text="${brand.name}"
+                                                th:selected="${param.brand != null and param.brand == brand.id}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col" style="flex: 0 0 11%;">
+                                        <label for="status" class="form-label">Trạng thái</label>
+                                        <select class="form-select" id="status" name="status">
+                                            <option value="">Tất cả</option>
+                                            <option value="ACTIVE">Hoạt động</option>
+                                            <option value="INACTIVE">Tạm dừng</option>
+                                        </select>
+                                    </div>
+                                    <div class="col" style="flex: 0 0 11%;">
+                                        <label for="stockStatus" class="form-label">Tồn kho</label>
+                                        <select class="form-select" id="stockStatus" name="stockStatus">
+                                            <option value="">Tất cả</option>
+                                            <option value="IN_STOCK">Còn hàng</option>
+                                            <option value="OUT_OF_STOCK">Hết hàng</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <a href="/admin/products" class="btn btn-outline-dark"><i
+                                                class="mdi mdi-close"></i> Xóa bộ lọc</a>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-3">
+                                        <label for="dateFilter" class="form-label">Thời gian tạo</label>
+                                        <select class="form-select" id="dateFilter" name="dateFilter">
+                                            <option value="">Tất cả</option>
+                                            <option value="TODAY">Hôm nay</option>
+                                            <option value="THIS_WEEK">Tuần này</option>
+                                            <option value="THIS_MONTH">Tháng này</option>
+                                            <option value="THIS_YEAR">Năm nay</option>
+                                            <option value="CUSTOM">Tùy chỉnh</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2" id="startDateContainer" style="display: none;">
+                                        <label for="startDate" class="form-label">Từ ngày</label>
+                                        <input type="date" class="form-control" id="startDate" name="startDate">
+                                    </div>
+                                    <div class="col-md-2" id="endDateContainer" style="display: none;">
+                                        <label for="endDate" class="form-label">Đến ngày</label>
+                                        <input type="date" class="form-control" id="endDate" name="endDate">
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-primary"><i class="mdi mdi-filter"></i> Áp dụng</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card card-rounded mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title card-title-dash">Danh sách sản phẩm</h4>
+                            <div th:replace="admin/products/components/product-table"></div>
+                        </div>
+                    </div>
+                </div>
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="admin/fragments/admin-scripts :: admin-scripts"></div>
+    <script src="/admin/js/admin/products/product-table.js"></script>
+    <script>
+        // Date filter handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateFilter = document.getElementById('dateFilter');
+            const startDateContainer = document.getElementById('startDateContainer');
+            const endDateContainer = document.getElementById('endDateContainer');
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            
+            // Show/hide custom date inputs
+            dateFilter.addEventListener('change', function() {
+                if (this.value === 'CUSTOM') {
+                    startDateContainer.style.display = 'block';
+                    endDateContainer.style.display = 'block';
+                } else {
+                    startDateContainer.style.display = 'none';
+                    endDateContainer.style.display = 'none';
+                    
+                    // Auto-fill dates for presets
+                    const today = new Date();
+                    let start = new Date();
+                    let end = new Date();
+                    
+                    switch(this.value) {
+                        case 'TODAY':
+                            start.setHours(0, 0, 0, 0);
+                            end.setHours(23, 59, 59, 999);
+                            break;
+                        case 'THIS_WEEK':
+                            const dayOfWeek = today.getDay();
+                            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Monday
+                            start = new Date(today.setDate(diff));
+                            start.setHours(0, 0, 0, 0);
+                            end = new Date();
+                            end.setHours(23, 59, 59, 999);
+                            break;
+                        case 'THIS_MONTH':
+                            start = new Date(today.getFullYear(), today.getMonth(), 1);
+                            start.setHours(0, 0, 0, 0);
+                            end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                            end.setHours(23, 59, 59, 999);
+                            break;
+                        case 'THIS_YEAR':
+                            start = new Date(today.getFullYear(), 0, 1);
+                            start.setHours(0, 0, 0, 0);
+                            end = new Date(today.getFullYear(), 11, 31);
+                            end.setHours(23, 59, 59, 999);
+                            break;
+                        default:
+                            startDate.value = '';
+                            endDate.value = '';
+                            return;
+                    }
+                    
+                    // Format dates for input
+                    startDate.value = start.toISOString().split('T')[0];
+                    endDate.value = end.toISOString().split('T')[0];
+                }
+            });
+            
+            // Trigger change on load if value exists
+            if (dateFilter.value) {
+                dateFilter.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+</body>
+
+</html>
