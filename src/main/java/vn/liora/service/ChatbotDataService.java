@@ -35,7 +35,7 @@ public class ChatbotDataService {
             StringBuilder context = new StringBuilder();
             
             // Load thống kê tổng quan
-            context.append("=== THỐNG KÊ TỔNG QUAN LORIA BEAUTY ===\n");
+            context.append("=== THỐNG KÊ TỔNG QUAN LORIA MẸ VÀ BÉ ===\n");
             long totalProducts = productRepository.count();
             long totalUsers = userRepository.count();
             long totalCategories = categoryRepository.count();
@@ -114,7 +114,7 @@ public class ChatbotDataService {
             StringBuilder summary = new StringBuilder();
             List<Product> products = productRepository.findAll();
             
-            summary.append("DANH SÁCH SẢN PHẨM LORIA BEAUTY:\n");
+            summary.append("DANH SÁCH SẢN PHẨM LORIA MẸ VÀ BÉ:\n");
             for (Product product : products) {
                 summary.append(String.format("%d. %s - %s VNĐ (Còn: %d, Đã bán: %d)", 
                     product.getProductId(), 

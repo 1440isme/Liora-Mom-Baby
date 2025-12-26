@@ -1,5 +1,5 @@
 <div th:fragment="chatbot-button">
-    <!-- 🌸 Floating Chatbot Button -->
+    <!--  Floating Chatbot Button -->
     <div class="chatbot-btn"
          style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
         <button class="openChatbot btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
@@ -27,7 +27,7 @@
         <!-- Header -->
         <div style="background-color:rgb(215, 141, 160); color:white; padding:12px 15px; font-weight:600;
                     display:flex; align-items:center; justify-content:space-between;">
-            <div><i class="fas fa-spa me-1"></i>   Liora Beauty</div>
+            <div><i class="fas fa-spa me-1"></i>   Liora Mẹ&Bé</div>
             <button type="button"
                     onclick="document.querySelector('.chatbot-window').style.display='none'"
                     style="background:none;border:none;color:white;font-size:18px;">×</button>
@@ -97,7 +97,7 @@
     </style>
     
     <script>
-        const GenAI_API_KEY = "AIzaSyBv4hDt6q_AiiSsXBc7XoEcyF1cH_topo4";
+        const GenAI_API_KEY = "AIzaSyDqib3dyaM8odH_xpJeUzlEhinpeRKAjhE";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GenAI_API_KEY}`;
 
         const openChatbotBtn = document.querySelector('.openChatbot');
@@ -187,7 +187,7 @@
                     // Add database context to the conversation
                     chatHistory.push({
                         role: 'user',
-                        parts: [{ text: `Dữ liệu database Liora Beauty:\n${databaseData}\n\nDựa trên dữ liệu này, hãy trả lời câu hỏi: ${userText}` }]
+                        parts: [{ text: `Dữ liệu database Liora Mom&Baby:\n${databaseData}\n\nDựa trên dữ liệu này, hãy trả lời câu hỏi: ${userText}` }]
                     });
                 } else {
                     // If database not loaded, try to load it first
@@ -195,7 +195,7 @@
                     if (databaseData) {
                         chatHistory.push({
                             role: 'user',
-                            parts: [{ text: `Dữ liệu database Liora Beauty:\n${databaseData}\n\nDựa trên dữ liệu này, hãy trả lời câu hỏi: ${userText}` }]
+                            parts: [{ text: `Dữ liệu database Liora Mom&Baby:\n${databaseData}\n\nDựa trên dữ liệu này, hãy trả lời câu hỏi: ${userText}` }]
                         });
                     } else {
                         // Fallback without database
@@ -214,7 +214,20 @@
                         contents: chatHistory,
                         systemInstruction: {
                             parts: [{ 
-                                text: "Bạn là Liora - nhân viên chăm sóc khách hàng của Liora Beauty. Bạn có quyền truy cập vào toàn bộ database sản phẩm, thông tin khách hàng và thống kê cửa hàng. Hãy trả lời dựa trên dữ liệu thực tế trong database. Bạn chuyên về skincare, makeup và nước hoa. Hãy trả lời một cách ngắn gọn, xúc tích và chuyên nghiệp như một nhân viên chăm sóc khách hàng. Luôn sử dụng emoji và giọng điệu thân thiện. Khi được hỏi về sản phẩm, hãy cung cấp thông tin chính xác từ database."
+                                text:
+                                    "Bạn là Liora – trợ lý tư vấn sản phẩm mẹ và bé của hệ thống Liora. " +
+                                    "Bạn có quyền truy cập dữ liệu sản phẩm, thông tin khách hàng và thống kê bán hàng trong hệ thống. " +
+                                    "Mọi câu trả lời cần dựa trên dữ liệu thực tế và thông tin khoa học đáng tin cậy.\n\n" +
+
+                                    "Bạn có chuyên môn về:\n" +
+                                    "- Sữa công thức: phân loại theo độ tuổi, thành phần dinh dưỡng, nhu cầu từng giai đoạn phát triển\n" +
+                                    "- Tã bỉm: lựa chọn size theo cân nặng, phân biệt tã dán và tã quần\n" +
+                                    "- Dinh dưỡng cho mẹ bầu: vitamin và khoáng chất thiết yếu trong thai kỳ\n" +
+                                    "- Chăm sóc trẻ sơ sinh: vệ sinh, tắm gội, massage và chăm sóc hằng ngày\n" +
+                                    "- Đồ dùng thiết yếu cho bé: bình sữa, nôi cũi, xe đẩy và phụ kiện cần thiết\n\n" +
+
+                                    "Hãy tư vấn một cách thân thiện, thật sự ngắn ngọn đúng trọng tâm, chuyên nghiệp và chính xác, " +
+                                    "ưu tiên lợi ích và sự an toàn của mẹ và bé."
                             }]
                         }
                     })
@@ -294,7 +307,7 @@
                     await loadDatabaseData();
                     
                     if (databaseData) {
-                        const successMsg = createMessageElement('🌸 Chào bạn! Mình là Liora - nhân viên chăm sóc khách hàng của Liora Beauty 🌸 Hôm nay bạn ghé Liora Beauty để tìm gì nè - skincare, makeup hay nước hoa ạ?', 'bot');
+                        const successMsg = createMessageElement('🌸 Chào bạn! Mình là Liora – trợ lý tư vấn mẹ và bé của Liora. Bạn cần tìm sản phẩm cho bé hay cho mẹ ạ?');
                         chatContent.appendChild(successMsg);
                         chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
                     } else {
