@@ -137,7 +137,7 @@ class ProductFormManager {
             ? window.productDescriptionEditor.getData()
             : (descriptionEl ? descriptionEl.value : '');
 
-        return {
+        const formData = {
             name: document.getElementById('name').value,
             description: editorHtml,
             price: parseFloat(document.getElementById('price').value),
@@ -146,6 +146,29 @@ class ProductFormManager {
             stock: parseInt(document.getElementById('stock').value),
             isActive: document.getElementById('isActive').checked
         };
+
+        // Mom & Baby specific fields (optional)
+        const ageRangeEl = document.getElementById('ageRange');
+        if (ageRangeEl && ageRangeEl.value) {
+            formData.ageRange = ageRangeEl.value;
+        }
+
+        const sizeEl = document.getElementById('size');
+        if (sizeEl && sizeEl.value) {
+            formData.size = sizeEl.value;
+        }
+
+        const volumeEl = document.getElementById('volume');
+        if (volumeEl && volumeEl.value) {
+            formData.volume = volumeEl.value;
+        }
+
+        const originEl = document.getElementById('origin');
+        if (originEl && originEl.value) {
+            formData.origin = originEl.value;
+        }
+
+        return formData;
     }
 
     validateForm() {

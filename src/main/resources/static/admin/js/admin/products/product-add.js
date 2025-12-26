@@ -260,6 +260,27 @@ class ProductAddManager {
         
         formData.append('isActive', document.getElementById('isActive').checked);
 
+        // Mom & Baby specific fields (optional)
+        const ageRangeEl = document.getElementById('ageRange');
+        if (ageRangeEl && ageRangeEl.value) {
+            formData.append('ageRange', ageRangeEl.value);
+        }
+
+        const sizeEl = document.getElementById('size');
+        if (sizeEl && sizeEl.value) {
+            formData.append('size', sizeEl.value);
+        }
+
+        const volumeEl = document.getElementById('volume');
+        if (volumeEl && volumeEl.value) {
+            formData.append('volume', volumeEl.value);
+        }
+
+        const originEl = document.getElementById('origin');
+        if (originEl && originEl.value) {
+            formData.append('origin', originEl.value);
+        }
+
         // Add images
         const productImages = document.getElementById('productImages');
         
@@ -415,8 +436,8 @@ class ProductAddManager {
                     
                     previewHTML += `
                         <div class="col-md-4 mb-2">
-                            <div class="position-relative">
-                                <img src="${e.target.result}" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;">
+                            <div class="position-relative" style="background-color: white; padding: 8px; border-radius: 4px;">
+                                <img src="${e.target.result}" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover; background-color: white; display: block;">
                                 <small class="text-muted d-block">${file.name}</small>
                                 <small class="text-muted">${(file.size / 1024).toFixed(1)} KB</small>
                                 ${index === 0 ? '<span class="badge bg-primary position-absolute top-0 end-0">Hình chính</span>' : ''}

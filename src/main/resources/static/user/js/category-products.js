@@ -13,6 +13,9 @@ class CategoryProductsManager {
             maxPrice: null,
             brands: [],
             ratings: [],
+            ageRange: [], // Mom & Baby: age range filter
+            size: [], // Mom & Baby: size filter
+            origin: [], // Mom & Baby: origin filter
             sort: ''
         };
         this.products = [];
@@ -33,17 +36,23 @@ class CategoryProductsManager {
 
     getCategoryIdFromUrl() {
         const path = window.location.pathname;
+        console.log('Current path:', path);
         const match = path.match(/\/product\/view\/category\/(\d+)/);
-        this.currentCategoryId = match ? parseInt(match[1]) : null;
+        this.currentCategoryId = match ? parseInt(match[1], 10) : null;
 
         // Also try to get from query params as fallback
         if (!this.currentCategoryId) {
             const urlParams = new URLSearchParams(window.location.search);
-            this.currentCategoryId = urlParams.get('categoryId');
+            const categoryIdParam = urlParams.get('categoryId');
+            if (categoryIdParam) {
+                this.currentCategoryId = parseInt(categoryIdParam, 10);
+            }
         }
 
-        if (!this.currentCategoryId) {
-            console.error('Category ID not found in URL');
+        console.log('Category ID extracted:', this.currentCategoryId);
+
+        if (!this.currentCategoryId || isNaN(this.currentCategoryId)) {
+            console.error('Category ID not found in URL or invalid');
             this.showLoading(false);
             this.showEmptyState('Danh mục không tồn tại');
             return;
@@ -140,14 +149,14 @@ class CategoryProductsManager {
                 size: this.pageSize
             });
 
-            // Add filters
+            // Add filters - only if they have values
             if (this.currentFilters.search) {
                 params.append('q', this.currentFilters.search);
             }
-            if (this.currentFilters.minPrice) {
+            if (this.currentFilters.minPrice != null && this.currentFilters.minPrice !== '') {
                 params.append('minPrice', this.currentFilters.minPrice);
             }
-            if (this.currentFilters.maxPrice) {
+            if (this.currentFilters.maxPrice != null && this.currentFilters.maxPrice !== '') {
                 params.append('maxPrice', this.currentFilters.maxPrice);
             }
             if (this.currentFilters.brands && this.currentFilters.brands.length > 0) {
@@ -155,6 +164,16 @@ class CategoryProductsManager {
             }
             if (this.currentFilters.ratings && this.currentFilters.ratings.length > 0) {
                 params.append('ratings', this.currentFilters.ratings.join(','));
+            }
+            // Mom & Baby filters - only add if they have values
+            if (this.currentFilters.ageRange && this.currentFilters.ageRange.length > 0) {
+                this.currentFilters.ageRange.forEach(age => params.append('ageRange', age));
+            }
+            if (this.currentFilters.size && this.currentFilters.size.length > 0) {
+                this.currentFilters.size.forEach(s => params.append('sizeFilter', s));
+            }
+            if (this.currentFilters.origin && this.currentFilters.origin.length > 0) {
+                this.currentFilters.origin.forEach(o => params.append('origin', o));
             }
             if (this.currentFilters.sort) {
                 // Split the sort value (format: "name,asc" or "price,desc")
@@ -166,24 +185,30 @@ class CategoryProductsManager {
             }
 
             const fullUrl = `/api/products/category/${this.currentCategoryId}?${params}`;
+            console.log('Fetching URL:', fullUrl);
+            console.log('Request params:', params.toString());
 
             const response = await fetch(fullUrl);
 
             if (!response.ok) {
+                console.error('HTTP error! status:', response.status, response.statusText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('API Response:', data);
 
             if (data.code === 1000) {
                 this.products = data.result.content || [];
                 this.totalElements = data.result.totalElements || 0;
                 this.totalPages = data.result.totalPages || 0;
+                
+                console.log('Products loaded:', this.products.length, 'Total:', this.totalElements);
 
                 // Hide loading spinner
                 this.showLoading(false);
             } else {
-                console.log('API error:', data.message);
+                console.log('API error code:', data.code, 'Message:', data.message);
                 this.showLoading(false);
                 this.showEmptyState('Chưa có sản phẩm nào trong danh mục này');
             }
@@ -870,6 +895,24 @@ class CategoryProductsManager {
             .filter(cb => cb.checked)
             .map(cb => parseInt(cb.value));
         console.log('Selected ratings:', this.currentFilters.ratings);
+
+        // Get selected age ranges (Mom & Baby)
+        const ageRangeCheckboxes = document.querySelectorAll('input[name="ageRange"]:checked');
+        this.currentFilters.ageRange = Array.from(ageRangeCheckboxes)
+            .map(cb => cb.value);
+        console.log('Selected age ranges:', this.currentFilters.ageRange);
+
+        // Get selected sizes (Mom & Baby)
+        const sizeCheckboxes = document.querySelectorAll('input[name="size"]:checked');
+        this.currentFilters.size = Array.from(sizeCheckboxes)
+            .map(cb => cb.value);
+        console.log('Selected sizes:', this.currentFilters.size);
+
+        // Get selected origins (Mom & Baby)
+        const originCheckboxes = document.querySelectorAll('input[name="origin"]:checked');
+        this.currentFilters.origin = Array.from(originCheckboxes)
+            .map(cb => cb.value);
+        console.log('Selected origins:', this.currentFilters.origin);
 
         console.log('Final filters:', this.currentFilters);
         this.currentPage = 0;

@@ -8,6 +8,9 @@ class BrandProductsManager {
             maxPrice: '',
             categories: [],
             ratings: [],
+            ageRange: [], // Mom & Baby: age range filter
+            size: [], // Mom & Baby: size filter
+            origin: [], // Mom & Baby: origin filter
             sort: ''
         };
         this.brandId = this.getBrandIdFromUrl();
@@ -161,6 +164,16 @@ class BrandProductsManager {
             }
             if (this.currentFilters.ratings && this.currentFilters.ratings.length > 0) {
                 params.append('ratings', this.currentFilters.ratings.join(','));
+            }
+            // Mom & Baby filters
+            if (this.currentFilters.ageRange && this.currentFilters.ageRange.length > 0) {
+                this.currentFilters.ageRange.forEach(age => params.append('ageRange', age));
+            }
+            if (this.currentFilters.size && this.currentFilters.size.length > 0) {
+                this.currentFilters.size.forEach(s => params.append('sizeFilter', s));
+            }
+            if (this.currentFilters.origin && this.currentFilters.origin.length > 0) {
+                this.currentFilters.origin.forEach(o => params.append('origin', o));
             }
             if (this.currentFilters.sort) {
                 // Split the sort value (format: "name,asc" or "price,desc")
@@ -672,6 +685,24 @@ class BrandProductsManager {
             .map(cb => parseInt(cb.value));
         console.log('Selected ratings:', this.currentFilters.ratings);
 
+        // Get selected age ranges (Mom & Baby)
+        const ageRangeCheckboxes = document.querySelectorAll('input[name="ageRange"]:checked');
+        this.currentFilters.ageRange = Array.from(ageRangeCheckboxes)
+            .map(cb => cb.value);
+        console.log('Selected age ranges:', this.currentFilters.ageRange);
+
+        // Get selected sizes (Mom & Baby)
+        const sizeCheckboxes = document.querySelectorAll('input[name="size"]:checked');
+        this.currentFilters.size = Array.from(sizeCheckboxes)
+            .map(cb => cb.value);
+        console.log('Selected sizes:', this.currentFilters.size);
+
+        // Get selected origins (Mom & Baby)
+        const originCheckboxes = document.querySelectorAll('input[name="origin"]:checked');
+        this.currentFilters.origin = Array.from(originCheckboxes)
+            .map(cb => cb.value);
+        console.log('Selected origins:', this.currentFilters.origin);
+
         console.log('Final filters:', this.currentFilters);
         console.log('Resetting to page 0 and calling loadProducts()');
         this.currentPage = 0;
@@ -683,7 +714,10 @@ class BrandProductsManager {
         return this.currentFilters.minPrice !== null ||
             this.currentFilters.maxPrice !== null ||
             this.currentFilters.categories.length > 0 ||
-            this.currentFilters.ratings.length > 0;
+            this.currentFilters.ratings.length > 0 ||
+            this.currentFilters.ageRange.length > 0 ||
+            this.currentFilters.size.length > 0 ||
+            this.currentFilters.origin.length > 0;
     }
 
     clearFilters() {
@@ -692,6 +726,9 @@ class BrandProductsManager {
             maxPrice: null,
             categories: [],
             ratings: [],
+            ageRange: [],
+            size: [],
+            origin: [],
             sort: ''
         };
 
@@ -709,6 +746,16 @@ class BrandProductsManager {
         // Reset rating checkboxes
         const ratingCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="rating"]');
         ratingCheckboxes.forEach(cb => cb.checked = false);
+
+        // Reset Mom & Baby filters
+        const ageRangeCheckboxes = document.querySelectorAll('input[name="ageRange"]');
+        ageRangeCheckboxes.forEach(cb => cb.checked = false);
+
+        const sizeCheckboxes = document.querySelectorAll('input[name="size"]');
+        sizeCheckboxes.forEach(cb => cb.checked = false);
+
+        const originCheckboxes = document.querySelectorAll('input[name="origin"]');
+        originCheckboxes.forEach(cb => cb.checked = false);
 
         this.currentPage = 0;
         this.loadProducts();
