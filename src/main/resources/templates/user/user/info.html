@@ -21,6 +21,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/user/css/style.css}">
     <link rel="stylesheet" th:href="@{/user/css/info-style.css}">
+    <link rel="stylesheet" th:href="@{/user/css/wallet-style.css}">
 </head>
 
 <body class="info-page">
@@ -57,6 +58,10 @@
                                     <span class="stat-label">Đã mua</span>
                                 </div>
                                 <div class="stat-item">
+                                    <span class="stat-number" id="walletBalanceHeader">-</span>
+                                    <span class="stat-label">Liora Xu</span>
+                                </div>
+                                <div class="stat-item">
                                     <span class="stat-number" id="memberSince">-</span>
                                     <span class="stat-label">Thành viên từ</span>
                                 </div>
@@ -83,6 +88,12 @@
                                     <button class="nav-link" id="orders-tab" data-bs-toggle="tab"
                                         data-bs-target="#orders" type="button" role="tab">
                                         <i class="mdi mdi-shopping"></i> Đơn hàng
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="wallet-tab" data-bs-toggle="tab"
+                                        data-bs-target="#wallet" type="button" role="tab">
+                                        <i class="mdi mdi-wallet"></i> Ví Liora Xu
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
@@ -284,6 +295,87 @@
                                             <i class="mdi mdi-shopping"></i>
                                             <h5>Đang tải đơn hàng...</h5>
                                             <p>Vui lòng chờ trong giây lát</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Wallet Tab -->
+                                <div class="tab-pane fade" id="wallet" role="tabpanel">
+                                    <h3 class="section-title">
+                                        <i class="mdi mdi-wallet"></i>
+                                        Ví Liora Xu
+                                    </h3>
+
+                                    <!-- Wallet Info Card -->
+                                    <div class="card mb-4" style="border-left: 4px solid #667eea;">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3 text-center">
+                                                    <i class="mdi mdi-wallet"
+                                                        style="font-size: 3rem; color: #667eea;"></i>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <p class="text-muted mb-1 small">Số dư hiện tại</p>
+                                                            <h3 class="mb-0 fw-bold" id="walletBalance"
+                                                                style="color: #667eea;">-</h3>
+                                                            <small class="text-muted">1 Liora Xu = 1 VND</small>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <p class="text-muted mb-1 small">Xu thưởng</p>
+                                                            <h5 class="mb-0 text-success" id="totalRewards">-</h5>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <p class="text-muted mb-1 small">Hoàn tiền</p>
+                                                            <h5 class="mb-0 text-info" id="totalRefunds">-</h5>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <p class="text-muted mb-1 small">Giao dịch</p>
+                                                            <h5 class="mb-0" id="totalTransactions">-</h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Transaction History -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="mb-0"><i class="mdi mdi-history me-2"></i>Lịch sử giao dịch
+                                                </h5>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary active"
+                                                        onclick="filterTransactions('ALL')">Tất cả</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                                        onclick="filterTransactions('REWARD')">Xu thưởng</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-info"
+                                                        onclick="filterTransactions('REFUND')">Hoàn tiền</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                                        onclick="filterTransactions('DEDUCTION')">Trừ xu</button>
+                                                </div>
+                                            </div>
+
+                                            <div id="transactionList">
+                                                <!-- Transactions will be populated here -->
+                                                <div class="empty-state">
+                                                    <i class="mdi mdi-wallet"></i>
+                                                    <h5>Đang tải giao dịch...</h5>
+                                                    <p>Vui lòng chờ trong giây lát</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Pagination -->
+                                            <div id="transactionPagination" class="d-flex justify-content-center mt-4"
+                                                style="display: none !important;">
+                                                <nav>
+                                                    <ul class="pagination" id="paginationList">
+                                                        <!-- Pagination will be populated here -->
+                                                    </ul>
+                                                </nav>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -584,6 +676,7 @@
     <script th:src="@{/user/js/auth.js}"></script>
     <script th:src="@{/user/js/auth-interceptor.js}"></script>
     <script th:src="@{/user/js/info.js}"></script>
+    <script th:src="@{/user/js/wallet.js}"></script>
 </body>
 
 </html>

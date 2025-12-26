@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Ví Liora Xu - Liora Admin')"></head>
+
+<body class="with-welcome-text">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-3">
+                        <div>
+                            <h1 class="h3 mb-0">Ví Liora Xu</h1>
+                            <p class="text-muted mb-0" id="userInfo">Đang tải thông tin...</p>
+                        </div>
+                        <div class="btn-wrapper">
+                            <button onclick="history.back()" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-arrow-left"></i> Quay lại
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Balance Card -->
+                    <div class="row mb-4">
+                        <div class="col-xl-12">
+                            <div class="card card-rounded"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <div class="card-body p-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 text-center">
+                                            <div class="wallet-icon-large">
+                                                <i class="mdi mdi-wallet" style="font-size: 4rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h6 class="text-white-50 mb-2">Số dư ví</h6>
+                                                    <h2 class="mb-0 fw-bold" id="walletBalance">-</h2>
+                                                    <small class="text-white-50">1 Liora Xu = 1 VND</small>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <h6 class="text-white-50 mb-2">Xu thưởng</h6>
+                                                    <h4 class="mb-0" id="totalRewards">-</h4>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <h6 class="text-white-50 mb-2">Hoàn tiền</h6>
+                                                    <h4 class="mb-0" id="totalRefunds">-</h4>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <h6 class="text-white-50 mb-2">Giao dịch</h6>
+                                                    <h4 class="mb-0" id="totalTransactions">-</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction History -->
+                    <div class="card card-rounded">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="card-title mb-0">Lịch sử giao dịch</h4>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary active"
+                                        onclick="filterTransactions('ALL')">Tất cả</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                        onclick="filterTransactions('REWARD')">Xu thưởng</button>
+                                    <button type="button" class="btn btn-sm btn-outline-info"
+                                        onclick="filterTransactions('REFUND')">Hoàn tiền</button>
+                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                        onclick="filterTransactions('DEDUCTION')">Trừ xu</button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="transactionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th width="50">STT</th>
+                                            <th>Loại</th>
+                                            <th>Mô tả</th>
+                                            <th>Số tiền</th>
+                                            <th>Số dư trước</th>
+                                            <th>Số dư sau</th>
+                                            <th>Đơn hàng</th>
+                                            <th>Thời gian</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactionsList">
+                                        <tr>
+                                            <td colspan="8" class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Đang tải...</span>
+                                                </div>
+                                                <p class="mt-3 text-muted">Đang tải lịch sử giao dịch...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div id="paginationContainer" class="d-flex justify-content-center mt-3"
+                                style="display: none !important;">
+                                <nav>
+                                    <ul class="pagination" id="paginationList">
+                                        <!-- Pagination will be populated here -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Include Footer -->
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{admin/fragments/admin-scripts :: admin-scripts}"></div>
+
+    <script>
+        // Get userId from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+
+        let allTransactions = [];
+        let currentFilter = 'ALL';
+        let currentPage = 0;
+        const pageSize = 10;
+
+        // Load wallet data on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            if (userId) {
+                loadWalletData();
+                loadTransactions();
+            } else {
+                alert('Không tìm thấy thông tin user');
+                history.back();
+            }
+        });
+
+        // Load wallet balance
+        async function loadWalletData() {
+            try {
+                const response = await fetch(`/admin/api/wallet/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load wallet');
+                }
+
+                const wallet = await response.json();
+
+                // Update UI
+                document.getElementById('userInfo').textContent =
+                    `${wallet.firstname || ''} ${wallet.lastname || ''} (${wallet.username}) - ID: ${wallet.userId}`;
+                document.getElementById('walletBalance').textContent = formatCurrency(wallet.balance) + ' Xu';
+
+                // Load transaction count
+                loadTransactionCount();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Không thể tải thông tin ví', 'error');
+            }
+        }
+
+        // Load transaction count
+        async function loadTransactionCount() {
+            try {
+                const response = await fetch(`/admin/api/wallet/${userId}/transactions?page=0&size=1000`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (response.ok) {
+                    const transactions = await response.json();
+                    document.getElementById('totalTransactions').textContent = transactions.length;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Load transactions
+        async function loadTransactions(page = 0) {
+            try {
+                const response = await fetch(`/admin/api/wallet/${userId}/transactions?page=${page}&size=100`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load transactions');
+                }
+
+                allTransactions = await response.json();
+                currentPage = page;
+
+                // Calculate stats
+                calculateStats(allTransactions);
+
+                // Display transactions
+                displayTransactions(allTransactions);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('transactionsList').innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="mdi mdi-alert-circle mdi-48px text-muted"></i>
+                            <p class="text-muted mt-2">Không thể tải giao dịch</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Calculate stats
+        function calculateStats(transactions) {
+            let totalRewards = 0;
+            let totalRefunds = 0;
+            let totalDeductions = 0;
+
+            transactions.forEach(tx => {
+                if (tx.type === 'REWARD') {
+                    totalRewards += tx.amount;
+                } else if (tx.type === 'REFUND') {
+                    totalRefunds += tx.amount;
+                } else if (tx.type === 'DEDUCTION') {
+                    totalDeductions += Math.abs(tx.amount);
+                }
+            });
+
+            // Show net rewards (rewards earned minus deductions)
+            const netRewards = totalRewards - totalDeductions;
+            document.getElementById('totalRewards').textContent = formatCurrency(netRewards) + ' Xu';
+            document.getElementById('totalRefunds').textContent = formatCurrency(totalRefunds) + ' Xu';
+        }
+
+        // Display transactions
+        function displayTransactions(transactions) {
+            const tbody = document.getElementById('transactionsList');
+
+            if (!transactions || transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="mdi mdi-wallet-outline mdi-48px text-muted"></i>
+                            <p class="text-muted mt-2">Chưa có giao dịch</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            transactions.forEach((tx, index) => {
+                const typeInfo = getTransactionTypeInfo(tx.type);
+                const isPositive = tx.amount >= 0;
+                const amountClass = isPositive ? 'text-success' : 'text-danger';
+                const amountPrefix = isPositive ? '+' : '';
+
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span class="badge ${typeInfo.badgeClass}">${typeInfo.label}</span></td>
+                        <td>${tx.description || '-'}</td>
+                        <td class="${amountClass} fw-bold">${amountPrefix}${formatCurrency(Math.abs(tx.amount))} Xu</td>
+                        <td>${formatCurrency(tx.balanceBefore)} Xu</td>
+                        <td>${formatCurrency(tx.balanceAfter)} Xu</td>
+                        <td>${tx.orderId ? `<a href="/admin/orders/detail/${tx.orderId}" class="text-primary">#${tx.orderId}</a>` : '-'}</td>
+                        <td>${formatDateTime(tx.createdDate)}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Get transaction type info
+        function getTransactionTypeInfo(type) {
+            const types = {
+                'REWARD': { label: 'Xu thưởng', badgeClass: 'bg-success' },
+                'REFUND': { label: 'Hoàn tiền', badgeClass: 'bg-info' },
+                'DEDUCTION': { label: 'Trừ xu', badgeClass: 'bg-warning' }
+            };
+            return types[type] || { label: 'Khác', badgeClass: 'bg-secondary' };
+        }
+
+        // Filter transactions
+        function filterTransactions(type) {
+            currentFilter = type;
+
+            // Update active button
+            document.querySelectorAll('.btn-group button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter and display
+            if (type === 'ALL') {
+                displayTransactions(allTransactions);
+            } else {
+                const filtered = allTransactions.filter(tx => tx.type === type);
+                displayTransactions(filtered);
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '0';
+            return new Intl.NumberFormat('vi-VN').format(amount);
+        }
+
+        // Format date time
+        function formatDateTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Get token
+        function getToken() {
+            return localStorage.getItem('access_token') || '';
+        }
+
+        // Show toast
+        function showToast(message, type = 'info') {
+            if (typeof AdminUtils !== 'undefined' && typeof AdminUtils.showToast === 'function') {
+                AdminUtils.showToast(message, type);
+            } else {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
+        }
+    </script>
+</body>
+
+</html>

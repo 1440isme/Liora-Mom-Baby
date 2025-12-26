@@ -186,6 +186,7 @@ class UsersManager {
                 <td>
                     <div class="btn-group" role="group">
                         <a href="/admin/users/${u.userId}/edit" class="btn btn-sm btn-outline-warning" title="Chỉnh sửa"><i class="mdi mdi-pencil-outline"></i></a>
+                        <a href="/admin/users/wallet?userId=${u.userId}" class="btn btn-sm btn-outline-info" title="Xem ví"><i class="mdi mdi-wallet-outline"></i></a>
                         <button type="button" class="btn btn-sm btn-outline-danger" data-action="delete-user" data-user-id="${u.userId}" data-user-name="${fullName}" title="Xóa"><i class="mdi mdi-delete-outline"></i></button>
                     </div>
                 </td>
