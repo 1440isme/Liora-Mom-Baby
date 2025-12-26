@@ -55,6 +55,10 @@ public class AdminProductController {
             @RequestParam("stock") Integer stock,
             @RequestParam("description") String description,
             @RequestParam(value = "isActive", defaultValue = "true") Boolean isActive,
+            @RequestParam(value = "ageRange", required = false) String ageRange,
+            @RequestParam(value = "size", required = false) String size,
+            @RequestParam(value = "volume", required = false) String volume,
+            @RequestParam(value = "origin", required = false) String origin,
             @RequestParam(value = "productImages", required = true) MultipartFile[] productImages) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
@@ -91,6 +95,10 @@ public class AdminProductController {
                     .description(description)
                     .available(available)
                     .isActive(isActive)
+                    .ageRange(ageRange)
+                    .size(size)
+                    .volume(volume)
+                    .origin(origin)
                     .build();
 
             // Tạo sản phẩm

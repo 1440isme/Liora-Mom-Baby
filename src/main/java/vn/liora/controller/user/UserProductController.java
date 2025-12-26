@@ -55,6 +55,9 @@ public class UserProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) BigDecimal minRating,
             @RequestParam(required = false) List<BigDecimal> ratings, // multiple ratings
+            @RequestParam(required = false) List<String> ageRange, // Mom & Baby: age range filter
+            @RequestParam(required = false) List<String> sizeFilter, // Mom & Baby: size filter (renamed to avoid conflict)
+            @RequestParam(required = false) List<String> origin, // Mom & Baby: origin filter
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDir, // sort direction
             Pageable pageable) {
@@ -113,6 +116,30 @@ public class UserProductController {
                             }
                         }
                         
+                        // Lọc theo độ tuổi (Mom & Baby)
+                        if (ageRange != null && !ageRange.isEmpty()) {
+                            String productAgeRange = product.getAgeRange();
+                            if (productAgeRange == null || !ageRange.contains(productAgeRange)) {
+                                return false;
+                            }
+                        }
+                        
+                        // Lọc theo size (Mom & Baby)
+                        if (sizeFilter != null && !sizeFilter.isEmpty()) {
+                            String productSize = product.getSize();
+                            if (productSize == null || !sizeFilter.contains(productSize)) {
+                                return false;
+                            }
+                        }
+                        
+                        // Lọc theo xuất xứ (Mom & Baby)
+                        if (origin != null && !origin.isEmpty()) {
+                            String productOrigin = product.getOrigin();
+                            if (productOrigin == null || !origin.contains(productOrigin)) {
+                                return false;
+                            }
+                        }
+                        
                         return true;
                     })
                     .collect(Collectors.toList());
@@ -160,6 +187,9 @@ public class UserProductController {
             @RequestParam(required = false) String brands,
             @RequestParam(required = false) String categories,
             @RequestParam(required = false) String ratings,
+            @RequestParam(required = false) List<String> ageRange, // Mom & Baby: age range filter
+            @RequestParam(required = false) List<String> sizeFilter, // Mom & Baby: size filter (renamed to avoid conflict with page size)
+            @RequestParam(required = false) List<String> origin, // Mom & Baby: origin filter
             @RequestParam(required = false, defaultValue = "false") Boolean includeChildren,
             Pageable pageable) {
 
@@ -254,6 +284,42 @@ public class UserProductController {
                 System.out.println("After rating filter: " + filteredProducts.size() + " products");
             }
 
+            // Apply age range filter (Mom & Baby)
+            if (ageRange != null && !ageRange.isEmpty()) {
+                System.out.println("Applying age range filter: " + ageRange);
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productAgeRange = product.getAgeRange();
+                            return productAgeRange != null && ageRange.contains(productAgeRange);
+                        })
+                        .toList();
+                System.out.println("After age range filter: " + filteredProducts.size() + " products");
+            }
+
+            // Apply size filter (Mom & Baby)
+            if (sizeFilter != null && !sizeFilter.isEmpty()) {
+                System.out.println("Applying size filter: " + sizeFilter);
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productSize = product.getSize();
+                            return productSize != null && sizeFilter.contains(productSize);
+                        })
+                        .toList();
+                System.out.println("After size filter: " + filteredProducts.size() + " products");
+            }
+
+            // Apply origin filter (Mom & Baby)
+            if (origin != null && !origin.isEmpty()) {
+                System.out.println("Applying origin filter: " + origin);
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productOrigin = product.getOrigin();
+                            return productOrigin != null && origin.contains(productOrigin);
+                        })
+                        .toList();
+                System.out.println("After origin filter: " + filteredProducts.size() + " products");
+            }
+
             // Apply sorting to filtered products
             if (sortBy != null && !sortBy.isEmpty()) {
                 System.out.println("Sorting products by: " + sortBy + " " + sortDir);
@@ -315,6 +381,9 @@ public class UserProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String categories,
             @RequestParam(required = false) String ratings,
+            @RequestParam(required = false) List<String> ageRange, // Mom & Baby: age range filter
+            @RequestParam(required = false) List<String> sizeFilter, // Mom & Baby: size filter (renamed to avoid conflict)
+            @RequestParam(required = false) List<String> origin, // Mom & Baby: origin filter
             Pageable pageable) {
 
         ApiResponse<Page<ProductResponse>> response = new ApiResponse<>();
@@ -375,6 +444,42 @@ public class UserProductController {
                         })
                         .toList();
                 System.out.println("After rating filter: " + filteredProducts.size() + " products");
+            }
+
+            // Apply age range filter (Mom & Baby)
+            if (ageRange != null && !ageRange.isEmpty()) {
+                System.out.println("Applying age range filter: " + ageRange);
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productAgeRange = product.getAgeRange();
+                            return productAgeRange != null && ageRange.contains(productAgeRange);
+                        })
+                        .toList();
+                System.out.println("After age range filter: " + filteredProducts.size() + " products");
+            }
+
+            // Apply size filter (Mom & Baby)
+            if (sizeFilter != null && !sizeFilter.isEmpty()) {
+                System.out.println("Applying size filter: " + sizeFilter);
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productSize = product.getSize();
+                            return productSize != null && sizeFilter.contains(productSize);
+                        })
+                        .toList();
+                System.out.println("After size filter: " + filteredProducts.size() + " products");
+            }
+
+            // Apply origin filter (Mom & Baby)
+            if (origin != null && !origin.isEmpty()) {
+                System.out.println("Applying origin filter: " + origin);
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productOrigin = product.getOrigin();
+                            return productOrigin != null && origin.contains(productOrigin);
+                        })
+                        .toList();
+                System.out.println("After origin filter: " + filteredProducts.size() + " products");
             }
 
             // Apply sorting to filtered products
@@ -558,6 +663,9 @@ public class UserProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String brands,
             @RequestParam(required = false) String ratings,
+            @RequestParam(required = false) List<String> ageRange, // Mom & Baby: age range filter
+            @RequestParam(required = false) List<String> sizeFilter, // Mom & Baby: size filter (renamed to avoid conflict with page size)
+            @RequestParam(required = false) List<String> origin, // Mom & Baby: origin filter
             Pageable pageable) {
 
         ApiResponse<Page<ProductResponse>> response = new ApiResponse<>();
@@ -613,6 +721,36 @@ public class UserProductController {
                             if (avgRating == null) return false;
                             return ratingList.stream().anyMatch(rating -> 
                                 avgRating.compareTo(BigDecimal.valueOf(rating)) >= 0);
+                        })
+                        .toList();
+            }
+
+            // Apply age range filter (Mom & Baby)
+            if (ageRange != null && !ageRange.isEmpty()) {
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productAgeRange = product.getAgeRange();
+                            return productAgeRange != null && ageRange.contains(productAgeRange);
+                        })
+                        .toList();
+            }
+
+            // Apply size filter (Mom & Baby)
+            if (sizeFilter != null && !sizeFilter.isEmpty()) {
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productSize = product.getSize();
+                            return productSize != null && sizeFilter.contains(productSize);
+                        })
+                        .toList();
+            }
+
+            // Apply origin filter (Mom & Baby)
+            if (origin != null && !origin.isEmpty()) {
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productOrigin = product.getOrigin();
+                            return productOrigin != null && origin.contains(productOrigin);
                         })
                         .toList();
             }
@@ -807,6 +945,9 @@ public class UserProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String brands,
             @RequestParam(required = false) String ratings,
+            @RequestParam(required = false) List<String> ageRange, // Mom & Baby: age range filter
+            @RequestParam(required = false) List<String> sizeFilter, // Mom & Baby: size filter (renamed to avoid conflict)
+            @RequestParam(required = false) List<String> origin, // Mom & Baby: origin filter
             Pageable pageable) {
 
         ApiResponse<Page<ProductResponse>> response = new ApiResponse<>();
@@ -850,6 +991,36 @@ public class UserProductController {
                             if (avgRating == null) return false;
                             return ratingList.stream().anyMatch(rating -> 
                                 avgRating.compareTo(BigDecimal.valueOf(rating)) >= 0);
+                        })
+                        .toList();
+            }
+
+            // Apply age range filter (Mom & Baby)
+            if (ageRange != null && !ageRange.isEmpty()) {
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productAgeRange = product.getAgeRange();
+                            return productAgeRange != null && ageRange.contains(productAgeRange);
+                        })
+                        .toList();
+            }
+
+            // Apply size filter (Mom & Baby)
+            if (sizeFilter != null && !sizeFilter.isEmpty()) {
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productSize = product.getSize();
+                            return productSize != null && sizeFilter.contains(productSize);
+                        })
+                        .toList();
+            }
+
+            // Apply origin filter (Mom & Baby)
+            if (origin != null && !origin.isEmpty()) {
+                filteredProducts = filteredProducts.stream()
+                        .filter(product -> {
+                            String productOrigin = product.getOrigin();
+                            return productOrigin != null && origin.contains(productOrigin);
                         })
                         .toList();
             }
@@ -963,6 +1134,9 @@ public class UserProductController {
             @RequestParam(required = false) String brands,
             @RequestParam(required = false) String categories,
             @RequestParam(required = false) String ratings,
+            @RequestParam(required = false) List<String> ageRange, // Mom & Baby: age range filter
+            @RequestParam(required = false) List<String> sizeFilter, // Mom & Baby: size filter (renamed to avoid conflict)
+            @RequestParam(required = false) List<String> origin, // Mom & Baby: origin filter
             Pageable pageable) {
 
         ApiResponse<Page<ProductResponse>> response = new ApiResponse<>();
@@ -1035,6 +1209,42 @@ public class UserProductController {
                         })
                         .toList();
                 System.out.println("After rating filter: " + similarProducts.size() + " products");
+            }
+
+            // Apply age range filter (Mom & Baby)
+            if (ageRange != null && !ageRange.isEmpty()) {
+                System.out.println("Similar Products - Applying age range filter: " + ageRange);
+                similarProducts = similarProducts.stream()
+                        .filter(product -> {
+                            String productAgeRange = product.getAgeRange();
+                            return productAgeRange != null && ageRange.contains(productAgeRange);
+                        })
+                        .toList();
+                System.out.println("Similar Products - After age range filter: " + similarProducts.size() + " products");
+            }
+
+            // Apply size filter (Mom & Baby)
+            if (sizeFilter != null && !sizeFilter.isEmpty()) {
+                System.out.println("Similar Products - Applying size filter: " + sizeFilter);
+                similarProducts = similarProducts.stream()
+                        .filter(product -> {
+                            String productSize = product.getSize();
+                            return productSize != null && sizeFilter.contains(productSize);
+                        })
+                        .toList();
+                System.out.println("Similar Products - After size filter: " + similarProducts.size() + " products");
+            }
+
+            // Apply origin filter (Mom & Baby)
+            if (origin != null && !origin.isEmpty()) {
+                System.out.println("Similar Products - Applying origin filter: " + origin);
+                similarProducts = similarProducts.stream()
+                        .filter(product -> {
+                            String productOrigin = product.getOrigin();
+                            return productOrigin != null && origin.contains(productOrigin);
+                        })
+                        .toList();
+                System.out.println("Similar Products - After origin filter: " + similarProducts.size() + " products");
             }
 
             // Apply sorting to filtered products

@@ -13,6 +13,9 @@ class BestsellerProductsPageManager {
             maxPrice: null,
             brands: [],
             ratings: [],
+            ageRange: [], // Mom & Baby: age range filter
+            size: [], // Mom & Baby: size filter
+            origin: [], // Mom & Baby: origin filter
             sort: ''
         };
         this.products = [];
@@ -244,6 +247,21 @@ class BestsellerProductsPageManager {
             .map(cb => parseInt(cb.value));
         console.log('Selected ratings:', this.currentFilters.ratings);
 
+        // Update age range filters (Mom & Baby)
+        const ageRangeCheckboxes = document.querySelectorAll('input[name="ageRange"]:checked');
+        this.currentFilters.ageRange = Array.from(ageRangeCheckboxes).map(cb => cb.value);
+        console.log('Selected age ranges:', this.currentFilters.ageRange);
+
+        // Update size filters (Mom & Baby)
+        const sizeCheckboxes = document.querySelectorAll('input[name="size"]:checked');
+        this.currentFilters.size = Array.from(sizeCheckboxes).map(cb => cb.value);
+        console.log('Selected sizes:', this.currentFilters.size);
+
+        // Update origin filters (Mom & Baby)
+        const originCheckboxes = document.querySelectorAll('input[name="origin"]:checked');
+        this.currentFilters.origin = Array.from(originCheckboxes).map(cb => cb.value);
+        console.log('Selected origins:', this.currentFilters.origin);
+
         // Update sort filter
         const sortSelect = document.getElementById('sortSelect');
         if (sortSelect) {
@@ -261,6 +279,9 @@ class BestsellerProductsPageManager {
             maxPrice: null,
             brands: [],
             ratings: [],
+            ageRange: [],
+            size: [],
+            origin: [],
             sort: ''
         };
 
@@ -316,6 +337,16 @@ class BestsellerProductsPageManager {
             }
             if (this.currentFilters.ratings && this.currentFilters.ratings.length > 0) {
                 params.append('ratings', this.currentFilters.ratings.join(','));
+            }
+            // Mom & Baby filters
+            if (this.currentFilters.ageRange && this.currentFilters.ageRange.length > 0) {
+                this.currentFilters.ageRange.forEach(age => params.append('ageRange', age));
+            }
+            if (this.currentFilters.size && this.currentFilters.size.length > 0) {
+                this.currentFilters.size.forEach(s => params.append('sizeFilter', s));
+            }
+            if (this.currentFilters.origin && this.currentFilters.origin.length > 0) {
+                this.currentFilters.origin.forEach(o => params.append('origin', o));
             }
             if (this.currentFilters.sort) {
                 // Split the sort value (format: "name,asc" or "price,desc")

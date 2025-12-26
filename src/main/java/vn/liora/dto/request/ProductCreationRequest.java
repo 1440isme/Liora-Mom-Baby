@@ -40,4 +40,9 @@ public class ProductCreationRequest {
     @Builder.Default
     private Boolean isActive = true;
 
+    // Mom & Baby specific fields
+    private String ageRange;
+    private String size;
+    private String volume;
+    private String origin;
 }
