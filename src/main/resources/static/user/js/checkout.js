@@ -133,7 +133,7 @@ class CheckoutPage {
                 // Lấy danh sách sản phẩm đã chọn từ cart
                 const selectedItemsResponse = await this.apiCall(`/CartProduct/${this.cartId}/selected-products`, 'GET');
                 this.selectedItems = selectedItemsResponse;
-                
+
                 this.renderSelectedItems();
                 this.updateOrderSummary();
             } else {
@@ -1337,7 +1337,18 @@ class CheckoutPage {
 
             $('#summary-subtotal').text(this.formatCurrency(subtotal));
             $('#summary-shipping').text(this.shippingFee === 0 ? '0đ' : this.formatCurrency(this.shippingFee));
+
+            // ✅ Reset orderTotalBeforeXu và cập nhật total
+            if (window.checkoutXu && window.checkoutXu.resetOrderTotalBeforeXu) {
+                window.checkoutXu.resetOrderTotalBeforeXu();
+            }
             $('#summary-total').text(this.formatCurrency(total));
+
+            // ✅ Nếu đang sử dụng xu, tính lại xu discount
+            const useXuToggle = document.getElementById('useXuToggle');
+            if (useXuToggle && useXuToggle.checked && window.checkoutXu) {
+                window.checkoutXu.calculateXuDiscount();
+            }
 
             // Luôn hiển thị dòng giảm giá
             if (!$('#discount-row').length) {
@@ -1512,7 +1523,7 @@ class CheckoutPage {
         } catch (error) {
             console.warn('API subtotal failed, using local calculation:', error);
         }
-        
+
         // Fallback: tính từ selectedItems
         return this.calculateSubtotalFromSelectedItems();
     }
@@ -1520,7 +1531,7 @@ class CheckoutPage {
     handleRemovePromo() {
         this.appliedDiscount = null;
         this.updateOrderSummary();
-        
+
         this.showToast('Đã gỡ mã giảm giá', 'info');
 
         // ✅ SỬA: Reset UI về trạng thái ban đầu
@@ -1591,7 +1602,7 @@ class CheckoutPage {
 
             // Nếu không phải VNPAY/MOMO hoặc thanh toán online thất bại, chuyển đến trang thành công
             this.showToast('Đặt hàng thành công!', 'success');
-            
+
             setTimeout(() => {
                 this.redirectToOrderDetail(response.idOrder);
             }, 1500);
@@ -1744,8 +1755,8 @@ class CheckoutPage {
 
     async handleQuantityInputChange(e) {
         await CartUtils.handleQuantityInputChange(
-            e, 
-            this.updateCartProductQuantity.bind(this), 
+            e,
+            this.updateCartProductQuantity.bind(this),
             this.showToast.bind(this),
             this.updateOrderSummary.bind(this) // Callback để cập nhật tổng tiền sau khi thay đổi
         );
@@ -1887,7 +1898,7 @@ class CheckoutPage {
     }
 
     // ========== HELPER METHODS ==========
-    
+
     /**
      * Tính subtotal từ selectedItems
      */
@@ -1895,7 +1906,7 @@ class CheckoutPage {
         if (!this.selectedItems || this.selectedItems.length === 0) {
             return 0;
         }
-        
+
         return this.selectedItems.reduce((total, item) => {
             // Sử dụng totalPrice nếu có, nếu không thì tính từ productPrice * quantity
             const itemTotal = item.totalPrice || (item.productPrice * item.quantity);
@@ -1906,6 +1917,51 @@ class CheckoutPage {
     // ========== API HELPER METHODS ==========
     async apiCall(url, method = 'GET', data = null) {
         return CartUtils.apiCall(url, method, data);
+    }
+
+    async handlePlaceOrder() {
+        try {
+            this.showLoading(true);
+
+            // Get xu discount amount
+            const xuUsed = window.checkoutXu ? window.checkoutXu.getXuDiscount() : 0;
+
+            // Collect order data
+            const orderData = {
+                name: $('#shippingFullName').val(),
+                phone: $('#shippingPhone').val(),
+                email: $('#shippingGmail').val(),
+                addressDetail: $('#shippingAddressDetail').val(),
+                provinceId: parseInt($('#shippingProvince').val()),
+                districtId: parseInt($('#shippingDistrict').val()),
+                wardCode: $('#shippingWard').val(),
+                paymentMethod: $('input[name="paymentMethod"]:checked').val(),
+                note: $('#orderNotes').val() || '',
+                discountCode: this.appliedDiscount?.code || null,
+                xuUsed: xuUsed,
+                cartId: this.cartId
+            };
+
+            // Submit order - URL phải là /order/{cartId}
+            const response = await this.apiCall(`/order/${this.cartId}`, 'POST', orderData);
+
+            if (response && response.orderId) {
+                if (orderData.paymentMethod === 'COD') {
+                    // Redirect đến trang chi tiết đơn hàng
+                    window.location.href = `/user/order-detail-view?orderId=${response.orderId}`;
+                } else if (orderData.paymentMethod === 'VNPay' && response.paymentUrl) {
+                    window.location.href = response.paymentUrl;
+                } else if (orderData.paymentMethod === 'MoMo' && response.paymentUrl) {
+                    window.location.href = response.paymentUrl;
+                } else {
+                    // Fallback nếu không có paymentUrl
+                    window.location.href = `/user/order-detail-view?orderId=${response.orderId}`;
+                }
+            }
+        } catch (error) {
+            this.showLoading(false);
+            this.showToast('Đặt hàng thất bại: ' + (error.message || 'Vui lòng thử lại'), 'error');
+        }
     }
 
     navigateToCart(event) {
@@ -1933,3 +1989,4 @@ $(document).ready(() => {
         window.checkoutPage = new CheckoutPage();
     }
 });
+

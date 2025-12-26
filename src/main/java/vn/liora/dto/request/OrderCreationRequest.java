@@ -33,8 +33,10 @@ public class OrderCreationRequest {
     Integer districtId;
     String wardCode;
     Integer provinceId;
-    
+
     Long cartId;
+
+    java.math.BigDecimal xuUsed; // Số xu sử dụng để thanh toán
 
     // Tổng tiền FE sẽ KHÔNG gửi nữa; BE tự tính và lưu duy nhất.
 }

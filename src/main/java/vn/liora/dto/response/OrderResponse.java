@@ -31,5 +31,6 @@ public class OrderResponse {
     Long discountId;
     String discountName;
     BigDecimal discountValue;
+    BigDecimal xuUsed; // Số xu đã sử dụng để thanh toán
     private Boolean hasReview = false;
 }

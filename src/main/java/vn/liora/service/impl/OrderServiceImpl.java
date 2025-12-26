@@ -184,6 +184,21 @@ public class OrderServiceImpl implements IOrderService {
             order.setTotal(computedTotal);
 
             final Order savedOrder = orderRepository.save(order);
+
+            // ✅ NEW: Process Xu Payment if xuUsed > 0
+            if (request.getXuUsed() != null && request.getXuUsed().compareTo(BigDecimal.ZERO) > 0 && user != null) {
+                try {
+                    walletService.useXuForPayment(
+                            user.getUserId(),
+                            savedOrder.getIdOrder(),
+                            request.getXuUsed());
+                    log.info("Used {} xu for payment in order {}", request.getXuUsed(), savedOrder.getIdOrder());
+                } catch (Exception e) {
+                    log.error("Failed to use xu for payment in order {}: {}", savedOrder.getIdOrder(), e.getMessage());
+                    // Don't rollback order, just log the error
+                }
+            }
+
             // After order persisted, increment discount usage (if a discount was applied)
             try {
                 if (savedOrder.getDiscount() != null) {
@@ -395,13 +410,17 @@ public class OrderServiceImpl implements IOrderService {
             // Cập nhật sold count = số lượng sản phẩm trong đơn hàng khi hoàn tất
             updateSoldCountForOrder(order, true);
 
-            // ✅ THÊM: Cộng xu thưởng vào ví (0.1% tổng đơn hàng)
+            // ✅ THÊM: Cộng xu thưởng vào ví (0.1% tổng đơn hàng - phí ship)
             if (order.getUser() != null) {
                 try {
+                    // Xu thưởng tính trên giá trị đơn hàng KHÔNG bao gồm phí ship
+                    java.math.BigDecimal orderValueForReward = order.getTotal()
+                            .subtract(order.getShippingFee() != null ? order.getShippingFee()
+                                    : java.math.BigDecimal.ZERO);
                     walletService.addRewardPoints(
                             order.getUser().getUserId(),
                             order.getIdOrder(),
-                            order.getTotal());
+                            orderValueForReward);
                     log.info("Added reward points to wallet for order {}", order.getIdOrder());
                 } catch (Exception e) {
                     log.error("Failed to add reward points for order {}: {}", order.getIdOrder(), e.getMessage());
@@ -423,7 +442,11 @@ public class OrderServiceImpl implements IOrderService {
                     // ✅ THÊM: Trừ xu thưởng đã cộng (chỉ trừ tối đa số dư hiện có)
                     if (order.getUser() != null) {
                         try {
-                            java.math.BigDecimal rewardAmount = order.getTotal()
+                            // Xu thưởng tính trên giá trị đơn hàng KHÔNG bao gồm phí ship
+                            java.math.BigDecimal orderValueForReward = order.getTotal()
+                                    .subtract(order.getShippingFee() != null ? order.getShippingFee()
+                                            : java.math.BigDecimal.ZERO);
+                            java.math.BigDecimal rewardAmount = orderValueForReward
                                     .multiply(new java.math.BigDecimal("0.001"));
                             walletService.deductPoints(
                                     order.getUser().getUserId(),

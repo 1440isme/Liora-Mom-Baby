@@ -85,6 +85,8 @@ class UserInfoManager {
 
             this.populateUserData();
             this.loadOrderStats();
+            // Load wallet data ngay khi vào trang để hiển thị trong thống kê chung
+            this.loadWalletDataForStats();
         } catch (error) {
             console.error('Error loading user info:', error);
             this.showError('Không thể tải thông tin người dùng');
@@ -1385,6 +1387,22 @@ class UserInfoManager {
         } catch (error) {
             // Silently fail for stats - not critical
             console.log('Could not load order stats:', error);
+        }
+    }
+
+    async loadWalletDataForStats() {
+        try {
+            // Load wallet balance để hiển thị trong header
+            if (typeof loadWalletData === 'function') {
+                await loadWalletData();
+            }
+            // Load all transactions để tính toán stats chính xác
+            if (typeof loadAllTransactionsForStats === 'function') {
+                await loadAllTransactionsForStats();
+            }
+        } catch (error) {
+            // Silently fail for wallet stats - not critical
+            console.log('Could not load wallet stats:', error);
         }
     }
 

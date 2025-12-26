@@ -6,9 +6,12 @@ let currentFilter = 'ALL';
 let allTransactions = [];
 
 // Load wallet data when wallet tab is shown
-document.getElementById('wallet-tab')?.addEventListener('shown.bs.tab', function () {
-    loadWalletData();
-    loadTransactions();
+document.getElementById('wallet-tab')?.addEventListener('shown.bs.tab', async function () {
+    await loadWalletData();
+    // Load all transactions for accurate stats calculation
+    await loadAllTransactionsForStats();
+    // Then load paginated transactions for display (without recalculating stats)
+    await loadTransactions(0, false);
 });
 
 // Load wallet balance and stats
@@ -69,8 +72,29 @@ async function loadTransactionCount() {
     }
 }
 
+// Load all transactions for stats calculation (loads more transactions for accurate stats)
+async function loadAllTransactionsForStats() {
+    try {
+        // Load a large number of transactions to calculate accurate stats
+        const response = await fetch(`/api/wallet/transactions?page=0&size=1000`);
+
+        if (!response.ok) {
+            throw new Error('Failed to load transactions for stats');
+        }
+
+        const transactions = await response.json();
+
+        // Calculate stats from all transactions
+        calculateWalletStats(transactions);
+
+    } catch (error) {
+        console.error('Error loading transactions for stats:', error);
+        // Silently fail - stats are not critical
+    }
+}
+
 // Load transactions
-async function loadTransactions(page = 0) {
+async function loadTransactions(page = 0, calculateStats = false) {
     try {
         const response = await fetch(`/api/wallet/transactions?page=${page}&size=${transactionsPerPage}`);
 
@@ -81,8 +105,10 @@ async function loadTransactions(page = 0) {
         allTransactions = await response.json();
         currentTransactionPage = page;
 
-        // Calculate stats from transactions
-        calculateWalletStats(allTransactions);
+        // Only calculate stats if explicitly requested (to avoid overriding stats from loadAllTransactionsForStats)
+        if (calculateStats) {
+            calculateWalletStats(allTransactions);
+        }
 
         // Display transactions
         displayTransactions(allTransactions);
@@ -104,6 +130,7 @@ function calculateWalletStats(transactions) {
     let totalRewards = 0;
     let totalRefunds = 0;
     let totalDeductions = 0;
+    let totalPayments = 0;
 
     transactions.forEach(tx => {
         if (tx.type === 'REWARD') {
@@ -112,13 +139,48 @@ function calculateWalletStats(transactions) {
             totalRefunds += tx.amount;
         } else if (tx.type === 'DEDUCTION') {
             totalDeductions += Math.abs(tx.amount); // Deduction is negative, so take absolute
+        } else if (tx.type === 'PAYMENT') {
+            totalPayments += Math.abs(tx.amount); // Payment is negative, so take absolute
         }
     });
 
-    // Show net rewards (rewards earned minus deductions)
-    const netRewards = totalRewards - totalDeductions;
-    document.getElementById('totalRewards').textContent = formatCurrency(netRewards) + ' Xu';
-    document.getElementById('totalRefunds').textContent = formatCurrency(totalRefunds) + ' Xu';
+    // Tính Xu cộng (REFUND + REWARD)
+    const totalAdded = totalRefunds + totalRewards;
+
+    // Tính Xu trừ (DEDUCTION + PAYMENT)
+    const totalDeducted = totalDeductions + totalPayments;
+
+    // Hiển thị Xu cộng và Xu trừ
+    const totalAddedEl = document.getElementById('totalAdded');
+    if (totalAddedEl) {
+        totalAddedEl.textContent = formatCurrency(totalAdded) + ' Xu';
+    }
+
+    const totalDeductedEl = document.getElementById('totalDeducted');
+    if (totalDeductedEl) {
+        totalDeductedEl.textContent = formatCurrency(totalDeducted) + ' Xu';
+    }
+
+    // Hiển thị chi tiết
+    const totalRewardsDetailEl = document.getElementById('totalRewardsDetail');
+    if (totalRewardsDetailEl) {
+        totalRewardsDetailEl.textContent = `Thưởng: ${formatCurrency(totalRewards)}`;
+    }
+
+    const totalRefundsDetailEl = document.getElementById('totalRefundsDetail');
+    if (totalRefundsDetailEl) {
+        totalRefundsDetailEl.textContent = `Hoàn: ${formatCurrency(totalRefunds)}`;
+    }
+
+    const totalPaymentsDetailEl = document.getElementById('totalPaymentsDetail');
+    if (totalPaymentsDetailEl) {
+        totalPaymentsDetailEl.textContent = `Thanh toán: ${formatCurrency(totalPayments)}`;
+    }
+
+    const totalDeductionsDetailEl = document.getElementById('totalDeductionsDetail');
+    if (totalDeductionsDetailEl) {
+        totalDeductionsDetailEl.textContent = `Hủy: ${formatCurrency(totalDeductions)}`;
+    }
 }
 
 // Display transactions
@@ -186,6 +248,11 @@ function getTransactionTypeInfo(type) {
             label: 'Trừ xu',
             icon: 'mdi-minus-circle',
             colorClass: 'bg-warning'
+        },
+        'PAYMENT': {
+            label: 'Thanh toán',
+            icon: 'mdi-cart',
+            colorClass: 'bg-primary'
         }
     };
 
@@ -259,6 +326,20 @@ function formatDateTime(dateString) {
 function getToken() {
     return localStorage.getItem('token') || '';
 }
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    // Try to use global toast function if available
+    if (typeof AdminUtils !== 'undefined' && typeof AdminUtils.showToast === 'function') {
+        AdminUtils.showToast(message, type);
+    } else if (typeof toast !== 'undefined') {
+        toast(message);
+    } else {
+        // Fallback to console
+        console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+}
+
 
 // Show toast notification
 function showToast(message, type = 'info') {

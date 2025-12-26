@@ -25,14 +25,14 @@ public interface IWalletService {
     WalletResponse getWalletByUserId(Long userId);
 
     /**
-     * Cộng xu thưởng khi đơn hàng hoàn thành (0.1% tổng đơn hàng)
+     * Cộng xu thưởng khi đơn hàng hoàn thành (0.1% giá trị sản phẩm, không bao gồm phí ship)
      * 
      * @param userId     ID của user
      * @param orderId    ID của đơn hàng
-     * @param orderTotal Tổng giá trị đơn hàng
+     * @param orderValue Giá trị đơn hàng (đã trừ phí ship)
      * @return WalletResponse sau khi cộng xu
      */
-    WalletResponse addRewardPoints(Long userId, Long orderId, BigDecimal orderTotal);
+    WalletResponse addRewardPoints(Long userId, Long orderId, BigDecimal orderValue);
 
     /**
      * Hoàn tiền vào ví khi đơn hàng bị hủy (100% giá trị đơn hàng)
@@ -54,6 +54,17 @@ public interface IWalletService {
      * @return WalletResponse sau khi trừ xu
      */
     WalletResponse deductPoints(Long userId, Long orderId, BigDecimal amount);
+
+    /**
+     * Sử dụng xu để thanh toán đơn hàng
+     * Trừ xu từ ví khi thanh toán
+     * 
+     * @param userId  ID của user
+     * @param orderId ID của đơn hàng
+     * @param amount  Số xu sử dụng
+     * @return WalletResponse sau khi trừ xu
+     */
+    WalletResponse useXuForPayment(Long userId, Long orderId, BigDecimal amount);
 
     /**
      * Lấy lịch sử giao dịch của ví (phân trang)

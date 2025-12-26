@@ -225,7 +225,8 @@
                             <div id="selected-items-container">
                                 <!-- Sản phẩm đã chọn sẽ được load động từ API -->
                                 <div class="text-center py-4">
-                                    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.3em; color: #e8a2b0;">
+                                    <div class="spinner-border" role="status"
+                                        style="width: 3rem; height: 3rem; border-width: 0.3em; color: #e8a2b0;">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
                                     <p class="text-muted mt-2">Đang tải sản phẩm...</p>
@@ -261,9 +262,51 @@
                                 <span id="summary-shipping" class="fw-medium">0đ</span>
                             </div>
 
+                            <!-- Liora Xu Section -->
+                            <div class="summary-row" id="xuDiscountRow" style="display: none; color: #28a745;">
+                                <span><i class="mdi mdi-wallet"></i> Giảm từ Liora Xu</span>
+                                <span id="summary-xu-discount" class="fw-medium">-0đ</span>
+                            </div>
+
                             <div class="summary-row total">
                                 <span>Tổng thanh toán</span>
                                 <span id="summary-total" class="fw-bold">0đ</span>
+                            </div>
+
+                            <!-- Use Liora Xu Toggle -->
+                            <div class="use-xu-section mt-3 mb-3"
+                                style="border-top: 1px solid #eee; padding-top: 15px;">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="useXuToggle"
+                                        style="cursor: pointer;">
+                                    <label class="form-check-label" for="useXuToggle" style="cursor: pointer;">
+                                        <i class="mdi mdi-wallet text-primary"></i>
+                                        <strong>Sử dụng Liora Xu để thanh toán</strong>
+                                    </label>
+                                </div>
+                                <div id="xuBalanceInfo" class="mt-2" style="display: none; font-size: 0.9rem;">
+                                    <div class="d-flex justify-content-between text-muted">
+                                        <span>Số dư hiện tại:</span>
+                                        <span id="currentXuBalance" class="fw-medium">0 Xu</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-success mt-1">
+                                        <span>Sẽ sử dụng:</span>
+                                        <span id="xuToUse" class="fw-medium">0 Xu</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted mt-1">
+                                        <span>Còn lại sau thanh toán:</span>
+                                        <span id="xuAfterPayment" class="fw-medium">0 Xu</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reward Preview -->
+                            <div class="reward-preview mb-3"
+                                style="background: #f0f8ff; padding: 10px; border-radius: 8px; border-left: 3px solid #667eea;">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="mdi mdi-gift"></i> Xu thưởng từ đơn hàng này:
+                                </small>
+                                <strong id="rewardPreview" style="color: #667eea; font-size: 1.1rem;">0 Xu</strong>
                             </div>
 
                             <button type="submit" form="checkoutForm" class="btn btn-checkout">
@@ -282,7 +325,8 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay" style="display: none;">
         <div class="text-center py-4">
-            <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.3em; color: #e8a2b0;">
+            <div class="spinner-border" role="status"
+                style="width: 3rem; height: 3rem; border-width: 0.3em; color: #e8a2b0;">
                 <span class="visually-hidden">Loading...</span>
             </div>
             <p class="text-muted mt-2">Đang xử lý...</p>
@@ -298,6 +342,7 @@
     <script th:src="@{/user/js/auth.js}"></script>
     <script th:src="@{/user/js/cart-utils.js}"></script>
     <script th:src="@{/user/js/checkout.js}"></script>
+    <script th:src="@{/user/js/checkout-xu.js}"></script>
 
     <!-- Demo Script for Frontend Display -->
     <script>
