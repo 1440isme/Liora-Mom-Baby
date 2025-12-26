@@ -50,7 +50,7 @@ public class AdminPageController {
             default -> dashboardService.getRevenueByTime(groupType, startDate, endDate);
         };
     }
-    
+
     // API lấy đơn hàng gần đây theo khoảng thời gian
     @GetMapping("/analytics/recent-orders")
     @ResponseBody
@@ -71,7 +71,7 @@ public class AdminPageController {
                 })
                 .collect(Collectors.toList());
     }
-    
+
     // API lấy sản phẩm bán chạy theo khoảng thời gian
     @GetMapping("/analytics/top-products")
     @ResponseBody
@@ -92,7 +92,7 @@ public class AdminPageController {
                 })
                 .collect(Collectors.toList());
     }
-    
+
     // API lấy tổng doanh thu theo khoảng thời gian
     @GetMapping("/analytics/total-revenue")
     @ResponseBody
@@ -103,7 +103,7 @@ public class AdminPageController {
         result.put("totalRevenue", dashboardService.getTotalRevenueByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy tổng đơn hàng theo khoảng thời gian
     @GetMapping("/analytics/total-orders")
     @ResponseBody
@@ -114,7 +114,7 @@ public class AdminPageController {
         result.put("totalOrders", dashboardService.getTotalOrdersByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy tổng số khách hàng theo khoảng thời gian
     @GetMapping("/analytics/total-customers")
     @ResponseBody
@@ -125,14 +125,14 @@ public class AdminPageController {
         result.put("totalCustomers", dashboardService.getTotalCustomersByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy dữ liệu khách hàng mới theo tháng
     @GetMapping("/customers/new-by-month")
     @ResponseBody
     public Map<String, Long> getNewCustomersByMonth() {
         return dashboardService.getNewCustomersByMonth();
     }
-    
+
     // API lấy số sản phẩm được bán theo khoảng thời gian
     @GetMapping("/analytics/total-products-sold")
     @ResponseBody
@@ -143,7 +143,7 @@ public class AdminPageController {
         result.put("totalProductsSold", dashboardService.countSoldProductsByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy số thương hiệu được bán theo khoảng thời gian
     @GetMapping("/analytics/total-brands-sold")
     @ResponseBody
@@ -164,7 +164,7 @@ public class AdminPageController {
         Map<String, Object> result = new HashMap<>();
         result.put("newCustomers", dashboardService.getNewCustomersByDateRange(startDate, endDate));
         result.put("returningCustomers", dashboardService.getReturningCustomersByDateRange(startDate, endDate));
-        
+
         // Convert List<TopCustomerResponse> to List<Map>
         List<TopCustomerResponse> topCustomers = dashboardService.getTopCustomersByDateRange(10, startDate, endDate);
         result.put("topCustomers", topCustomers.stream()
@@ -178,7 +178,7 @@ public class AdminPageController {
                     return map;
                 })
                 .collect(Collectors.toList()));
-        
+
         return result;
     }
 
@@ -299,6 +299,14 @@ public class AdminPageController {
         return "admin/users/edit";
     }
 
+    @GetMapping("/users/wallet")
+    @PreAuthorize("hasAuthority('wallet.view')")
+    public String userWallet(@RequestParam Long userId, Model model) {
+        addCurrentUserToModel(model);
+        model.addAttribute("userId", userId);
+        return "admin/users/wallet";
+    }
+
     // Roles
     @GetMapping("/roles")
     @PreAuthorize("hasAuthority('role.view')")
@@ -329,7 +337,7 @@ public class AdminPageController {
         return "admin/permissions/manage";
     }
 
-    //Analytics
+    // Analytics
     @GetMapping("/analytics")
     public String analytics(Model model) {
         addCurrentUserToModel(model);

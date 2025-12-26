@@ -31,6 +31,7 @@ import vn.liora.service.IOrderService;
 import vn.liora.service.IProductService;
 import vn.liora.service.IGhnShippingService;
 import vn.liora.service.EmailService;
+import vn.liora.service.IWalletService;
 import vn.liora.entity.Discount;
 import vn.liora.repository.DiscountRepository;
 
@@ -59,6 +60,7 @@ public class OrderServiceImpl implements IOrderService {
     IGhnShippingService ghnShippingService;
     EmailService emailService;
     GhnShippingRepository ghnShippingRepository;
+    IWalletService walletService;
 
     @Override
     @Transactional
@@ -182,6 +184,21 @@ public class OrderServiceImpl implements IOrderService {
             order.setTotal(computedTotal);
 
             final Order savedOrder = orderRepository.save(order);
+
+            // ✅ NEW: Process Xu Payment if xuUsed > 0
+            if (request.getXuUsed() != null && request.getXuUsed().compareTo(BigDecimal.ZERO) > 0 && user != null) {
+                try {
+                    walletService.useXuForPayment(
+                            user.getUserId(),
+                            savedOrder.getIdOrder(),
+                            request.getXuUsed());
+                    log.info("Used {} xu for payment in order {}", request.getXuUsed(), savedOrder.getIdOrder());
+                } catch (Exception e) {
+                    log.error("Failed to use xu for payment in order {}: {}", savedOrder.getIdOrder(), e.getMessage());
+                    // Don't rollback order, just log the error
+                }
+            }
+
             // After order persisted, increment discount usage (if a discount was applied)
             try {
                 if (savedOrder.getDiscount() != null) {
@@ -392,6 +409,24 @@ public class OrderServiceImpl implements IOrderService {
 
             // Cập nhật sold count = số lượng sản phẩm trong đơn hàng khi hoàn tất
             updateSoldCountForOrder(order, true);
+
+            // ✅ THÊM: Cộng xu thưởng vào ví (0.1% tổng đơn hàng - phí ship)
+            if (order.getUser() != null) {
+                try {
+                    // Xu thưởng tính trên giá trị đơn hàng KHÔNG bao gồm phí ship
+                    java.math.BigDecimal orderValueForReward = order.getTotal()
+                            .subtract(order.getShippingFee() != null ? order.getShippingFee()
+                                    : java.math.BigDecimal.ZERO);
+                    walletService.addRewardPoints(
+                            order.getUser().getUserId(),
+                            order.getIdOrder(),
+                            orderValueForReward);
+                    log.info("Added reward points to wallet for order {}", order.getIdOrder());
+                } catch (Exception e) {
+                    log.error("Failed to add reward points for order {}: {}", order.getIdOrder(), e.getMessage());
+                    // Không throw exception để không rollback đơn hàng
+                }
+            }
         } else {
             // Cập nhật trạng thái thanh toán cho các trường hợp khác
             if ("CANCELLED".equals(newOrderStatus)) {
@@ -403,6 +438,39 @@ public class OrderServiceImpl implements IOrderService {
                 // Nếu chuyển từ COMPLETED về CANCELLED, cần giảm sold count
                 if ("COMPLETED".equals(currentOrderStatus)) {
                     updateSoldCountForOrder(order, false);
+
+                    // ✅ THÊM: Trừ xu thưởng đã cộng (chỉ trừ tối đa số dư hiện có)
+                    if (order.getUser() != null) {
+                        try {
+                            // Xu thưởng tính trên giá trị đơn hàng KHÔNG bao gồm phí ship
+                            java.math.BigDecimal orderValueForReward = order.getTotal()
+                                    .subtract(order.getShippingFee() != null ? order.getShippingFee()
+                                            : java.math.BigDecimal.ZERO);
+                            java.math.BigDecimal rewardAmount = orderValueForReward
+                                    .multiply(new java.math.BigDecimal("0.001"));
+                            walletService.deductPoints(
+                                    order.getUser().getUserId(),
+                                    order.getIdOrder(),
+                                    rewardAmount);
+                            log.info("Deducted reward points from wallet for cancelled order {}", order.getIdOrder());
+                        } catch (Exception e) {
+                            log.error("Failed to deduct reward points for order {}: {}", order.getIdOrder(),
+                                    e.getMessage());
+                        }
+                    }
+                }
+
+                // ✅ THÊM: Hoàn tiền vào ví khi đơn hàng bị hủy sau khi đã thanh toán
+                if ("PAID".equals(currentPaymentStatus) && order.getUser() != null) {
+                    try {
+                        walletService.addRefund(
+                                order.getUser().getUserId(),
+                                order.getIdOrder(),
+                                order.getTotal());
+                        log.info("Added refund to wallet for cancelled order {}", order.getIdOrder());
+                    } catch (Exception e) {
+                        log.error("Failed to add refund for order {}: {}", order.getIdOrder(), e.getMessage());
+                    }
                 }
             } else if ("PENDING".equals(newOrderStatus) || "CONFIRMED".equals(newOrderStatus)) {
                 // Nếu đơn hàng từ COMPLETED chuyển về PENDING/CONFIRMED và đã hoàn tiền, chuyển

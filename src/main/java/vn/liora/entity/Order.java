@@ -40,6 +40,10 @@ public class Order {
     @Builder.Default
     BigDecimal shippingFee = BigDecimal.ZERO;
 
+    @Column(name = "XuUsed", columnDefinition = "DECIMAL(18,2) DEFAULT 0")
+    @Builder.Default
+    BigDecimal xuUsed = BigDecimal.ZERO;
+
     @Column(name = "Name", nullable = false, columnDefinition = "NVARCHAR(255)")
     String name;
     @Column(name = "Phone", nullable = false)

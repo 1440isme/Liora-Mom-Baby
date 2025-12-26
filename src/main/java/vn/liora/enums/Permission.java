@@ -72,6 +72,9 @@ public enum Permission {
     DISCOUNT_UPDATE("discount.update", "Sửa mã giảm giá", PermissionCategory.DISCOUNTS),
     DISCOUNT_DELETE("discount.delete", "Xóa mã giảm giá", PermissionCategory.DISCOUNTS),
 
+    // VÍ LIORA XU
+    WALLET_VIEW("wallet.view", "Xem ví người dùng", PermissionCategory.WALLET),
+
     // HỆ THỐNG
     SYSTEM_SETTINGS("system.settings", "Cài đặt hệ thống", PermissionCategory.SYSTEM),
     SYSTEM_LOGS("system.logs", "Xem logs hệ thống", PermissionCategory.SYSTEM);
