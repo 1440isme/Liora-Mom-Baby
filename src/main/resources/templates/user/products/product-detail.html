@@ -870,7 +870,7 @@
 
 
                         <!-- Action Buttons -->
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 flex-wrap">
                             <!-- Add to Cart Button -->
                             <button th:if="${product.stock > 0 and product.isActive}"
                                 class="btn btn-pink btn-lg text-white fw-semibold" onclick="addToCart()"
@@ -893,6 +893,13 @@
                                 th:data-product-id="${product.productId}" th:data-product-name="${product.name}"
                                 th:data-product-price="${product.price}">
                                 Mua ngay
+                            </button>
+
+                            <!-- Compare Button -->
+                            <button class="btn btn-outline-primary btn-lg fw-semibold product-detail-compare-btn compare-btn"
+                                th:data-product-id="${product.productId}"
+                                title="Thêm vào danh sách so sánh">
+                                <i class="fas fa-balance-scale me-2"></i>So sánh
                             </button>
                         </div>
 
@@ -1135,6 +1142,7 @@
     <script th:src="@{/user/js/products.js}"></script>
     <script th:src="@{/user/js/product-detail.js}"></script>
     <script th:src="@{/user/js/recently-viewed-manager.js}"></script>
+    <script th:src="@{/user/js/product-comparison.js}"></script>
 
     <script>
         // Gallery Functions with Debug

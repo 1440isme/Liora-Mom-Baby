@@ -265,6 +265,10 @@ class BrandProductsManager {
             if (window.loadProductRatings) {
                 window.loadProductRatings();
             }
+            // Update compare buttons state
+            if (window.productComparisonManager) {
+                window.productComparisonManager.updateCompareButtons();
+            }
         }, 500);
     }
 
@@ -288,8 +292,17 @@ class BrandProductsManager {
                              style="cursor: pointer;">
                         
                     <!-- Product Status Badge - Removed to avoid overlapping with image -->
-                        
-                        <div class="product-actions">
+                    
+                    <!-- Nút So sánh - Ở góc trái riêng biệt -->
+                    <button class="compare-btn" 
+                            data-product-id="${product.productId}"
+                            title="Thêm vào danh sách so sánh">
+                        <i class="fas fa-balance-scale"></i>
+                        <span class="d-none d-md-inline">So sánh</span>
+                    </button>
+                    
+                    <!-- Product Actions - Ở góc phải -->
+                    <div class="product-actions">
                         <button class="quick-view-btn" 
                                 onclick="if(window.app) window.app.showQuickView(${product.productId}); else alert('Chức năng đang được tải...');"
                                 title="Xem nhanh">
