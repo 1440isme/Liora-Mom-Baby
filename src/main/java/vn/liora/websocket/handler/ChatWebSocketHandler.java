@@ -24,6 +24,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final MessageService messageService;
     private final ObjectMapper objectMapper;
+    private final vn.liora.repository.UserRepository userRepository;
 
     private static final Map<String, Set<WebSocketSession>> ROOMS = new ConcurrentHashMap<>();
     private static final Map<WebSocketSession, UserCtx> CONTEXT = new ConcurrentHashMap<>();
@@ -46,34 +47,42 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     // CONNECT
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        HttpSession httpSession = (HttpSession) session.getAttributes().get("httpSession");
-        if (httpSession == null) {
-            session.close();
-            return;
-        }
-
-        User currentUser = (User) httpSession.getAttribute("currentUser");
+        User currentUser = (User) session.getAttributes().get("currentUser");
         if (currentUser == null) {
+            System.err.println("[WS] currentUser is null, closing session " + session.getId());
             session.close();
             return;
         }
+        System.out.println("[WS] User connected: " + currentUser.getUsername() + ", session: " + session.getId());
 
-        String room = Objects.requireNonNull(session.getUri())
-                .getPath().replaceAll(".*/", "");
+        String room = null;
+        try {
+            room = Objects.requireNonNull(session.getUri()).getPath().replaceAll(".*/", "");
+        } catch (Exception e) {
+            System.err.println("[WS] Cannot extract room from URI: " + session.getUri());
+            session.close();
+            return;
+        }
+        if (room == null || room.isEmpty()) {
+            System.err.println("[WS] Room is null or empty, closing session " + session.getId());
+            session.close();
+            return;
+        }
 
         UserCtx ctx = new UserCtx();
         ctx.room = room;
         ctx.userId = currentUser.getUserId();
         ctx.username = currentUser.getUsername();
-        ctx.role = currentUser.getRoles().toString();
+        ctx.role = currentUser.getRoles().stream().findFirst().map(r -> r.getName()).orElse("USER");
 
         CONTEXT.put(session, ctx);
         ROOMS.computeIfAbsent(room, k -> ConcurrentHashMap.newKeySet()).add(session);
+        System.out.println("[WS] User " + ctx.username + " joined room: " + room);
 
         // SEND HISTORY
         var historyMessages = messageService.findRecentByRoom(room, 50)
                 .stream()
-                .map(m -> ChatMessageMapper.toResponse(m, "CHAT"))
+                .map(m -> ChatMessageMapper.toResponse(m, "CHAT", userRepository))
                 .toList();
 
         ChatHistoryResponse historyResponse = ChatHistoryResponse.builder()
@@ -82,9 +91,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 .messages(historyMessages)
                 .build();
 
-        session.sendMessage(
+        try {
+            session.sendMessage(
                 new TextMessage(objectMapper.writeValueAsString(historyResponse))
-        );
+            );
+        } catch (Exception e) {
+            System.err.println("[WS] Error sending history to user " + ctx.username + ": " + e.getMessage());
+            e.printStackTrace();
+            session.close();
+            return;
+        }
 
         // ===== BROADCAST JOIN =====
         broadcast(room, ChatMessageResponse.builder()
@@ -129,7 +145,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         // BROADCAST CHAT
         ChatMessageResponse response =
-                ChatMessageMapper.toResponse(entity, "CHAT");
+                ChatMessageMapper.toResponse(entity, "CHAT", userRepository);
 
         broadcast(ctx.room, response);
     }
@@ -153,14 +169,35 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    // PUBLIC METHOD để admin controller có thể gọi
+    public void broadcastMessage(String room, Object payload) {
+        broadcast(room, payload);
+    }
+    
     // BROADCAST
     private void broadcast(String room, Object payload) {
         try {
             String json = objectMapper.writeValueAsString(payload);
-            for (WebSocketSession s : ROOMS.getOrDefault(room, Set.of())) {
-                s.sendMessage(new TextMessage(json));
+            Set<WebSocketSession> sessions = ROOMS.getOrDefault(room, Set.of());
+            System.out.println("[WS] Broadcasting to room: " + room + ", sessions: " + sessions.size());
+            
+            for (WebSocketSession s : sessions) {
+                try {
+                    if (s.isOpen()) {
+                        s.sendMessage(new TextMessage(json));
+                        System.out.println("[WS] Message sent to session: " + s.getId());
+                    } else {
+                        System.out.println("[WS] Session " + s.getId() + " is closed, removing from room");
+                        ROOMS.getOrDefault(room, Set.of()).remove(s);
+                    }
+                } catch (Exception e) {
+                    System.err.println("[WS] Error sending to session " + s.getId() + ": " + e.getMessage());
+                    // Remove closed session
+                    ROOMS.getOrDefault(room, Set.of()).remove(s);
+                }
             }
         } catch (Exception e) {
+            System.err.println("[WS] Error in broadcast: " + e.getMessage());
             e.printStackTrace();
         }
     }

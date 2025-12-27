@@ -119,6 +119,7 @@ public class SecurityConfig {
                 return httpSecurity
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(getAllPublicEndpoints()).permitAll()
+                                                .requestMatchers("/ws/chat/**").permitAll()
                                                 .requestMatchers("/info").authenticated()
                                                 .requestMatchers("/users/myInfo").authenticated()
                                                 .requestMatchers("/users/uploadAvatar").authenticated()

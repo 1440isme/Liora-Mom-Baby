@@ -58,4 +58,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     ORDER BY YEAR(u.createdDate), MONTH(u.createdDate)
     """)
     List<Object[]> countNewCustomersByMonth(java.time.LocalDateTime startDate);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username")
+    Optional<User> findByUsernameFetchRoles(String username);
 }

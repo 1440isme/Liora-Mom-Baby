@@ -1,53 +1,29 @@
 <div th:fragment="chatbot-button">
     <!--  Floating Chatbot Button -->
-    <div class="chatbot-btn"
-         style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
-        <button class="openChatbot btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
-                style="width: 60px; height: 60px; background-color: rgb(215, 141, 160); border: none;">
-            <i class="fas fa-comments fs-4 text-white"></i>
+    <div class="chatbot-btn">
+        <button class="openChatbot">
+          <i class="fas fa-comments"></i>
         </button>
-    </div>
-
-    <!-- 🤖 Floating Chatbot Window -->
-    <div class="chatbot-window"
-         style="
-            display:none;
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 340px;
-            height: 460px;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-            z-index: 9999;
-            overflow: hidden;
-            font-family: 'Nunito', sans-serif;
-         ">
+      </div>
+      
+      <!-- 🤖 Floating Chatbot Window -->
+      <div class="chatbot-window">
+      
         <!-- Header -->
-        <div style="background-color:rgb(215, 141, 160); color:white; padding:12px 15px; font-weight:600;
-                    display:flex; align-items:center; justify-content:space-between;">
-            <div><i class="fas fa-spa me-1"></i>  Liora Chatbot</div>
-            <button type="button"
-                    onclick="document.querySelector('.chatbot-window').style.display='none'"
-                    style="background:none;border:none;color:white;font-size:18px;">×</button>
+        <div class="chatbot-header">
+          <div><i class="fas fa-spa me-1"></i> Liora Chatbot</div>
+          <button onclick="document.querySelector('.chatbot-window').style.display='none'">×</button>
         </div>
-
-    <!-- Chat content -->
-        <div class="chat-content"
-             style="height:355px; overflow-y:auto; padding:12px; background:#f8f9fa;">
-        </div>
-
+      
+        <!-- Chat content -->
+        <div class="chat-content"></div>
+      
         <!-- Input area -->
-        <div class="chat-input-area"
-             style="padding:8px 10px; border-top:1px solid #ddd; background:white; display:flex; align-items:center;">
-            <input class="chat-input form-control form-control-sm me-2 rounded-pill"
-                   placeholder="Nhập tin nhắn...">
-            <button class="send-btn btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                    style="background-color:rgb(215, 141, 160); width:36px; height:36px;"
-            >
-                <i class="fas fa-paper-plane text-white"></i>
-            </button>
+        <div class="chat-input-area">
+          <input class="chat-input" placeholder="Nhập tin nhắn...">
+          <button class="send-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
         </div>
     </div>
     
@@ -94,6 +70,145 @@
         .chatbot-window img:hover {
             transform: scale(1.1);
         }
+
+        /* Floating button */
+.chatbot-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.chatbot-btn .openChatbot {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d78da0, #e8a2b0);
+  border: none;
+  box-shadow: 0 4px 20px rgba(215, 141, 160, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .3s ease;
+}
+
+.chatbot-btn .openChatbot:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(215, 141, 160, 0.6);
+}
+
+.chatbot-btn i {
+  font-size: 22px;
+  color: white;
+}
+
+/* Chat window */
+.chatbot-window {
+  display: none;
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 380px;
+  height: 520px;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(215, 141, 160, 0.3);
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  z-index: 9999;
+  animation: slideUp .3s ease;
+}
+
+/* Header */
+.chatbot-header {
+  background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+  color: white;
+  padding: 20px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(215, 141, 160, 0.2);
+}
+
+.chatbot-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Content */
+.chat-content {
+  height: calc(520px - 140px);
+  max-height: calc(80vh - 140px);
+  padding: 20px;
+  background: #f8f9fa;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Input */
+.chat-input-area {
+  padding: 16px 20px;
+  border-top: 1px solid #f5d7db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: white;
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  border-radius: 24px;
+  border: 2px solid #f5d7db;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  height: 44px;
+  box-sizing: border-box;
+  align-self: center;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: #d78da0;
+  box-shadow: 0 0 0 3px rgba(215, 141, 160, 0.15);
+}
+
+.send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(215, 141, 160, 0.2);
+  cursor: pointer;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(215, 141, 160, 0.3);
+  background: linear-gradient(90deg, #b85c7a 0%, #d78da0 100%);
+}
+
+.send-btn i {
+  color: white;
+  font-size: 16px;
+}
     </style>
     
     <script>
@@ -134,40 +249,47 @@
         // Database will be loaded when chatbot is opened
 
         // Create message element with dynamic classes and return it
-        const createMessageElement = (message, sender) => {
+        const createMessageElement = (message, sender = 'bot') => {
             const msgDiv = document.createElement('div');
-            msgDiv.className = `${sender}-message mb-2 d-flex ${sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`;
+            msgDiv.className = `message-item ${sender}-message`;
+            msgDiv.style.marginBottom = '12px';
             
             if (sender === 'bot') {
                 msgDiv.innerHTML = `
-                    <div class="d-flex align-items-start">
+                    <div style="display:flex; align-items:flex-end; gap:8px; justify-content:flex-start;">
                         <img src="/uploads/users/2025/10/08/avatars/07ccb057-9d2e-4412-b574-17cabf3cbad6.png" 
                              alt="Liora Avatar" 
-                             style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover;">
+                             style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #f5d7db; flex-shrink: 0;"
+                             onerror="this.src='/user/img/default-product.jpg'">
                         <div class="message-bubble" style="
-                            display:inline-block;
-                            background-color:#e9ecef;
-                            color:black;
-                            padding:8px 12px;
-                            border-radius:15px;
                             max-width:75%;
+                            background:#fff;
+                            border:1px solid #f5d7db;
+                            color:#333;
+                            border-radius:18px 18px 18px 4px;
+                            padding:12px 16px;
+                            box-shadow:0 2px 8px rgba(0,0,0,0.05);
+                            font-size:0.95rem;
+                            line-height:1.5;
                             word-wrap:break-word;
-                            text-align:left;
                         ">${message}</div>
                     </div>
                 `;
             } else {
                 msgDiv.innerHTML = `
-                    <div class="message-bubble" style="
-                        display:inline-block;
-                        background-color:#fdecef;
-                        color:#b94b6f;
-                        padding:8px 12px;
-                        border-radius:15px;
-                        max-width:75%;
-                        word-wrap:break-word;
-                        text-align:left;
-                    ">${message}</div>
+                    <div style="display:flex; justify-content:flex-end; align-items:flex-end; gap:8px;">
+                        <div class="message-bubble" style="
+                            max-width:75%;
+                            background:linear-gradient(135deg, #d78da0 0%, #e8a2b0 100%);
+                            color:#fff;
+                            border-radius:18px 18px 4px 18px;
+                            padding:12px 16px;
+                            box-shadow:0 2px 8px rgba(215, 141, 160, 0.2);
+                            font-size:0.95rem;
+                            line-height:1.5;
+                            word-wrap:break-word;
+                        ">${message}</div>
+                    </div>
                 `;
             }
             return msgDiv;
@@ -308,7 +430,7 @@
                     await loadDatabaseData();
 
                     if (databaseData) {
-                        const successMsg = createMessageElement('🌸 Chào bạn! Mình là Liora – trợ lý tư vấn mẹ và bé của Liora. Bạn cần tìm sản phẩm cho bé hay cho mẹ ạ?');
+                        const successMsg = createMessageElement('🌸 Chào bạn! Mình là Liora – trợ lý tư vấn mẹ và bé của Liora. Bạn cần tìm sản phẩm cho bé hay cho mẹ ạ?', 'bot');
                         chatContent.appendChild(successMsg);
                         chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
                     } else {

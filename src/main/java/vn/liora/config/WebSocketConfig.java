@@ -1,7 +1,7 @@
 package vn.liora.config;
 
 import vn.liora.websocket.handler.ChatWebSocketHandler;
-import vn.liora.websocket.interceptor.HttpSessionHandshakeInterceptor;
+import vn.liora.websocket.interceptor.JwtHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
@@ -12,12 +12,12 @@ import org.springframework.web.socket.config.annotation.*;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final ChatWebSocketHandler chatWebSocketHandler;
-    private final HttpSessionHandshakeInterceptor handshakeInterceptor;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler, "/ws/chat/{room}")
-                .addInterceptors(handshakeInterceptor)
-                .setAllowedOrigins("*");
+            .addInterceptors(jwtHandshakeInterceptor)
+            .setAllowedOrigins("*");
     }
 }
