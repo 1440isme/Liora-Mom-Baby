@@ -8,41 +8,34 @@
 </head>
 
 <body>
-    <!-- Statistics Cards -->
-    <div class="row">
-        <!-- Total Revenue Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Tổng doanh thu
-                            </div>
-                            <span id="totalRevenueDisplay" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
-
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <!-- Statistics Cards - Compact Design: 5 cards per row -->
+    <style>
+        @media (min-width: 1200px) {
+            .stats-row-5 > div {
+                flex: 0 0 20%;
+                max-width: 20%;
+            }
+        }
+    </style>
+    <div class="row stats-row-5">
         <!-- Total Orders Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                                                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Tổng đơn hàng thành công
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-success shadow-sm h-100 py-2" style="border-left: 3px solid #28a745 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-shopping-cart me-1"></i>Đơn hàng
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tổng số đơn hàng đã hoàn thành (COMPLETED) trong khoảng thời gian được chọn"></i>
                             </div>
-                            <div id="totalOrdersDisplay" class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalOrders}">0</div>
+                            <div id="totalOrdersDisplay" class="h6 mb-0 font-weight-bold text-gray-800" th:text="${totalOrders}" style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -50,18 +43,23 @@
         </div>
 
         <!-- Total Products Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div id="totalProductsLabel" class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Sản phẩm được bán
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-info shadow-sm h-100 py-2" style="border-left: 3px solid #17a2b8 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div id="totalProductsLabel" class="text-xs font-weight-bold text-info text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-box me-1"></i>Sản phẩm
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tổng số sản phẩm unique đã được bán trong khoảng thời gian (mỗi sản phẩm chỉ đếm 1 lần)"></i>
                             </div>
-                            <div id="totalProductsDisplay" class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalProducts}">0</div>
+                            <div id="totalProductsDisplay" class="h6 mb-0 font-weight-bold text-gray-800" th:text="${totalProducts}" style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        <div class="text-info opacity-50">
+                            <i class="fas fa-box fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -69,18 +67,190 @@
         </div>
 
         <!-- Total Brands Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div id="totalBrandsLabel" class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Thương hiệu được bán
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-warning shadow-sm h-100 py-2" style="border-left: 3px solid #ffc107 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div id="totalBrandsLabel" class="text-xs font-weight-bold text-warning text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-tags me-1"></i>Thương hiệu
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tổng số thương hiệu unique đã có sản phẩm được bán trong khoảng thời gian"></i>
                             </div>
-                            <div id="totalBrandsDisplay" class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalBrands}">0</div>
+                            <div id="totalBrandsDisplay" class="h6 mb-0 font-weight-bold text-gray-800" th:text="${totalBrands}" style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-tags fa-2x text-gray-300"></i>
+                        <div class="text-warning opacity-50">
+                            <i class="fas fa-tags fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Order Value Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-info shadow-sm h-100 py-2" style="border-left: 3px solid #17a2b8 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-shopping-bag me-1"></i>Giá trị TB/Đơn
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Giá trị trung bình mỗi đơn hàng. Công thức: Tổng doanh thu / Số đơn hàng"></i>
+                            </div>
+                            <span id="averageOrderValueDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0 ₫</span>
+                        </div>
+                        <div class="text-info opacity-50">
+                            <i class="fas fa-calculator fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Gross Revenue Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-success shadow-sm h-100 py-2" style="border-left: 3px solid #28a745 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-chart-line me-1"></i>Doanh thu gộp
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tổng giá trị đơn hàng trước khi trừ giảm giá. Công thức: Total + Voucher + Xu"></i>
+                            </div>
+                            <span id="grossRevenueDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0 ₫</span>
+                        </div>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-money-bill-wave fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marketing Spend Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-warning shadow-sm h-100 py-2" style="border-left: 3px solid #ffc107 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-bullhorn me-1"></i>Chi phí Marketing
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tổng chi phí marketing qua voucher và xu. Công thức: Voucher + Xu"></i>
+                            </div>
+                            <span id="marketingSpendDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0 ₫</span>
+                        </div>
+                        <div class="text-warning opacity-50">
+                            <i class="fas fa-ad fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Revenue Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-primary shadow-sm h-100 py-2" style="border-left: 3px solid #007bff !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-cash-register me-1"></i>Doanh thu thực tế
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Số tiền thực tế nhận được (Cash-in). Công thức: Gross Revenue - Marketing Spend = Total"></i>
+                            </div>
+                            <span id="netRevenueDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0 ₫</span>
+                        </div>
+                        <div class="text-primary opacity-50">
+                            <i class="fas fa-wallet fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Return Rate Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-danger shadow-sm h-100 py-2" style="border-left: 3px solid #dc3545 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-undo me-1"></i>Tỷ lệ trả hàng
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tỷ lệ đơn hàng bị trả lại. Công thức: (Số đơn trả hàng / Tổng đơn COMPLETED) × 100%"></i>
+                            </div>
+                            <span id="returnRateDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0%</span>
+                        </div>
+                        <div class="text-danger opacity-50">
+                            <i class="fas fa-exchange-alt fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repeat Purchase Rate Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-success shadow-sm h-100 py-2" style="border-left: 3px solid #28a745 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-redo me-1"></i>Tỷ lệ mua lại
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tỷ lệ khách hàng mua ≥2 lần. Công thức: (Khách có ≥2 đơn / Tổng khách) × 100%"></i>
+                            </div>
+                            <span id="repeatPurchaseRateDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0%</span>
+                        </div>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-user-check fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue per Customer Card -->
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-purple shadow-sm h-100 py-2" style="border-left: 3px solid #6f42c1 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-purple text-uppercase mb-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-user-tag me-1"></i>Doanh thu/Khách hàng
+                                <i class="mdi mdi-information-outline ms-1" 
+                                   style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Giá trị trung bình mỗi khách hàng. Công thức: Tổng doanh thu / Số khách hàng unique"></i>
+                            </div>
+                            <span id="revenuePerCustomerDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0 ₫</span>
+                        </div>
+                        <div class="opacity-50" style="color: #6f42c1;">
+                            <i class="fas fa-users fa-lg"></i>
                         </div>
                     </div>
                 </div>

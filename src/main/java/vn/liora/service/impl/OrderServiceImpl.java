@@ -178,21 +178,36 @@ public class OrderServiceImpl implements IOrderService {
             }
             order.setShippingFee(shippingFee);
 
-            // 10. Set tổng tiền cho order (bao gồm phí ship)
+            // 10. Set xuUsed vào order trước khi tính total
+            BigDecimal xuUsed = BigDecimal.ZERO;
+            if (request.getXuUsed() != null && request.getXuUsed().compareTo(BigDecimal.ZERO) > 0) {
+                xuUsed = request.getXuUsed();
+                order.setXuUsed(xuUsed);
+            } else {
+                order.setXuUsed(BigDecimal.ZERO);
+            }
+
+            // 11. Set tổng tiền cho order theo công thức: Total = (Subtotal + ShippingFee)
+            // - (Voucher + Xu)
             order.setTotalDiscount(totalDiscount);
-            BigDecimal computedTotal = total.add(shippingFee);
+            // total hiện tại = subtotal - totalDiscount (đã trừ voucher)
+            // Cần trừ thêm xuUsed: Total = (subtotal - totalDiscount) + shippingFee -
+            // xuUsed
+            // Hoặc: Total = (Subtotal + ShippingFee) - (Voucher + Xu)
+            BigDecimal computedTotal = total.add(shippingFee).subtract(xuUsed);
             order.setTotal(computedTotal);
 
             final Order savedOrder = orderRepository.save(order);
 
-            // ✅ NEW: Process Xu Payment if xuUsed > 0
-            if (request.getXuUsed() != null && request.getXuUsed().compareTo(BigDecimal.ZERO) > 0 && user != null) {
+            // 12. Process Xu Payment if xuUsed > 0 (trừ xu từ wallet sau khi order đã được
+            // lưu)
+            if (xuUsed.compareTo(BigDecimal.ZERO) > 0 && user != null) {
                 try {
                     walletService.useXuForPayment(
                             user.getUserId(),
                             savedOrder.getIdOrder(),
-                            request.getXuUsed());
-                    log.info("Used {} xu for payment in order {}", request.getXuUsed(), savedOrder.getIdOrder());
+                            xuUsed);
+                    log.info("Used {} xu for payment in order {}", xuUsed, savedOrder.getIdOrder());
                 } catch (Exception e) {
                     log.error("Failed to use xu for payment in order {}: {}", savedOrder.getIdOrder(), e.getMessage());
                     // Don't rollback order, just log the error
@@ -303,10 +318,14 @@ public class OrderServiceImpl implements IOrderService {
         // Tính discount amount
         BigDecimal discountAmount = discountService.calculateDiscountAmount(discountId, subTotal);
 
-        // Cập nhật order
+        // Cập nhật order theo công thức: Total = (Subtotal + ShippingFee) - (Voucher +
+        // Xu)
         order.setDiscount(discount);
         order.setTotalDiscount(discountAmount);
-        order.setTotal(subTotal.subtract(discountAmount));
+        BigDecimal xuUsed = order.getXuUsed() != null ? order.getXuUsed() : BigDecimal.ZERO;
+        BigDecimal shippingFee = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal computedTotal = subTotal.add(shippingFee).subtract(discountAmount).subtract(xuUsed);
+        order.setTotal(computedTotal);
 
         orderRepository.save(order);
 
@@ -337,10 +356,14 @@ public class OrderServiceImpl implements IOrderService {
         // Tính subtotal từ OrderProducts (nhất quán với applyDiscountToOrder)
         BigDecimal subTotal = calculateOrderSubTotal(order);
 
-        // Remove discount from order
+        // Remove discount from order theo công thức: Total = (Subtotal + ShippingFee) -
+        // (Voucher + Xu)
         order.setDiscount(null);
         order.setTotalDiscount(BigDecimal.ZERO);
-        order.setTotal(subTotal); // total = subtotal (không có discount)
+        BigDecimal xuUsed = order.getXuUsed() != null ? order.getXuUsed() : BigDecimal.ZERO;
+        BigDecimal shippingFee = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal computedTotal = subTotal.add(shippingFee).subtract(xuUsed); // Không có discount nữa
+        order.setTotal(computedTotal);
 
         orderRepository.save(order);
 

@@ -202,25 +202,30 @@ class OrderManager {
             const totalOrders = filteredOrdersForStats.length;
             const cancelledOrders = filteredOrdersForStats.filter(order => order.orderStatus === 'CANCELLED').length;
             const pendingOrders = filteredOrdersForStats.filter(order => order.orderStatus === 'PENDING').length;
+            // Tính doanh thu từ đơn hàng COMPLETED (theo logic mới: chỉ tính đơn hàng hoàn thành)
             const totalRevenue = filteredOrdersForStats
                 .filter(order => order.orderStatus === 'COMPLETED')
-                .reduce((sum, order) => sum + (order.total || 0), 0);
+                .reduce((sum, order) => {
+                    // Đảm bảo order.total là số, không phải null/undefined
+                    const orderTotal = order.total ? parseFloat(order.total) : 0;
+                    return sum + orderTotal;
+                }, 0);
 
             this.updateStatistics({
-                total: totalOrders,
-                cancelled: cancelledOrders,
-                pending: pendingOrders,
-                revenue: totalRevenue
+                totalOrders: totalOrders,
+                cancelledOrders: cancelledOrders,
+                pendingOrders: pendingOrders,
+                totalRevenue: totalRevenue
             });
 
         } catch (error) {
             console.error('Error calculating statistics:', error);
             // Set default values nếu có lỗi
             this.updateStatistics({
-                total: 0,
-                cancelled: 0,
-                pending: 0,
-                revenue: 0
+                totalOrders: 0,
+                cancelledOrders: 0,
+                pendingOrders: 0,
+                totalRevenue: 0
             });
         }
     }
@@ -228,17 +233,20 @@ class OrderManager {
     updateStatistics(stats) {
         // Đảm bảo stats object và các giá trị tồn tại
         const safeStats = stats || {};
-        const total = safeStats.total || 0;
-        const cancelled = safeStats.cancelled || 0;
-        const pending = safeStats.pending || 0;
-        const revenue = safeStats.revenue || 0;
+
+        // Hỗ trợ cả format từ API (totalOrders, cancelledOrders, ...) và format từ calculateStatisticsFromFilteredData (total, cancelled, ...)
+        const total = safeStats.totalOrders || safeStats.total || 0;
+        const cancelled = safeStats.cancelledOrders || safeStats.cancelled || 0;
+        const pending = safeStats.pendingOrders || safeStats.pending || 0;
+        const revenue = safeStats.totalRevenue || safeStats.completedRevenue || safeStats.revenue || 0;
 
         $('#totalOrders').text(total.toLocaleString());
         $('#paidOrders').text(cancelled.toLocaleString());
         $('#pendingOrders').text(pending.toLocaleString());
         $('#totalRevenue').text(new Intl.NumberFormat('vi-VN', {
             style: 'currency',
-            currency: 'VND'
+            currency: 'VND',
+            minimumFractionDigits: 0
         }).format(revenue));
     }
 

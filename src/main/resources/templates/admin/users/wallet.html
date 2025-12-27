@@ -27,33 +27,31 @@
                     <!-- Wallet Balance Card -->
                     <div class="row mb-4">
                         <div class="col-xl-12">
-                            <div class="card card-rounded"
-                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <div class="card card-rounded" style="border-left: 4px solid #667eea;">
                                 <div class="card-body p-4">
                                     <div class="row align-items-center">
-                                        <div class="col-md-2 text-center">
-                                            <div class="wallet-icon-large">
-                                                <i class="mdi mdi-wallet" style="font-size: 4rem;"></i>
-                                            </div>
+                                        <div class="col-md-3 text-center">
+                                            <i class="mdi mdi-wallet" style="font-size: 3rem; color: #667eea;"></i>
                                         </div>
-                                        <div class="col-md-10">
+                                        <div class="col-md-9">
                                             <div class="row">
-                                                <div class="col-md-4">
-                                                    <h6 class="text-white-50 mb-2">Số dư ví</h6>
-                                                    <h2 class="mb-0 fw-bold" id="walletBalance">-</h2>
-                                                    <small class="text-white-50">1 Liora Xu = 1 VND</small>
+                                                <div class="col-6 col-md-3">
+                                                    <p class="text-muted mb-1 small">Số dư hiện tại</p>
+                                                    <h4 class="mb-0 fw-bold" id="walletBalance" style="color: #667eea;">
+                                                        -</h4>
+                                                    <small class="text-muted">1 Xu = 1 VND</small>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <h6 class="text-white-50 mb-2">Xu thưởng</h6>
-                                                    <h4 class="mb-0" id="totalRewards">-</h4>
+                                                <div class="col-6 col-md-3">
+                                                    <p class="text-muted mb-1 small">Đã nhận</p>
+                                                    <h5 class="mb-0 text-success" id="totalAdded">-</h5>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <h6 class="text-white-50 mb-2">Hoàn tiền</h6>
-                                                    <h4 class="mb-0" id="totalRefunds">-</h4>
+                                                <div class="col-6 col-md-3">
+                                                    <p class="text-muted mb-1 small">Đã sử dụng</p>
+                                                    <h5 class="mb-0 text-danger" id="totalDeducted">-</h5>
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <h6 class="text-white-50 mb-2">Giao dịch</h6>
-                                                    <h4 class="mb-0" id="totalTransactions">-</h4>
+                                                <div class="col-6 col-md-3">
+                                                    <p class="text-muted mb-1 small">Giao dịch</p>
+                                                    <h5 class="mb-0" id="totalTransactions">-</h5>
                                                 </div>
                                             </div>
                                         </div>
@@ -73,8 +71,9 @@
                                         onclick="filterTransactions('ALL')">Tất cả</button>
                                     <button type="button" class="btn btn-sm btn-outline-success"
                                         onclick="filterTransactions('REWARD')">Xu thưởng</button>
-                                    <button type="button" class="btn btn-sm btn-outline-info"
-                                        onclick="filterTransactions('REFUND')">Hoàn tiền</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="filterTransactions('PAYMENT')">Thanh toán</button>
+
                                     <button type="button" class="btn btn-sm btn-outline-warning"
                                         onclick="filterTransactions('DEDUCTION')">Trừ xu</button>
                                 </div>
@@ -170,32 +169,12 @@
                     `${wallet.firstname || ''} ${wallet.lastname || ''} (${wallet.username}) - ID: ${wallet.userId}`;
                 document.getElementById('walletBalance').textContent = formatCurrency(wallet.balance) + ' Xu';
 
-                // Load transaction count
-                loadTransactionCount();
-
             } catch (error) {
                 console.error('Error:', error);
                 showToast('Không thể tải thông tin ví', 'error');
             }
         }
 
-        // Load transaction count
-        async function loadTransactionCount() {
-            try {
-                const response = await fetch(`/admin/api/wallet/${userId}/transactions?page=0&size=1000`, {
-                    headers: {
-                        'Authorization': `Bearer ${getToken()}`
-                    }
-                });
-
-                if (response.ok) {
-                    const transactions = await response.json();
-                    document.getElementById('totalTransactions').textContent = transactions.length;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
 
         // Load transactions
         async function loadTransactions(page = 0) {
@@ -232,11 +211,12 @@
             }
         }
 
-        // Calculate stats
+        // Calculate stats - giống với user info
         function calculateStats(transactions) {
             let totalRewards = 0;
             let totalRefunds = 0;
             let totalDeductions = 0;
+            let totalPayments = 0;
 
             transactions.forEach(tx => {
                 if (tx.type === 'REWARD') {
@@ -244,14 +224,22 @@
                 } else if (tx.type === 'REFUND') {
                     totalRefunds += tx.amount;
                 } else if (tx.type === 'DEDUCTION') {
-                    totalDeductions += Math.abs(tx.amount);
+                    totalDeductions += Math.abs(tx.amount); // Deduction is negative, so take absolute
+                } else if (tx.type === 'PAYMENT') {
+                    totalPayments += Math.abs(tx.amount); // Payment is negative, so take absolute
                 }
             });
 
-            // Show net rewards (rewards earned minus deductions)
-            const netRewards = totalRewards - totalDeductions;
-            document.getElementById('totalRewards').textContent = formatCurrency(netRewards) + ' Xu';
-            document.getElementById('totalRefunds').textContent = formatCurrency(totalRefunds) + ' Xu';
+            // Tính Xu cộng (REFUND + REWARD) - giống user info
+            const totalAdded = totalRefunds + totalRewards;
+
+            // Tính Xu trừ (DEDUCTION + PAYMENT) - giống user info
+            const totalDeducted = totalDeductions + totalPayments;
+
+            // Hiển thị Xu cộng và Xu trừ
+            document.getElementById('totalAdded').textContent = formatCurrency(totalAdded) + ' Xu';
+            document.getElementById('totalDeducted').textContent = formatCurrency(totalDeducted) + ' Xu';
+            document.getElementById('totalTransactions').textContent = transactions.length;
         }
 
         // Display transactions
@@ -298,7 +286,6 @@
         function getTransactionTypeInfo(type) {
             const types = {
                 'REWARD': { label: 'Xu thưởng', badgeClass: 'bg-success' },
-                'REFUND': { label: 'Hoàn tiền', badgeClass: 'bg-info' },
                 'DEDUCTION': { label: 'Trừ xu', badgeClass: 'bg-warning' },
                 'PAYMENT': { label: 'Thanh toán', badgeClass: 'bg-primary' }
             };

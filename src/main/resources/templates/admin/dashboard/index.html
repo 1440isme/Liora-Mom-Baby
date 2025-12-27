@@ -110,78 +110,143 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
-            const ctx = document.getElementById("weeklyRevenueChart").getContext("2d");
-
-            // === Tính 7 ngày gần nhất ===
-            const end = new Date();
-            const start = new Date();
-            start.setDate(end.getDate() - 6); // từ 6 ngày trước đến hôm nay
-
-            // Gọi API lấy dữ liệu thực tế
-            const url = `/admin/revenue?type=time&groupType=day&startDate=${start.toISOString()}&endDate=${end.toISOString()}`;
-            const res = await fetch(url);
-            const data = await res.json();
-
-            // === Xử lý dữ liệu: đảm bảo đủ 7 ngày ===
-            const dailyRevenue = {};
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(start);
-                d.setDate(start.getDate() + i);
-                const label = d.toISOString().split("T")[0]; // YYYY-MM-DD
-                dailyRevenue[label] = data[label] || 0; // nếu không có thì gán 0
+            const canvas = document.getElementById("weeklyRevenueChart");
+            if (!canvas) {
+                console.error("Canvas element not found");
+                return;
             }
 
-            const labels = Object.keys(dailyRevenue);
-            const values = Object.values(dailyRevenue);
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                console.error("Could not get 2d context");
+                return;
+            }
 
-            // === Vẽ biểu đồ ===
-            new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "Doanh thu (₫)",
-                        data: values,
-                        borderColor: "rgba(54, 162, 235, 1)",
-                        backgroundColor: "rgba(54, 162, 235, 0.2)",
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => value.toLocaleString("vi-VN") + " ₫"
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                callback: (val, i) => {
-                                    // Hiển thị dạng ngắn gọn: Thứ + ngày
-                                    const d = new Date(labels[i]);
-                                    const days = ["CN","T2","T3","T4","T5","T6","T7"];
-                                    return `${days[d.getDay()]} (${d.getDate()})`;
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => "Doanh thu: " + ctx.parsed.y.toLocaleString("vi-VN") + " ₫"
+            try {
+                // === Tính 7 ngày gần nhất ===
+                const end = new Date();
+                const start = new Date();
+                start.setDate(end.getDate() - 6); // từ 6 ngày trước đến hôm nay
+                
+                // Format dates: YYYY-MM-DDTHH:mm:ss
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+                };
+
+                const startDateStr = formatDate(start);
+                const endDateStr = formatDate(end);
+
+                // Gọi API lấy dữ liệu thực tế
+                const url = `/admin/revenue?type=time&groupType=day&startDate=${encodeURIComponent(startDateStr)}&endDate=${encodeURIComponent(endDateStr)}`;
+                console.log("Fetching revenue data from:", url);
+                
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                console.log("Revenue data received:", data);
+
+                // === Xử lý dữ liệu: đảm bảo đủ 7 ngày ===
+                const dailyRevenue = {};
+                const labels = [];
+                
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start);
+                    d.setDate(start.getDate() + i);
+                    const dateKey = d.toISOString().split("T")[0]; // YYYY-MM-DD
+                    
+                    // Tìm giá trị trong data (có thể key là dateKey hoặc format khác)
+                    let value = 0;
+                    if (data[dateKey] !== undefined) {
+                        value = data[dateKey];
+                    } else {
+                        // Thử tìm với format khác
+                        for (const key in data) {
+                            if (key.includes(dateKey) || key === dateKey) {
+                                value = data[key];
+                                break;
                             }
                         }
                     }
+                    
+                    dailyRevenue[dateKey] = value || 0;
+                    labels.push(dateKey);
                 }
-            });
+
+                const values = labels.map(label => dailyRevenue[label] || 0);
+                console.log("Processed data - Labels:", labels, "Values:", values);
+
+                // === Vẽ biểu đồ ===
+                new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels.map(label => {
+                            const d = new Date(label);
+                            const days = ["CN","T2","T3","T4","T5","T6","T7"];
+                            return `${days[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+                        }),
+                        datasets: [{
+                            label: "Doanh thu (₫)",
+                            data: values,
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            backgroundColor: "rgba(54, 162, 235, 0.2)",
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND',
+                                            minimumFractionDigits: 0
+                                        }).format(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y;
+                                        return "Doanh thu: " + new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND',
+                                            minimumFractionDigits: 0
+                                        }).format(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Error loading chart:", error);
+                // Hiển thị thông báo lỗi trên canvas
+                ctx.fillStyle = "#999";
+                ctx.font = "16px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Không thể tải dữ liệu biểu đồ", canvas.width / 2, canvas.height / 2);
+            }
         });
     </script>
 

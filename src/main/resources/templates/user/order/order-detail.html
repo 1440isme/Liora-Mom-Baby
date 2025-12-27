@@ -343,7 +343,7 @@
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Tạm tính:</span>
                                         <span
-                                            th:text="${#numbers.formatDecimal((order.total + order.totalDiscount - order.shippingFee), 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                            th:text="${#numbers.formatDecimal((order.total + order.totalDiscount + (order.xuUsed != null ? order.xuUsed : 0) - order.shippingFee), 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Phí vận chuyển:</span>

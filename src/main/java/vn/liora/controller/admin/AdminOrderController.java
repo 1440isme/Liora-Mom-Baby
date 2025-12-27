@@ -132,18 +132,14 @@ public class AdminOrderController {
             statistics.put("completedOrders", completedCount);
             statistics.put("cancelledOrders", cancelledCount);
 
-            // Tổng doanh thu từ tất cả đơn hàng
+            // Tổng doanh thu từ đơn hàng hoàn tất (COMPLETED) - theo logic mới
             BigDecimal totalRevenue = allOrders.stream()
-                    .map(OrderResponse::getTotal)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            statistics.put("totalRevenue", totalRevenue);
-
-            // Doanh thu từ đơn hàng hoàn tất
-            BigDecimal completedRevenue = allOrders.stream()
                     .filter(o -> "COMPLETED".equals(o.getOrderStatus()))
                     .map(OrderResponse::getTotal)
+                    .filter(total -> total != null)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            statistics.put("completedRevenue", completedRevenue);
+            statistics.put("totalRevenue", totalRevenue);
+            statistics.put("completedRevenue", totalRevenue); // Giữ lại để tương thích
 
             return ResponseEntity.ok(statistics);
         } catch (Exception e) {
