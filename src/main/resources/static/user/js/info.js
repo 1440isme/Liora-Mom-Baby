@@ -13,6 +13,7 @@ class UserInfoManager {
         this.currentOrderPage = 0;
         this.orderPageSize = 5;
         this.totalOrderPages = 0;
+        this.currentOrderStatus = 'ALL'; // Current filter status
         this.init();
     }
 
@@ -445,7 +446,7 @@ class UserInfoManager {
 
         // Load data for specific tabs
         if (tabId === '#orders') {
-            this.loadOrders();
+            this.loadOrders(0, this.currentOrderStatus);
         } else if (tabId === '#address') {
             this.loadAddresses();
         }
@@ -468,9 +469,14 @@ class UserInfoManager {
         }
     }
 
-    async loadOrders(page = 0) {
+    async loadOrders(page = 0, status = null) {
         const ordersContainer = document.getElementById('ordersList');
         if (!ordersContainer) return;
+
+        // Use current status if not provided
+        if (status === null) {
+            status = this.currentOrderStatus;
+        }
 
         try {
             const token = localStorage.getItem('access_token');
@@ -488,7 +494,13 @@ class UserInfoManager {
                 </div>
             `;
 
-            const response = await fetch(`/users/myOrdersWithProducts?page=${page}&size=${this.orderPageSize}`, {
+            // Build URL with status filter
+            let url = `/users/myOrdersWithProducts?page=${page}&size=${this.orderPageSize}`;
+            if (status && status !== 'ALL') {
+                url += `&status=${status}`;
+            }
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -514,12 +526,13 @@ class UserInfoManager {
             this.totalOrderPages = paginatedData.totalPages;
 
             if (ordersWithProducts.length === 0 && page === 0) {
+                const statusText = status && status !== 'ALL' ? this.getOrderStatusText(status) : '';
                 ordersContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="mdi mdi-shopping"></i>
-                        <h5>Chưa có đơn hàng nào</h5>
-                        <p>Hãy mua sắm để xem lịch sử đơn hàng của bạn</p>
-                        <a href="/" class="btn btn-primary">Mua sắm ngay</a>
+                        <h5>${statusText ? `Chưa có đơn hàng ${statusText.toLowerCase()}` : 'Chưa có đơn hàng nào'}</h5>
+                        <p>${statusText ? `Bạn chưa có đơn hàng nào ở trạng thái ${statusText.toLowerCase()}` : 'Hãy mua sắm để xem lịch sử đơn hàng của bạn'}</p>
+                        ${!statusText ? '<a href="/" class="btn btn-primary">Mua sắm ngay</a>' : ''}
                     </div>
                 `;
             } else {
@@ -528,7 +541,7 @@ class UserInfoManager {
                         await this.createCompactOrderCard(orderWithProduct)
                     )
                 );
-                const paginationHTML = this.createPaginationHTML(paginatedData);
+                const paginationHTML = this.createPaginationHTML(paginatedData, status);
                 ordersContainer.innerHTML = ordersHTML.join('') + paginationHTML;
             }
 
@@ -539,10 +552,30 @@ class UserInfoManager {
                     <i class="mdi mdi-alert"></i>
                     <h5>Lỗi tải đơn hàng</h5>
                     <p>Vui lòng thử lại sau</p>
-                    <button class="btn btn-primary" onclick="userInfoManager.loadOrders()">Thử lại</button>
+                    <button class="btn btn-primary" onclick="userInfoManager.loadOrders(0, userInfoManager.currentOrderStatus)">Thử lại</button>
                 </div>
             `;
         }
+    }
+
+    filterOrdersByStatus(status) {
+        // Update current status
+        this.currentOrderStatus = status;
+
+        // Reset to first page when filtering
+        this.currentOrderPage = 0;
+
+        // Update active tab
+        const tabs = document.querySelectorAll('#orderStatusTabs .nav-link');
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('data-status') === status) {
+                tab.classList.add('active');
+            }
+        });
+
+        // Load orders with new status
+        this.loadOrders(0, status);
     }
 
     async createCompactOrderCard(orderWithProduct) {
@@ -657,7 +690,7 @@ class UserInfoManager {
         `;
     }
 
-    createPaginationHTML(paginatedData) {
+    createPaginationHTML(paginatedData, status = null) {
         if (paginatedData.totalPages <= 1) {
             return '';
         }
@@ -666,6 +699,7 @@ class UserInfoManager {
         const totalPages = paginatedData.totalPages;
         const hasNext = paginatedData.hasNext;
         const hasPrevious = paginatedData.hasPrevious;
+        const statusParam = status && status !== 'ALL' ? `, '${status}'` : '';
 
         let paginationHTML = `
             <div class="pagination-container mt-4">
@@ -677,7 +711,7 @@ class UserInfoManager {
         if (hasPrevious) {
             paginationHTML += `
                 <li class="page-item">
-                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage - 1})">
+                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage - 1}${statusParam})">
                         <i class="mdi mdi-chevron-left"></i> Trước
                     </button>
                 </li>
@@ -706,7 +740,7 @@ class UserInfoManager {
             } else {
                 paginationHTML += `
                     <li class="page-item">
-                        <button class="page-link" onclick="userInfoManager.loadOrders(${i})">${i + 1}</button>
+                        <button class="page-link" onclick="userInfoManager.loadOrders(${i}${statusParam})">${i + 1}</button>
                     </li>
                 `;
             }
@@ -716,7 +750,7 @@ class UserInfoManager {
         if (hasNext) {
             paginationHTML += `
                 <li class="page-item">
-                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage + 1})">
+                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage + 1}${statusParam})">
                         Sau <i class="mdi mdi-chevron-right"></i>
                     </button>
                 </li>
@@ -949,15 +983,12 @@ class UserInfoManager {
             // Hiển thị loading
             this.showLoading();
 
-            const response = await fetch(`/api/orders/${orderId}/cancel`, {
-                method: 'POST',
+            const response = await fetch(`/order/${orderId}/cancel`, {
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    reason: 'Khách hàng yêu cầu hủy'
-                })
+                }
             });
 
             if (!response.ok) {
@@ -969,7 +1000,7 @@ class UserInfoManager {
 
             // Reload orders list
             setTimeout(() => {
-                this.loadOrders(this.currentOrderPage);
+                this.loadOrders(this.currentOrderPage, this.currentOrderStatus);
             }, 1000);
 
         } catch (error) {
@@ -1018,7 +1049,7 @@ class UserInfoManager {
 
             // Reload orders list
             setTimeout(() => {
-                this.loadOrders(this.currentOrderPage);
+                this.loadOrders(this.currentOrderPage, this.currentOrderStatus);
             }, 2000);
 
         } catch (error) {

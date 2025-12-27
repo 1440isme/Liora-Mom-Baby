@@ -197,8 +197,55 @@ class ReturnRequestManager {
         $('#viewCustomerName').text(request.customerName);
         $('#viewCustomerEmail').text(request.customerEmail);
 
-        // Fill reason (with HTML content)
-        $('#viewReason').html(request.reason);
+        // Fill reason (with HTML content including images)
+        if (request.reason) {
+            // Debug: Log the reason content to see what we're getting
+            console.log('Return request reason content:', request.reason);
+
+            // Display HTML content directly - CKEditor content includes <figure> tags with images
+            $('#viewReason').html(request.reason);
+
+            // Ensure images are loaded properly - handle both <img> and <figure><img> structures
+            setTimeout(() => {
+                // Handle images in figure tags (CKEditor format)
+                $('#viewReason figure img').each(function () {
+                    const img = $(this);
+                    let src = img.attr('src');
+                    if (src) {
+                        // Ensure absolute path
+                        if (!src.startsWith('http') && !src.startsWith('//') && !src.startsWith('/')) {
+                            src = '/' + src;
+                            img.attr('src', src);
+                        }
+                        // Add error handler
+                        img.on('error', function () {
+                            console.error('Failed to load image:', src);
+                            $(this).closest('figure').replaceWith('<div class="text-danger"><i class="mdi mdi-alert-circle"></i> Không thể tải hình ảnh: ' + src + '</div>');
+                        });
+                    }
+                });
+
+                // Handle standalone img tags
+                $('#viewReason img').not('figure img').each(function () {
+                    const img = $(this);
+                    let src = img.attr('src');
+                    if (src) {
+                        // Ensure absolute path
+                        if (!src.startsWith('http') && !src.startsWith('//') && !src.startsWith('/')) {
+                            src = '/' + src;
+                            img.attr('src', src);
+                        }
+                        // Add error handler
+                        img.on('error', function () {
+                            console.error('Failed to load image:', src);
+                            $(this).replaceWith('<div class="text-danger"><i class="mdi mdi-alert-circle"></i> Không thể tải hình ảnh: ' + src + '</div>');
+                        });
+                    }
+                });
+            }, 100);
+        } else {
+            $('#viewReason').html('<span class="text-muted">Không có lý do</span>');
+        }
 
         // Fill status
         const statusClass = this.getStatusClass(request.status);

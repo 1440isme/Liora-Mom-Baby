@@ -460,18 +460,8 @@ public class OrderServiceImpl implements IOrderService {
                     }
                 }
 
-                // ✅ THÊM: Hoàn tiền vào ví khi đơn hàng bị hủy sau khi đã thanh toán
-                if ("PAID".equals(currentPaymentStatus) && order.getUser() != null) {
-                    try {
-                        walletService.addRefund(
-                                order.getUser().getUserId(),
-                                order.getIdOrder(),
-                                order.getTotal());
-                        log.info("Added refund to wallet for cancelled order {}", order.getIdOrder());
-                    } catch (Exception e) {
-                        log.error("Failed to add refund for order {}: {}", order.getIdOrder(), e.getMessage());
-                    }
-                }
+                // ✅ BỎ: Không hoàn tiền vào ví khi đơn hàng bị hủy
+                // Tiền sẽ được hoàn qua ngân hàng khi duyệt yêu cầu trả hàng
             } else if ("PENDING".equals(newOrderStatus) || "CONFIRMED".equals(newOrderStatus)) {
                 // Nếu đơn hàng từ COMPLETED chuyển về PENDING/CONFIRMED và đã hoàn tiền, chuyển
                 // về "Đã thanh toán"
@@ -645,10 +635,47 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public List<OrderResponse> getMyOrdersPaginatedByStatus(Long userId, String orderStatus, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        List<Order> orders;
+        if (orderStatus == null || orderStatus.isEmpty() || "ALL".equals(orderStatus)) {
+            orders = orderRepository.findByUserOrderByOrderDateDesc(user);
+        } else {
+            orders = orderRepository.findByUserAndOrderStatus(user, orderStatus);
+        }
+
+        // Manual pagination
+        int start = page * size;
+        int end = Math.min(start + size, orders.size());
+
+        if (start >= orders.size()) {
+            return new ArrayList<>();
+        }
+
+        List<Order> paginatedOrders = orders.subList(start, end);
+        return orderMapper.toOrderResponseList(paginatedOrders);
+    }
+
+    @Override
     public Long countMyOrders(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return orderRepository.countByUser(user);
+    }
+
+    @Override
+    public Long countMyOrdersByStatus(Long userId, String orderStatus) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (orderStatus == null || orderStatus.isEmpty() || "ALL".equals(orderStatus)) {
+            return orderRepository.countByUser(user);
+        } else {
+            List<Order> orders = orderRepository.findByUserAndOrderStatus(user, orderStatus);
+            return (long) orders.size();
+        }
     }
 
     @Override
@@ -725,8 +752,9 @@ public class OrderServiceImpl implements IOrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang PENDING)
-        if (!"PENDING".equals(order.getOrderStatus())) {
+        // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang PENDING hoặc
+        // CONFIRMED)
+        if (!"PENDING".equals(order.getOrderStatus()) && !"CONFIRMED".equals(order.getOrderStatus())) {
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_CANCELLED);
         }
 

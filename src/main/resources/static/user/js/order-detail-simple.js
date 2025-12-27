@@ -298,6 +298,13 @@ function cancelOrder(orderId) {
 }
 
 function returnOrder() {
+    // Check if button is disabled (return request already exists)
+    const returnButton = document.querySelector('button[onclick="returnOrder()"]');
+    if (returnButton && returnButton.disabled) {
+        alert('Bạn đã gửi yêu cầu trả hàng cho đơn hàng này. Vui lòng chờ xử lý.');
+        return;
+    }
+
     // Lấy order ID từ Thymeleaf data attribute
     const orderId = document.body.getAttribute('data-order-id');
 
@@ -328,74 +335,153 @@ function returnOrder() {
     $('#returnRequestModal').modal('show');
 }
 
-// Handle return reason change
+// Initialize CKEditor for return request
+let returnRequestEditor = null;
+
+// Handle return request modal
 $(document).ready(function () {
-    $('#returnReason').on('change', function () {
-        if ($(this).val() === 'other') {
-            $('#otherReasonGroup').slideDown();
-        } else {
-            $('#otherReasonGroup').slideUp();
-            $('#otherReasonText').val('');
-        }
-    });
+    // Initialize CKEditor when modal is shown
+    $('#returnRequestModal').on('shown.bs.modal', function () {
+        if (!returnRequestEditor && $('#returnReasonEditor').length > 0) {
+            const textarea = document.getElementById('returnReasonEditor');
+            
+            if (typeof ClassicEditor !== 'undefined') {
+                // Define UploadAdapter class
+                class ReturnRequestUploadAdapter {
+                    constructor(loader) {
+                        this.loader = loader;
+                    }
 
-    // Handle image selection
-    $('#returnImages').on('change', function () {
-        const files = this.files;
-        const previewContainer = $('#imagePreviewContainer');
-        previewContainer.empty();
+                    upload() {
+                        return this.loader.file
+                            .then(file => {
+                                console.log('Uploading return request image:', file.name, 'Size:', file.size);
+                                
+                                // Get fresh token for each upload
+                                const token = localStorage.getItem('access_token') || '';
+                                console.log('Using token:', token ? 'Token exists' : 'No token');
+                                
+                                const formData = new FormData();
+                                formData.append('upload', file);
 
-        if (files.length > 5) {
-            alert('Chỉ được chọn tối đa 5 ảnh');
-            this.value = '';
-            return;
-        }
+                                return fetch('/api/orders/return/upload-image', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: formData,
+                                    credentials: 'include'
+                                })
+                                    .then(response => {
+                                        console.log('Upload response status:', response.status);
+                                        if (!response.ok) {
+                                            return response.json().then(err => {
+                                                console.error('Upload failed:', err);
+                                                throw new Error(err.error?.message || 'Upload failed');
+                                            });
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        console.log('Upload response data:', data);
+                                        if (data.error) {
+                                            throw new Error(data.error.message || 'Upload failed');
+                                        }
+                                        if (!data.url) {
+                                            console.error('No URL in response:', data);
+                                            throw new Error('Upload response missing URL');
+                                        }
+                                        console.log('Upload successful, URL:', data.url);
+                                        return {
+                                            default: data.url
+                                        };
+                                    })
+                                    .catch(error => {
+                                        console.error('Upload error:', error);
+                                        throw error;
+                                    });
+                            });
+                    }
 
-        Array.from(files).forEach((file, index) => {
-            if (file.size > 5 * 1024 * 1024) {
-                alert(`Ảnh ${file.name} quá lớn (tối đa 5MB)`);
-                return;
+                    abort() {
+                        console.log('Upload aborted');
+                    }
+                }
+
+                // Plugin function to register upload adapter
+                function ReturnRequestUploadAdapterPlugin(editor) {
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        console.log('Creating upload adapter for return request');
+                        return new ReturnRequestUploadAdapter(loader);
+                    };
+                }
+
+                ClassicEditor
+                    .create(textarea, {
+                        extraPlugins: [ReturnRequestUploadAdapterPlugin],
+                        image: {
+                            toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:alignRight'],
+                            styles: ['alignLeft', 'alignRight'],
+                            resizeOptions: [
+                                {
+                                    name: 'imageResize:original',
+                                    label: 'Original',
+                                    value: null
+                                },
+                                {
+                                    name: 'imageResize:50',
+                                    label: '50%',
+                                    value: '50'
+                                },
+                                {
+                                    name: 'imageResize:75',
+                                    label: '75%',
+                                    value: '75'
+                                }
+                            ]
+                        },
+                        toolbar: {
+                            items: [
+                                'undo', 'redo', '|',
+                                'heading', '|',
+                                'bold', 'italic', '|',
+                                'link', '|',
+                                'uploadImage', '|',
+                                'bulletedList', 'numberedList'
+                            ]
+                        },
+                        pasteFromOfficeEnabled: true,
+                        height: 200
+                    })
+                    .then(editor => {
+                        console.log('CKEditor initialized for return request');
+                        returnRequestEditor = editor;
+                    })
+                    .catch(error => {
+                        console.error('Error initializing CKEditor for return request:', error);
+                    });
             }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const col = $(`
-                    <div class="col-md-3">
-                        <div class="position-relative">
-                            <img src="${e.target.result}" class="img-thumbnail" style="width: 100%; height: 150px; object-fit: cover;">
-                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
-                                    onclick="removeImage(${index})">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `);
-                previewContainer.append(col);
-            };
-            reader.readAsDataURL(file);
-        });
+        }
     });
 
     // Submit return request
     $('#btnSubmitReturn').on('click', async function () {
         const orderId = $('#returnOrderId').val();
-        const reason = $('#returnReason').val();
-        const otherReasonText = $('#otherReasonText').val();
-        const images = $('#returnImages')[0].files;
+
+        // Get HTML content from CKEditor
+        let reasonContent = '';
+        if (returnRequestEditor) {
+            reasonContent = returnRequestEditor.getData();
+        } else {
+            // Fallback to textarea value if editor not initialized
+            reasonContent = $('#returnReasonEditor').val();
+        }
 
         // Validation
-        if (!reason) {
-            alert('Vui lòng chọn lý do trả hàng');
+        if (!reasonContent || reasonContent.trim() === '' || reasonContent.trim() === '<p></p>') {
+            alert('Vui lòng nhập lý do trả hàng và hình ảnh minh chứng');
             return;
         }
-
-        if (reason === 'other' && !otherReasonText.trim()) {
-            alert('Vui lòng nhập lý do khác');
-            return;
-        }
-
-        // Build full reason text
-        let fullReason = reason === 'other' ? otherReasonText : reason;
 
         const token = localStorage.getItem('access_token');
         if (!token) {
@@ -404,7 +490,6 @@ $(document).ready(function () {
         }
 
         try {
-            // For now, just send text (TODO: handle image upload later)
             const response = await fetch(`/api/orders/${orderId}/return`, {
                 method: 'POST',
                 headers: {
@@ -412,13 +497,17 @@ $(document).ready(function () {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    reason: fullReason.trim()
+                    reason: reasonContent
                 })
             });
 
             if (response.ok) {
                 $('#returnRequestModal').modal('hide');
-                alert('Yêu cầu trả hàng đã được gửi thành công. Chúng tôi sẽ xử lý trong thời gian sớm nhất.');
+                // Clear editor
+                if (returnRequestEditor) {
+                    returnRequestEditor.setData('');
+                }
+                // Reload page to show status
                 window.location.reload();
             } else {
                 const errorData = await response.json();
@@ -432,20 +521,13 @@ $(document).ready(function () {
 
     // Reset modal when closed
     $('#returnRequestModal').on('hidden.bs.modal', function () {
-        $('#returnReason').val('');
-        $('#otherReasonText').val('');
-        $('#returnDescription').val('');
-        $('#returnImages').val('');
-        $('#imagePreviewContainer').empty();
-        $('#otherReasonGroup').hide();
+        if (returnRequestEditor) {
+            returnRequestEditor.setData('');
+        } else {
+            $('#returnReasonEditor').val('');
+        }
     });
 });
-
-function removeImage(index) {
-    // Remove image from preview
-    $(`#imagePreviewContainer .col-md-3:eq(${index})`).remove();
-    // Note: Can't remove from file input, would need to rebuild FileList
-}
 
 // Enhanced reorder function with modal (from order-detail.js)
 async function reorderOrder(orderId) {

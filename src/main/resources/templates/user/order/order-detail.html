@@ -99,6 +99,27 @@
                     <a href="/register" class="alert-link">đăng ký tài khoản</a>.
                 </div>
 
+                <!-- Return Request Status Alert -->
+                <div th:if="${returnRequest != null}" class="alert mb-4" th:class="${returnRequest.status == 'PENDING'} ? 'alert-warning' : 
+                               (${returnRequest.status == 'ACCEPTED'} ? 'alert-success' : 'alert-danger')">
+                    <div class="d-flex align-items-center">
+                        <i class="fas me-2"
+                            th:class="${returnRequest.status == 'PENDING'} ? 'fa-clock' : 
+                                     (${returnRequest.status == 'ACCEPTED'} ? 'fa-check-circle' : 'fa-times-circle')"></i>
+                        <div>
+                            <strong th:if="${returnRequest.status == 'PENDING'}">Yêu cầu của bạn đang chờ xử lý</strong>
+                            <strong th:if="${returnRequest.status == 'ACCEPTED'}">Yêu cầu của bạn đã được chấp
+                                nhận</strong>
+                            <strong th:if="${returnRequest.status == 'REJECTED'}">Yêu cầu của bạn đã bị từ chối</strong>
+                            <div th:if="${returnRequest.adminNote != null and returnRequest.adminNote != ''}"
+                                class="mt-2">
+                                <small><strong>Chú thích:</strong> <span
+                                        th:text="${returnRequest.adminNote}"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Page Header -->
                 <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
                     <h1 class="h3 mb-0 text-gray-800">
@@ -122,16 +143,22 @@
                             th:onclick="'checkReviewStatusAndOpen(' + ${order.idOrder} + ')'" id="reviewButton">
                             <i class="fas fa-star me-1"></i> Đánh giá
                         </button>
-                        <button class="btn btn-warning text-white me-2" th:if="${order.orderStatus == 'DELIVERED'}"
+                        <button class="btn btn-warning text-white me-2"
+                            th:if="${order.orderStatus == 'DELIVERED' and returnRequest == null}"
                             onclick="returnOrder()">
                             <i class="fas fa-undo me-1"></i> Trả hàng/Hoàn tiền
                         </button>
 
-                        <!-- Nút Đánh giá cho COMPLETED -->
+                        <!-- Nút Đánh giá và Trả hàng cho COMPLETED -->
                         <button class="btn btn-primary me-2" th:if="${order.orderStatus == 'COMPLETED'}"
                             th:onclick="'checkReviewStatusAndOpen(' + ${order.idOrder} + ')'"
                             id="reviewButtonCompleted">
                             <i class="fas fa-star me-1"></i> <span id="reviewButtonText">Đánh giá</span>
+                        </button>
+                        <button class="btn btn-warning text-white me-2"
+                            th:if="${order.orderStatus == 'COMPLETED' and returnRequest == null}"
+                            onclick="returnOrder()">
+                            <i class="fas fa-undo me-1"></i> Trả hàng/Hoàn tiền
                         </button>
 
                         <!-- Nút Mua lại cho CANCELLED và COMPLETED -->
@@ -519,39 +546,15 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">
-                            <i class="fas fa-clipboard-list me-2"></i>Lý do trả hàng <span class="text-danger">*</span>
+                            <i class="fas fa-clipboard-list me-2"></i>Lý do trả hàng và hình ảnh minh chứng <span
+                                class="text-danger">*</span>
                         </label>
-                        <select class="form-select" id="returnReason">
-                            <option value="">-- Chọn lý do --</option>
-                            <option value="Sản phẩm bị lỗi/hỏng">Sản phẩm bị lỗi/hỏng</option>
-                            <option value="Sản phẩm không đúng mô tả">Sản phẩm không đúng mô tả</option>
-                            <option value="Sản phẩm thiếu phụ kiện">Sản phẩm thiếu phụ kiện</option>
-                            <option value="Giao sai sản phẩm">Giao sai sản phẩm</option>
-                            <option value="Chất lượng không tốt">Chất lượng không tốt</option>
-                            <option value="Không vừa/không phù hợp">Không vừa/không phù hợp</option>
-                            <option value="Đổi ý không muốn mua">Đổi ý không muốn mua</option>
-                            <option value="other">Lý do khác...</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3" id="otherReasonGroup" style="display: none;">
-                        <label class="form-label fw-bold">Chi tiết lý do khác:</label>
-                        <textarea class="form-control" id="otherReasonText" rows="2"
-                            placeholder="Vui lòng mô tả chi tiết..."></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">
-                            <i class="fas fa-images me-2"></i>Hình ảnh minh chứng
-                        </label>
-                        <input type="file" class="form-control" id="returnImages" accept="image/*" multiple>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i> Có thể chọn nhiều ảnh (tối đa 5 ảnh, mỗi ảnh không quá
-                            5MB)
+                        <small class="text-muted d-block mb-2">
+                            <i class="fas fa-info-circle"></i> Vui lòng mô tả chi tiết lý do trả hàng và có thể đính kèm
+                            hình ảnh minh chứng
                         </small>
-
-                        <!-- Preview images -->
-                        <div id="imagePreviewContainer" class="mt-3 row g-2"></div>
+                        <textarea class="form-control review-editor" id="returnReasonEditor" rows="5"
+                            placeholder="Vui lòng mô tả chi tiết lý do trả hàng..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

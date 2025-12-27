@@ -32,6 +32,7 @@ public class OrderDetailController {
 
     private final IOrderService orderService;
     private final UserRepository userRepository;
+    private final vn.liora.service.IReturnRequestService returnRequestService;
 
     // Các endpoint cụ thể phải đặt TRƯỚC endpoint có path variable
     @GetMapping("/order-detail/access")
@@ -92,11 +93,20 @@ public class OrderDetailController {
                 orderResponse.setXuUsed(java.math.BigDecimal.ZERO);
             }
 
+            // Lấy return request nếu có
+            vn.liora.dto.response.ReturnRequestResponse returnRequest = null;
+            try {
+                returnRequest = returnRequestService.getReturnRequestByOrderId(orderId);
+            } catch (Exception e) {
+                log.debug("No return request found for order: {}", orderId);
+            }
+
             // Thêm thông tin vào model
             model.addAttribute("order", orderResponse);
             model.addAttribute("orderProducts", orderProducts);
             model.addAttribute("user", user);
             model.addAttribute("isGuest", false);
+            model.addAttribute("returnRequest", returnRequest);
 
             log.info("Successfully loaded order detail for orderId: {}, userId: {}", orderId, user.getUserId());
             return "user/order/order-detail";
@@ -235,11 +245,20 @@ public class OrderDetailController {
             // Lấy danh sách sản phẩm trong đơn hàng
             var orderProducts = orderService.getProductsByOrderId(orderId);
 
+            // Lấy return request nếu có
+            vn.liora.dto.response.ReturnRequestResponse returnRequest = null;
+            try {
+                returnRequest = returnRequestService.getReturnRequestByOrderId(orderId);
+            } catch (Exception e) {
+                log.debug("No return request found for order: {}", orderId);
+            }
+
             // Thêm thông tin vào model
             model.addAttribute("order", orderResponse);
             model.addAttribute("orderProducts", orderProducts);
             model.addAttribute("user", user);
             model.addAttribute("isGuest", false); // User đã đăng nhập
+            model.addAttribute("returnRequest", returnRequest);
 
             return "user/order/order-detail";
 
@@ -327,10 +346,19 @@ public class OrderDetailController {
                 orderResponse.setXuUsed(java.math.BigDecimal.ZERO);
             }
 
+            // Lấy return request nếu có
+            vn.liora.dto.response.ReturnRequestResponse returnRequest = null;
+            try {
+                returnRequest = returnRequestService.getReturnRequestByOrderId(orderId);
+            } catch (Exception e) {
+                log.debug("No return request found for order: {}", orderId);
+            }
+
             model.addAttribute("order", orderResponse);
             model.addAttribute("orderProducts", orderProducts);
             model.addAttribute("user", user);
             model.addAttribute("isGuest", false); // User đã đăng nhập
+            model.addAttribute("returnRequest", returnRequest);
 
             log.info("Successfully loaded order detail for orderId: {}, userId: {}", orderId, user.getUserId());
             return "user/order/order-detail";

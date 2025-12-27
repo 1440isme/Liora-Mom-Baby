@@ -122,7 +122,10 @@ public class SecurityConfig {
                                                 .requestMatchers("/info").authenticated()
                                                 .requestMatchers("/users/myInfo").authenticated()
                                                 .requestMatchers("/users/uploadAvatar").authenticated()
-
+                                                // Order API endpoints require authentication
+                                                .requestMatchers("/api/orders/**").authenticated()
+                                                // Review API endpoints require authentication (except public ones)
+                                                .requestMatchers("/api/reviews/**").authenticated()
                                                 .requestMatchers("/admin/**").authenticated()
                                                 .requestMatchers("/admin/api/**").authenticated()
                                                 .anyRequest().authenticated())

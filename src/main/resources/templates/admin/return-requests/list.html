@@ -227,7 +227,8 @@
 
                     <div class="mb-3">
                         <h6 class="text-primary mb-2"><i class="mdi mdi-comment-text me-2"></i>Lý do trả hàng</h6>
-                        <div id="viewReason" class="border rounded p-3 bg-light" style="min-height: 100px;"></div>
+                        <div id="viewReason" class="border rounded p-3 bg-light return-request-reason"
+                            style="min-height: 100px; word-wrap: break-word;"></div>
                     </div>
 
                     <div class="row">
@@ -379,6 +380,52 @@
         .status-rejected {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        .return-request-reason {
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .return-request-reason img {
+            max-width: 100%;
+            max-height: 500px;
+            height: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: block;
+            object-fit: contain;
+        }
+
+        .return-request-reason p {
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .return-request-reason figure {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .return-request-reason figure img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            max-height: 500px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            object-fit: contain;
+        }
+
+        .return-request-reason figure.image {
+            margin: 20px 0;
+        }
+
+        .return-request-reason figure.image img {
+            display: block;
+            margin: 0 auto;
         }
     </style>
 </body>

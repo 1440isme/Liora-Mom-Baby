@@ -49,4 +49,9 @@ public interface IReturnRequestService {
      * Đếm số lượng theo status
      */
     long countByStatus(String status);
+
+    /**
+     * Lấy return request mới nhất của một order
+     */
+    ReturnRequestResponse getReturnRequestByOrderId(Long orderId);
 }

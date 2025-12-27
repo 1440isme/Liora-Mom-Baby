@@ -289,6 +289,68 @@
                                         Lịch sử đơn hàng
                                     </h3>
 
+                                    <!-- Order Status Filter Tabs -->
+                                    <div class="mb-4">
+                                        <ul class="nav nav-pills nav-justified" id="orderStatusTabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="all-orders-tab"
+                                                    data-bs-toggle="pill" data-status="ALL" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('ALL')">
+                                                    Tất cả
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="pending-orders-tab" data-bs-toggle="pill"
+                                                    data-status="PENDING" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('PENDING')">
+                                                    Chờ xử lý
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="confirmed-orders-tab" data-bs-toggle="pill"
+                                                    data-status="CONFIRMED" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('CONFIRMED')">
+                                                    Đã xác nhận
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="shipping-orders-tab" data-bs-toggle="pill"
+                                                    data-status="SHIPPING" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('SHIPPING')">
+                                                    Đang giao
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="delivered-orders-tab" data-bs-toggle="pill"
+                                                    data-status="DELIVERED" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('DELIVERED')">
+                                                    Đã giao
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="completed-orders-tab" data-bs-toggle="pill"
+                                                    data-status="COMPLETED" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('COMPLETED')">
+                                                    Hoàn thành
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="returned-orders-tab" data-bs-toggle="pill"
+                                                    data-status="RETURNED" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('RETURNED')">
+                                                    Đã trả hàng
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="cancelled-orders-tab" data-bs-toggle="pill"
+                                                    data-status="CANCELLED" type="button" role="tab"
+                                                    onclick="userInfoManager.filterOrdersByStatus('CANCELLED')">
+                                                    Đã hủy
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+
                                     <div id="ordersList">
                                         <!-- Order cards will be populated here -->
                                         <div class="empty-state">
@@ -323,12 +385,12 @@
                                                             <small class="text-muted">1 Xu = 1 VND</small>
                                                         </div>
                                                         <div class="col-6 col-md-3">
-                                                            <p class="text-muted mb-1 small">Xu cộng</p>
+                                                            <p class="text-muted mb-1 small">Đã nhận</p>
                                                             <h5 class="mb-0 text-success" id="totalAdded">-</h5>
 
                                                         </div>
                                                         <div class="col-6 col-md-3">
-                                                            <p class="text-muted mb-1 small">Xu trừ</p>
+                                                            <p class="text-muted mb-1 small">Đã sử dụng</p>
                                                             <h5 class="mb-0 text-danger" id="totalDeducted">-</h5>
 
                                                         </div>

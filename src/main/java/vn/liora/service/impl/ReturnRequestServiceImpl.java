@@ -18,7 +18,9 @@ import vn.liora.repository.OrderRepository;
 import vn.liora.repository.ReturnRequestRepository;
 import vn.liora.repository.UserRepository;
 import vn.liora.service.IReturnRequestService;
+import vn.liora.service.IWalletService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class ReturnRequestServiceImpl implements IReturnRequestService {
     ReturnRequestRepository returnRequestRepository;
     OrderRepository orderRepository;
     UserRepository userRepository;
+    IWalletService walletService;
 
     @Override
     @Transactional
@@ -146,12 +149,29 @@ public class ReturnRequestServiceImpl implements IReturnRequestService {
         returnRequest.setProcessedBy(admin);
         returnRequest.setAdminNote(request.getAdminNote());
 
-        // Nếu ACCEPTED, cập nhật order status thành RETURNED
+        // Nếu ACCEPTED, cập nhật order status thành RETURNED và trừ lại số xu đã dùng
         if ("ACCEPTED".equals(request.getStatus())) {
             Order order = returnRequest.getOrder();
             order.setOrderStatus("RETURNED");
             orderRepository.save(order);
             log.info("Order {} status updated to RETURNED", order.getIdOrder());
+
+            // Trừ lại số xu đã dùng cho đơn hàng này (nếu có)
+            if (order.getUser() != null && order.getXuUsed() != null 
+                    && order.getXuUsed().compareTo(BigDecimal.ZERO) > 0) {
+                try {
+                    walletService.deductPoints(
+                            order.getUser().getUserId(),
+                            order.getIdOrder(),
+                            order.getXuUsed());
+                    log.info("Deducted {} xu from wallet for returned order {}", 
+                            order.getXuUsed(), order.getIdOrder());
+                } catch (Exception e) {
+                    log.error("Failed to deduct xu for returned order {}: {}", 
+                            order.getIdOrder(), e.getMessage());
+                    // Không throw exception để không rollback việc duyệt trả hàng
+                }
+            }
         }
 
         ReturnRequest updated = returnRequestRepository.save(returnRequest);
@@ -163,6 +183,15 @@ public class ReturnRequestServiceImpl implements IReturnRequestService {
     @Override
     public long countByStatus(String status) {
         return returnRequestRepository.countByStatus(status);
+    }
+
+    @Override
+    public ReturnRequestResponse getReturnRequestByOrderId(Long orderId) {
+        ReturnRequest returnRequest = returnRequestRepository.findFirstByOrder_IdOrderOrderByCreatedDateDesc(orderId);
+        if (returnRequest == null) {
+            return null;
+        }
+        return mapToResponse(returnRequest);
     }
 
     // Helper method to map Entity to Response DTO

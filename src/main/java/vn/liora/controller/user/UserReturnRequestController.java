@@ -7,7 +7,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -69,12 +68,32 @@ public class UserReturnRequestController {
     }
 
     /**
+     * Lấy return request của một order
+     */
+    @GetMapping("/{orderId}/return-request")
+    public ResponseEntity<ReturnRequestResponse> getReturnRequestByOrderId(@PathVariable Long orderId) {
+        ReturnRequestResponse response = returnRequestService.getReturnRequestByOrderId(orderId);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Upload ảnh minh chứng cho yêu cầu trả hàng
      */
     @PostMapping("/return/upload-image")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, Object>> uploadReturnRequestImage(
             @RequestParam("upload") MultipartFile file) {
+
+        // Check authentication manually
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", Map.of("message", "Bạn cần đăng nhập để thực hiện thao tác này"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
 
         Map<String, Object> response = new HashMap<>();
 
