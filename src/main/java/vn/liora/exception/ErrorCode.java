@@ -135,6 +135,11 @@ public enum ErrorCode {
 
         // Payment errors
         PAYMENT_CREATION_FAILED(5000, "Không thể tạo thanh toán", HttpStatus.INTERNAL_SERVER_ERROR),
+
+        // Return Request errors
+        RETURN_REQUEST_NOT_FOUND(7000, "Không tìm thấy yêu cầu trả hàng", HttpStatus.NOT_FOUND),
+        RETURN_REQUEST_ALREADY_EXISTS(7001, "Đơn hàng này đã có yêu cầu trả hàng", HttpStatus.BAD_REQUEST),
+        RETURN_REQUEST_ALREADY_PROCESSED(7002, "Yêu cầu trả hàng đã được xử lý", HttpStatus.BAD_REQUEST),
         ;
 
         private int code;

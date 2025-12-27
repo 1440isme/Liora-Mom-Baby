@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="admin/fragments/admin-head :: admin-head('Quản lý yêu cầu trả hàng - Liora Admin')"></head>
+
+<body class="with-welcome-text return-requests-page">
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper">
+            <div th:replace="admin/layout/admin-navbar"></div>
+            <div th:replace="admin/layout/admin-sidebar"></div>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Alert Container -->
+                    <div id="alertContainer"></div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="d-none text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+
+                    <!-- Page Header -->
+                    <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">
+                            <i class="mdi mdi-undo-variant me-2"></i>Quản lý yêu cầu trả hàng
+                        </h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Date Filter -->
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-nowrap">Từ ngày:</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDateFrom"
+                                    style="width: 140px;">
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-nowrap">Đến ngày:</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDateTo"
+                                    style="width: 140px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-warning">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                                Chờ xử lý
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="pendingCount">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-clock-alert mdi-36px text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-success">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                                Đã chấp nhận
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="acceptedCount">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-check-circle mdi-36px text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card card-rounded h-100 py-2 border-start-danger">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                                Đã từ chối
+                                            </div>
+                                            <div class="h5 mb-0 fw-bold" id="rejectedCount">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="mdi mdi-close-circle mdi-36px text-danger"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="card card-rounded mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="mdi mdi-filter-outline me-2"></i>Tìm kiếm và lọc
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Tìm kiếm</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="searchRequest"
+                                            placeholder="Mã đơn hàng, tên khách hàng...">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnSearch">
+                                            <i class="mdi mdi-magnify"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="filterStatus">
+                                        <option value="">Tất cả</option>
+                                        <option value="PENDING">Chờ xử lý</option>
+                                        <option value="ACCEPTED">Đã chấp nhận</option>
+                                        <option value="REJECTED">Đã từ chối</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1 mb-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-secondary w-100" id="btnRefresh"
+                                        title="Làm mới">
+                                        <i class="mdi mdi-refresh"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Return Requests Table -->
+                    <div class="card card-rounded">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" width="8%">ID</th>
+                                            <th scope="col" width="15%">Mã đơn hàng</th>
+                                            <th scope="col" width="18%">Khách hàng</th>
+                                            <th scope="col" width="25%">Lý do</th>
+                                            <th scope="col" width="12%">Trạng thái</th>
+                                            <th scope="col" width="12%">Ngày tạo</th>
+                                            <th scope="col" width="10%">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="returnRequestTableBody">
+                                        <!-- Return requests will be loaded here via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span id="paginationInfo" class="text-muted">Hiển thị 0-0 trong tổng số 0 yêu
+                                        cầu</span>
+                                </div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0" id="pagination">
+                                        <!-- Pagination will be generated here -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div th:replace="admin/layout/admin-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Detail Modal -->
+    <div class="modal fade" id="viewDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="mdi mdi-eye me-2"></i>Chi tiết yêu cầu trả hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="mdi mdi-information me-2"></i>Thông tin đơn hàng
+                            </h6>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td class="fw-medium" width="40%">Mã đơn hàng:</td>
+                                    <td id="viewOrderNumber"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">Tổng tiền:</td>
+                                    <td id="viewOrderTotal" class="text-primary fw-bold"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">Trạng thái đơn:</td>
+                                    <td id="viewOrderStatus"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="mdi mdi-account me-2"></i>Thông tin khách hàng</h6>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td class="fw-medium" width="40%">Họ tên:</td>
+                                    <td id="viewCustomerName"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">Email:</td>
+                                    <td id="viewCustomerEmail"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h6 class="text-primary mb-2"><i class="mdi mdi-comment-text me-2"></i>Lý do trả hàng</h6>
+                        <div id="viewReason" class="border rounded p-3 bg-light" style="min-height: 100px;"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="fw-medium">Trạng thái:</label>
+                                <div id="viewStatus"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-medium">Ngày tạo:</label>
+                                <div id="viewCreatedDate"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="fw-medium">Người xử lý:</label>
+                                <div id="viewProcessedBy">Chưa xử lý</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-medium">Ngày xử lý:</label>
+                                <div id="viewProcessedDate">Chưa xử lý</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="viewAdminNoteContainer" style="display: none;">
+                        <label class="fw-medium">Ghi chú của admin:</label>
+                        <div id="viewAdminNote" class="border rounded p-2 bg-light"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="btnEditFromView" style="display: none;">
+                        <i class="mdi mdi-pencil me-2"></i>Xử lý yêu cầu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="mdi mdi-pencil me-2"></i>Xử lý yêu cầu trả hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="updateRequestId">
+
+                    <div class="alert alert-info">
+                        <strong>Đơn hàng:</strong> <span id="updateOrderNumber"></span><br>
+                        <strong>Khách hàng:</strong> <span id="updateCustomerName"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Lý do trả hàng:</label>
+                        <div id="updateReason" class="border rounded p-2 bg-light"
+                            style="max-height: 150px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Quyết định: <span class="text-danger">*</span></label>
+                        <select class="form-select" id="updateStatus" required>
+                            <option value="">-- Chọn quyết định --</option>
+                            <option value="ACCEPTED">Chấp nhận</option>
+                            <option value="REJECTED">Từ chối</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Ghi chú:</label>
+                        <textarea class="form-control" id="updateAdminNote" rows="3"
+                            placeholder="Nhập ghi chú cho khách hàng..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="btnSubmitUpdate">
+                        <i class="mdi mdi-check me-2"></i>Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/admin/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/admin/js/off-canvas.js}"></script>
+    <script th:src="@{/admin/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/admin/js/misc.js}"></script>
+    <script th:src="@{/admin/js/admin/return-requests.js}"></script>
+
+    <style>
+        .border-start-primary {
+            border-left: 4px solid #4e73df !important;
+        }
+
+        .border-start-success {
+            border-left: 4px solid #1cc88a !important;
+        }
+
+        .border-start-danger {
+            border-left: 4px solid #e74a3b !important;
+        }
+
+        .border-start-warning {
+            border-left: 4px solid #f6c23e !important;
+        }
+
+        .border-start-info {
+            border-left: 4px solid #36b9cc !important;
+        }
+
+        .card-rounded {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #5a5c69;
+        }
+
+        .return-requests-page .content-wrapper {
+            background-color: #f8f9fc;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</body>
+
+</html>

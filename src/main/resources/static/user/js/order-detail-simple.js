@@ -9,33 +9,33 @@ function uploadVideoToEditor(editorId) {
         console.error('Editor not found:', editorId);
         return;
     }
-    
+
     // Create file input
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'video/*';
     input.style.display = 'none';
-    
+
     input.onchange = async () => {
         const file = input.files[0];
         if (!file) {
             document.body.removeChild(input);
             return;
         }
-        
+
         try {
             // Get current content
             const currentContent = editor.getData();
-            
+
             // Show loading message in editor
             const loadingMsg = `<p><em>📹 Đang tải lên video: ${file.name}...</em></p>`;
             const newContentWithLoading = currentContent + loadingMsg;
             editor.setData(newContentWithLoading);
-            
+
             // Upload video
             const formData = new FormData();
             formData.append('upload', file);
-            
+
             const token = localStorage.getItem('access_token');
             const response = await fetch('/api/reviews/upload-media', {
                 method: 'POST',
@@ -45,26 +45,26 @@ function uploadVideoToEditor(editorId) {
                 body: formData,
                 credentials: 'include'
             });
-            
+
             const data = await response.json();
-            
+
             if (data.error) {
                 throw new Error(data.error.message || 'Upload failed');
             }
-            
+
             // Remove loading message and insert video
             const currentEditorContent = editor.getData();
             const cleanedContent = currentEditorContent.replace(/<p><em>📹 Đang tải lên video:.*?<\/em><\/p>/g, '');
-            
+
             // Insert video as a figure element (CKEditor compatible format)
             const videoHtml = `<figure class="media"><video controls src="${data.url}" style="max-width: 100%; height: auto;"></video></figure>`;
             const finalContent = cleanedContent + videoHtml + '<p><br></p>';
-            
+
             editor.setData(finalContent);
-            
+
             console.log('Inserted video HTML:', videoHtml);
             console.log('Final content:', finalContent);
-            
+
             // Wait a moment then check if video was inserted
             setTimeout(() => {
                 const editorData = editor.getData();
@@ -73,22 +73,22 @@ function uploadVideoToEditor(editorId) {
                     console.warn('Video tag was stripped by CKEditor!');
                 }
             }, 100);
-            
+
             console.log('Video uploaded successfully:', data.url);
             document.body.removeChild(input);
         } catch (error) {
             console.error('Video upload error:', error);
             alert('Lỗi khi tải lên video: ' + error.message);
-            
+
             // Remove loading message on error
             const currentContent = editor.getData();
             const cleanedContent = currentContent.replace(/<p><em>Đang tải lên video:.*?<\/em><\/p>/g, '');
             editor.setData(cleanedContent);
-            
+
             document.body.removeChild(input);
         }
     };
-    
+
     document.body.appendChild(input);
     input.click();
 }
@@ -97,29 +97,29 @@ function uploadVideoToEditor(editorId) {
 async function initReviewEditors() {
     // Wait a bit for DOM to be ready
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     console.log('Looking for .review-editor elements, found:', $('.review-editor').length);
-    
-    $('.review-editor').each(function() {
+
+    $('.review-editor').each(function () {
         const textarea = $(this)[0];
         const editorId = textarea.id;
-        
+
         console.log('Found textarea with ID:', editorId);
-        
+
         // Skip if already initialized
         if (window.reviewEditors && window.reviewEditors[editorId]) {
             console.log('CKEditor already initialized for:', editorId);
             return;
         }
-        
+
         // Check if ClassicEditor is available
         if (typeof ClassicEditor === 'undefined') {
             console.error('ClassicEditor is not defined. CKEditor CDN may not be loaded.');
             return;
         }
-        
+
         console.log('Initializing CKEditor for:', editorId);
-        
+
         // Initialize CKEditor with upload functionality
         ClassicEditor
             .create(textarea, {
@@ -198,17 +198,17 @@ async function initReviewEditors() {
             })
             .then(editor => {
                 console.log('CKEditor initialized successfully for:', editorId);
-                
+
                 // Configure upload adapter manually after editor is created
                 if (editor.plugins.get('FileRepository')) {
-                    editor.plugins.get('FileRepository').createUploadAdapter = function(loader) {
+                    editor.plugins.get('FileRepository').createUploadAdapter = function (loader) {
                         return {
-                            upload: function() {
+                            upload: function () {
                                 return loader.file
                                     .then(file => {
                                         const formData = new FormData();
                                         formData.append('upload', file);
-                                        
+
                                         return fetch('/api/reviews/upload-media', {
                                             method: 'POST',
                                             headers: {
@@ -217,28 +217,28 @@ async function initReviewEditors() {
                                             body: formData,
                                             credentials: 'include'
                                         })
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            if (data.error) {
-                                                throw new Error(data.error.message || 'Upload failed');
-                                            }
-                                            return {
-                                                default: data.url
-                                            };
-                                        })
-                                        .catch(error => {
-                                            console.error('Upload error:', error);
-                                            throw error;
-                                        });
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.error) {
+                                                    throw new Error(data.error.message || 'Upload failed');
+                                                }
+                                                return {
+                                                    default: data.url
+                                                };
+                                            })
+                                            .catch(error => {
+                                                console.error('Upload error:', error);
+                                                throw error;
+                                            });
                                     });
                             },
-                            abort: function() {
+                            abort: function () {
                                 // Handle abort if needed
                             }
                         };
                     };
                 }
-                
+
                 if (!window.reviewEditors) {
                     window.reviewEditors = {};
                 }
@@ -295,6 +295,156 @@ function cancelOrder(orderId) {
                 alert('Có lỗi xảy ra khi hủy đơn hàng');
             });
     }
+}
+
+function returnOrder() {
+    // Lấy order ID từ Thymeleaf data attribute
+    const orderId = document.body.getAttribute('data-order-id');
+
+    // Fallback: parse từ URL nếu không có data attribute
+    if (!orderId) {
+        const pathParts = window.location.pathname.split('/');
+        const orderIdFromUrl = pathParts[pathParts.length - 1];
+
+        if (!orderIdFromUrl || isNaN(orderIdFromUrl)) {
+            alert('Không tìm thấy thông tin đơn hàng');
+            return;
+        }
+
+        $('#returnOrderId').val(orderIdFromUrl);
+    } else {
+        $('#returnOrderId').val(orderId);
+    }
+
+    // Check if modal exists
+    const modal = $('#returnRequestModal');
+
+    if (modal.length === 0) {
+        alert('Lỗi: Modal chưa được tải. Vui lòng refresh trang.');
+        return;
+    }
+
+    // Hiển thị modal
+    $('#returnRequestModal').modal('show');
+}
+
+// Handle return reason change
+$(document).ready(function () {
+    $('#returnReason').on('change', function () {
+        if ($(this).val() === 'other') {
+            $('#otherReasonGroup').slideDown();
+        } else {
+            $('#otherReasonGroup').slideUp();
+            $('#otherReasonText').val('');
+        }
+    });
+
+    // Handle image selection
+    $('#returnImages').on('change', function () {
+        const files = this.files;
+        const previewContainer = $('#imagePreviewContainer');
+        previewContainer.empty();
+
+        if (files.length > 5) {
+            alert('Chỉ được chọn tối đa 5 ảnh');
+            this.value = '';
+            return;
+        }
+
+        Array.from(files).forEach((file, index) => {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`Ảnh ${file.name} quá lớn (tối đa 5MB)`);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const col = $(`
+                    <div class="col-md-3">
+                        <div class="position-relative">
+                            <img src="${e.target.result}" class="img-thumbnail" style="width: 100%; height: 150px; object-fit: cover;">
+                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
+                                    onclick="removeImage(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `);
+                previewContainer.append(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // Submit return request
+    $('#btnSubmitReturn').on('click', async function () {
+        const orderId = $('#returnOrderId').val();
+        const reason = $('#returnReason').val();
+        const otherReasonText = $('#otherReasonText').val();
+        const images = $('#returnImages')[0].files;
+
+        // Validation
+        if (!reason) {
+            alert('Vui lòng chọn lý do trả hàng');
+            return;
+        }
+
+        if (reason === 'other' && !otherReasonText.trim()) {
+            alert('Vui lòng nhập lý do khác');
+            return;
+        }
+
+        // Build full reason text
+        let fullReason = reason === 'other' ? otherReasonText : reason;
+
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('Bạn không thể thực hiện thao tác này');
+            return;
+        }
+
+        try {
+            // For now, just send text (TODO: handle image upload later)
+            const response = await fetch(`/api/orders/${orderId}/return`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason: fullReason.trim()
+                })
+            });
+
+            if (response.ok) {
+                $('#returnRequestModal').modal('hide');
+                alert('Yêu cầu trả hàng đã được gửi thành công. Chúng tôi sẽ xử lý trong thời gian sớm nhất.');
+                window.location.reload();
+            } else {
+                const errorData = await response.json();
+                alert('Lỗi: ' + (errorData.message || 'Không thể tạo yêu cầu trả hàng'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi gửi yêu cầu trả hàng');
+        }
+    });
+
+    // Reset modal when closed
+    $('#returnRequestModal').on('hidden.bs.modal', function () {
+        $('#returnReason').val('');
+        $('#otherReasonText').val('');
+        $('#returnDescription').val('');
+        $('#returnImages').val('');
+        $('#imagePreviewContainer').empty();
+        $('#otherReasonGroup').hide();
+    });
+});
+
+function removeImage(index) {
+    // Remove image from preview
+    $(`#imagePreviewContainer .col-md-3:eq(${index})`).remove();
+    // Note: Can't remove from file input, would need to rebuild FileList
 }
 
 // Enhanced reorder function with modal (from order-detail.js)
@@ -736,11 +886,11 @@ let orderProducts = [];
 $(document).ready(function () {
     // Get order ID - Priority: 1) Query param, 2) URL path
     let orderId = null;
-    
+
     // Try to get from query parameter first
     const urlParams = new URLSearchParams(window.location.search);
     const orderIdParam = urlParams.get('orderId');
-    
+
     if (orderIdParam && !isNaN(orderIdParam)) {
         orderId = orderIdParam;
         console.log('Got orderId from query parameter:', orderId);
@@ -750,7 +900,7 @@ $(document).ready(function () {
         orderId = pathParts[pathParts.length - 1];
         console.log('Got orderId from URL path:', orderId);
     }
-    
+
     console.log('Page load - URL:', window.location.href);
     console.log('Page load - Hash:', window.location.hash);
     console.log('Page load - OrderId:', orderId);
@@ -777,19 +927,19 @@ $(document).ready(function () {
     // Also listen for hash changes
     window.addEventListener('hashchange', function () {
         console.log('Hash changed to:', window.location.hash);
-        
+
         // Get order ID with same priority as before
         let orderId = null;
         const urlParams = new URLSearchParams(window.location.search);
         const orderIdParam = urlParams.get('orderId');
-        
+
         if (orderIdParam && !isNaN(orderIdParam)) {
             orderId = orderIdParam;
         } else {
             const pathParts = window.location.pathname.split('/');
             orderId = pathParts[pathParts.length - 1];
         }
-        
+
         console.log('Hash change - OrderId:', orderId);
 
         if (orderId && !isNaN(orderId)) {
@@ -881,7 +1031,7 @@ async function loadOrderProductsForReview(orderId) {
 function renderReviewProducts(products) {
     // ✅ FIX: Destroy all CKEditor instances before rendering new content
     destroyReviewEditors();
-    
+
     const container = $('#reviewProductsList');
     container.empty();
 
@@ -1013,7 +1163,7 @@ function renderReviewProducts(products) {
             </div>
         `;
         container.append(productHtml);
-        
+
         // ✅ FIX: Lưu existing review data vào data attribute của card
         if (isReviewed && existingReview) {
             const card = $(`.card[data-order-product-id="${product.idOrderProduct}"]`);
@@ -1043,7 +1193,7 @@ function renderReviewProducts(products) {
         card.data('rating', rating);
         console.log('Rating stored:', card.data('rating'));
     });
-    
+
     // ✅ FIX: Add click handler for "Sửa" button using event delegation
     $(document).off('click', '.edit-btn').on('click', '.edit-btn', function () {
         const orderProductId = $(this).data('order-product-id');
@@ -1170,7 +1320,7 @@ async function openViewReviewModal(orderId) {
 function renderViewReviewProducts(products) {
     // ✅ FIX: Destroy all CKEditor instances before rendering new content
     destroyReviewEditors();
-    
+
     const container = $('#reviewProductsList');
     container.empty();
 
@@ -1331,7 +1481,7 @@ function renderViewReviewProducts(products) {
         card.data('rating', rating);
         console.log('Rating stored in view modal:', card.data('rating'));
     });
-    
+
     // ✅ FIX: Add click handler for "Sửa" button using event delegation
     $(document).off('click', '.edit-btn').on('click', '.edit-btn', function () {
         const orderProductId = $(this).data('order-product-id');
@@ -1342,7 +1492,7 @@ function renderViewReviewProducts(products) {
 
     // ✅ FIX: Always show both buttons (Đóng and Gửi đánh giá)
     $('#reviewModalLabel').html('<i class="fas fa-star me-2"></i>Đánh giá sản phẩm');
-    
+
     // Always show both buttons
     $('.modal-footer').html(`
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -1439,7 +1589,7 @@ function editReview(orderProductId) {
     });
     // Lưu rating vào card data ngay lập tức
     card.data('rating', existingReview.rating);
-    
+
     // DEBUG: Log để kiểm tra
     console.log('Edit review - Set initial rating:', existingReview.rating);
 
@@ -1492,11 +1642,11 @@ function saveReviewChanges(orderProductId) {
     const card = $(`.card[data-order-product-id="${orderProductId}"]`);
     const rating = card.data('rating');
     const existingReview = card.data('existing-review');
-    
+
     // Try to get content from CKEditor first
     let content = '';
     const editorId = `review-editor-edit-${orderProductId}`;
-    
+
     try {
         if (window.reviewEditors && window.reviewEditors[editorId]) {
             content = window.reviewEditors[editorId].getData();
@@ -1517,12 +1667,12 @@ function saveReviewChanges(orderProductId) {
         console.error('Error getting content in saveReviewChanges:', error);
         content = '';
     }
-    
+
     const anonymous = card.find('input[type="checkbox"]').is(':checked');
 
     // Nếu rating không được set (user không chọn lại star), dùng rating cũ
     const finalRating = rating || existingReview?.rating || 0;
-    
+
     console.log('Saving review changes for product:', orderProductId);
     console.log('- Rating:', finalRating);
     console.log('- Content length:', content ? content.length : 0);
@@ -1701,66 +1851,66 @@ async function submitAllReviews() {
         const pendingChanges = $(this).data('pending-changes');
         const card = $(this);
 
-                 // Xử lý review đã sửa (có pending changes)
-         if (pendingChanges) {
-             // Lấy rating cuối cùng - ưu tiên pendingChanges, sau đó card data, cuối cùng existingReview
-             let finalRating = pendingChanges.rating;
-             if (!finalRating || finalRating < 1) {
-                 finalRating = card.data('rating');
-             }
-             if (!finalRating || finalRating < 1) {
-                 finalRating = existingReview?.rating;
-             }
-             
-             // Nếu vẫn không có rating hợp lệ, báo lỗi
-             if (!finalRating || finalRating < 1) {
-                 console.log('No valid rating found for product:', orderProductId);
-                 hasInvalidReview = true;
-                 return;
-             }
-             
-                           // DEBUG: Kiểm tra content từ CKEditor trước khi submit
-              const editorId = `review-editor-edit-${orderProductId}`;
-              let finalContent = pendingChanges.content || '';
-              
-              // Lấy content mới nhất từ CKEditor nếu có
-              if (window.reviewEditors && window.reviewEditors[editorId]) {
-                  try {
-                      const latestContent = window.reviewEditors[editorId].getData();
-                      if (latestContent && latestContent.trim()) {
-                          finalContent = latestContent.trim();
-                          console.log('Got latest content from CKEditor:', editorId);
-                          console.log('Content length:', finalContent.length);
-                      } else {
-                          console.log('CKEditor content is empty, using pendingChanges');
-                          // Nếu CKEditor rỗng, giữ nguyên content cũ
-                          if (pendingChanges.content) {
-                              finalContent = pendingChanges.content;
-                          }
-                      }
-                  } catch (error) {
-                      console.error('Error getting content from CKEditor:', error);
-                      // Fallback to pendingChanges content
-                      if (pendingChanges.content) {
-                          finalContent = pendingChanges.content;
-                      }
-                  }
-              } else {
-                  console.log('CKEditor not initialized, using pendingChanges content');
-              }
+        // Xử lý review đã sửa (có pending changes)
+        if (pendingChanges) {
+            // Lấy rating cuối cùng - ưu tiên pendingChanges, sau đó card data, cuối cùng existingReview
+            let finalRating = pendingChanges.rating;
+            if (!finalRating || finalRating < 1) {
+                finalRating = card.data('rating');
+            }
+            if (!finalRating || finalRating < 1) {
+                finalRating = existingReview?.rating;
+            }
 
-              console.log('Final content length:', finalContent ? finalContent.length : 0);
+            // Nếu vẫn không có rating hợp lệ, báo lỗi
+            if (!finalRating || finalRating < 1) {
+                console.log('No valid rating found for product:', orderProductId);
+                hasInvalidReview = true;
+                return;
+            }
 
-             updatedReviews.push({
-                 reviewId: existingReview.reviewId,
-                 rating: finalRating,
-                 content: finalContent || '',
-                 anonymous: pendingChanges.anonymous
-             });
-             hasValidReview = true;
-             console.log('Added review to update list:', { reviewId: existingReview.reviewId, rating: finalRating, contentLength: finalContent?.length });
-             return;
-         }
+            // DEBUG: Kiểm tra content từ CKEditor trước khi submit
+            const editorId = `review-editor-edit-${orderProductId}`;
+            let finalContent = pendingChanges.content || '';
+
+            // Lấy content mới nhất từ CKEditor nếu có
+            if (window.reviewEditors && window.reviewEditors[editorId]) {
+                try {
+                    const latestContent = window.reviewEditors[editorId].getData();
+                    if (latestContent && latestContent.trim()) {
+                        finalContent = latestContent.trim();
+                        console.log('Got latest content from CKEditor:', editorId);
+                        console.log('Content length:', finalContent.length);
+                    } else {
+                        console.log('CKEditor content is empty, using pendingChanges');
+                        // Nếu CKEditor rỗng, giữ nguyên content cũ
+                        if (pendingChanges.content) {
+                            finalContent = pendingChanges.content;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error getting content from CKEditor:', error);
+                    // Fallback to pendingChanges content
+                    if (pendingChanges.content) {
+                        finalContent = pendingChanges.content;
+                    }
+                }
+            } else {
+                console.log('CKEditor not initialized, using pendingChanges content');
+            }
+
+            console.log('Final content length:', finalContent ? finalContent.length : 0);
+
+            updatedReviews.push({
+                reviewId: existingReview.reviewId,
+                rating: finalRating,
+                content: finalContent || '',
+                anonymous: pendingChanges.anonymous
+            });
+            hasValidReview = true;
+            console.log('Added review to update list:', { reviewId: existingReview.reviewId, rating: finalRating, contentLength: finalContent?.length });
+            return;
+        }
 
         // Chỉ xét điều kiện với sản phẩm chưa đánh giá (không có class border-success)
         const isAlreadyReviewed = card.hasClass('border-success');
@@ -1784,7 +1934,7 @@ async function submitAllReviews() {
         } else {
             content = textarea.val() ? textarea.val().trim() : '';
         }
-        
+
         const anonymous = card.find('input[type="checkbox"]').is(':checked');
 
         // Debug: Log để kiểm tra
@@ -1886,21 +2036,21 @@ async function submitAllReviews() {
             }
         }
 
-                 // Đóng modal
-         $('#reviewModal').modal('hide');
+        // Đóng modal
+        $('#reviewModal').modal('hide');
 
-         // Hiển thị toast thông báo thành công
-         const message = newReviews.length > 0 && updatedReviews.length > 0
-             ? 'Đánh giá và cập nhật thành công! ✨'
-             : newReviews.length > 0
-                 ? 'Đánh giá thành công! ✨'
-                 : 'Cập nhật đánh giá thành công! ✨';
-         showToast(message, 'success');
+        // Hiển thị toast thông báo thành công
+        const message = newReviews.length > 0 && updatedReviews.length > 0
+            ? 'Đánh giá và cập nhật thành công! ✨'
+            : newReviews.length > 0
+                ? 'Đánh giá thành công! ✨'
+                : 'Cập nhật đánh giá thành công! ✨';
+        showToast(message, 'success');
 
-         // Reload trang để hiển thị dữ liệu mới
-         setTimeout(() => {
-             window.location.reload();
-         }, 1500);
+        // Reload trang để hiển thị dữ liệu mới
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
 
     } catch (error) {
         console.error('Error submitting reviews:', error);

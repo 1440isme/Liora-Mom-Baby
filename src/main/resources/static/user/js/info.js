@@ -608,25 +608,49 @@ class UserInfoManager {
                         <i class="mdi mdi-cursor-pointer"></i>
                         <span>Xem chi tiết</span>
                     </div>
+                    
+                    ${/* Nút Hủy đơn cho PENDING và CONFIRMED */ ''}
+                    ${order.orderStatus === 'PENDING' || order.orderStatus === 'CONFIRMED' ? `
+                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); userInfoManager.cancelOrder(${order.idOrder})">
+                        <i class="mdi mdi-close-circle"></i> Hủy đơn
+                    </button>
+                    ` : ''}
+                    
+                    ${/* Nút Đánh giá và Trả hàng cho DELIVERED */ ''}
+                    ${order.orderStatus === 'DELIVERED' ? `
+                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
+                        <i class="mdi mdi-star"></i> Đánh giá
+                    </button>
+                    <button class="btn btn-warning btn-sm text-white" onclick="event.stopPropagation(); userInfoManager.returnOrder(${order.idOrder})">
+                        <i class="mdi mdi-undo-variant"></i> Trả hàng
+                    </button>
+                    ` : ''}
+                    
+                    ${/* Nút Mua lại cho CANCELLED */ ''}
+                    ${order.orderStatus === 'CANCELLED' ? `
+                    <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); userInfoManager.reorder(${order.idOrder})">
+                        <i class="mdi mdi-redo"></i> Mua lại
+                    </button>
+                    ` : ''}
+                    
+                    ${/* Nút Xem đánh giá và Mua lại cho COMPLETED */ ''}
                     ${order.orderStatus === 'COMPLETED' ? `
                         ${reviewStatus.allReviewed ? `
-                        <button class="btn btn-success btn-sm" disabled>
-                            <i class="mdi mdi-check"></i> Đã đánh giá
+                        <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
+                            <i class="mdi mdi-eye"></i> Xem đánh giá
                         </button>
                         ` : reviewStatus.hasAnyReview ? `
                         <button class="btn btn-warning btn-sm text-white" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
                             <i class="mdi mdi-star"></i> Xem đánh giá
                         </button>
                         ` : `
-                        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
+                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
                             <i class="mdi mdi-star"></i> Đánh giá
                         </button>
                         `}
-                        ` : ''}
-                    ${order.orderStatus === 'COMPLETED' || order.orderStatus === 'CANCELLED' ? `
-                    <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); userInfoManager.reorder(${order.idOrder})">
-                        <i class="mdi mdi-redo"></i> Mua lại
-                    </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); userInfoManager.reorder(${order.idOrder})">
+                            <i class="mdi mdi-redo"></i> Mua lại
+                        </button>
                     ` : ''}
                 </div>
             </div>
@@ -789,8 +813,11 @@ class UserInfoManager {
         const statusMap = {
             'PENDING': 'status-pending',
             'CONFIRMED': 'status-confirmed',
+            'SHIPPING': 'status-shipping',
+            'DELIVERED': 'status-delivered',
             'COMPLETED': 'status-completed',
-            'CANCELLED': 'status-cancelled'
+            'CANCELLED': 'status-cancelled',
+            'RETURNED': 'status-returned'
         };
         return statusMap[status] || 'status-pending';
     }
@@ -799,8 +826,11 @@ class UserInfoManager {
         const statusMap = {
             'PENDING': 'Chờ xử lý',
             'CONFIRMED': 'Đã xác nhận',
-            'COMPLETED': 'Hoàn tất',
-            'CANCELLED': 'Đã hủy'
+            'SHIPPING': 'Đang giao hàng',
+            'DELIVERED': 'Đã giao hàng',
+            'COMPLETED': 'Hoàn thành',
+            'CANCELLED': 'Đã hủy',
+            'RETURNED': 'Đã trả hàng'
         };
         return statusMap[status] || status;
     }
@@ -902,6 +932,101 @@ class UserInfoManager {
     async openReviewModal(orderId) {
         // Chuyển đến trang chi tiết đơn hàng với modal đánh giá
         window.location.href = `/user/order-detail/${orderId}#review`;
+    }
+
+    async cancelOrder(orderId) {
+        // Xác nhận trước khi hủy
+        const confirmed = confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');
+        if (!confirmed) return;
+
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                this.showError('Vui lòng đăng nhập để thực hiện thao tác này');
+                return;
+            }
+
+            // Hiển thị loading
+            this.showLoading();
+
+            const response = await fetch(`/api/orders/${orderId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason: 'Khách hàng yêu cầu hủy'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Không thể hủy đơn hàng');
+            }
+
+            this.showToast('Đơn hàng đã được hủy thành công', 'success');
+
+            // Reload orders list
+            setTimeout(() => {
+                this.loadOrders(this.currentOrderPage);
+            }, 1000);
+
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+            this.showError(error.message || 'Có lỗi xảy ra khi hủy đơn hàng');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async returnOrder(orderId) {
+        // Hiển thị form để user nhập lý do trả hàng
+        const reason = prompt('Vui lòng nhập lý do trả hàng:');
+        if (!reason || reason.trim() === '') {
+            this.showToast('Vui lòng nhập lý do trả hàng', 'warning');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                this.showError('Vui lòng đăng nhập để thực hiện thao tác này');
+                return;
+            }
+
+            // Hiển thị loading
+            this.showLoading();
+
+            const response = await fetch(`/api/orders/${orderId}/return`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason: reason.trim()
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Không thể tạo yêu cầu trả hàng');
+            }
+
+            this.showToast('Yêu cầu trả hàng đã được gửi thành công. Chúng tôi sẽ xử lý trong thời gian sớm nhất.', 'success');
+
+            // Reload orders list
+            setTimeout(() => {
+                this.loadOrders(this.currentOrderPage);
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error creating return request:', error);
+            this.showError(error.message || 'Có lỗi xảy ra khi tạo yêu cầu trả hàng');
+        } finally {
+            this.hideLoading();
+        }
     }
 
     async enrichOrderItemsWithCurrentStatus(orderItems, token) {
