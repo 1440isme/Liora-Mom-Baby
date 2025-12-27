@@ -473,6 +473,10 @@ class RecentlyViewedManager {
                     const productCards = container.querySelectorAll('.product-card');
                     window.ProductRatingUtils.loadAndUpdateProductCards(productCards);
                 }
+                // Update compare buttons state
+                if (window.productComparisonManager) {
+                    window.productComparisonManager.updateCompareButtons();
+                }
             }, 500);
 
             console.log('✅ [SUCCESS] Render recently viewed hoàn tất');
@@ -650,6 +654,15 @@ class RecentlyViewedManager {
                              onerror="this.src='/user/img/default-product.jpg'">
                     </a>
                     
+                    <!-- Nút So sánh - Ở góc trái riêng biệt -->
+                    <button class="compare-btn" 
+                            data-product-id="${product.productId}"
+                            title="Thêm vào danh sách so sánh">
+                        <i class="fas fa-balance-scale"></i>
+                        <span class="d-none d-md-inline">So sánh</span>
+                    </button>
+                    
+                    <!-- Product Actions - Ở góc phải -->
                     <div class="product-actions">
                         <button class="quick-view-btn" 
                                 onclick="if(window.recentlyViewedManager) window.recentlyViewedManager.showQuickView('${product.productId}'); else alert('Chức năng đang được tải...');"
