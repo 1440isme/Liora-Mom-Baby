@@ -1,0 +1,243 @@
+<div th:fragment="chat-ws-button">
+  <!-- Floating Chat Button -->
+  <div style="position: fixed; bottom: 20px; right: 90px; z-index: 9999">
+    <button
+      class="btn rounded-circle shadow-lg"
+      onclick="toggleChatWS()"
+      style="width: 60px; height: 60px; background: #d78da0; border: none"
+    >
+      <i class="fas fa-headset fs-4 text-white"></i>
+    </button>
+  </div>
+
+  <!-- Floating Chat Box -->
+  <div
+    id="chatBox"
+    style="
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 340px;
+      height: 460px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      z-index: 9999;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    "
+  >
+    <div
+      style="
+        background-color: rgb(215, 141, 160);
+        color: white;
+        padding: 12px 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      "
+    >
+      <div><i class="fas fa-spa me-1"></i> Liora CSKH</div>
+      <button
+        type="button"
+        onclick="closeChatWS()"
+        style="background: none; border: none; color: white; font-size: 18px"
+      >
+        ×
+      </button>
+    </div>
+
+    <!-- Chat content -->
+    <div
+      id="chatContent"
+      style="
+        height: 355px;
+        overflow-y: auto;
+        padding: 12px;
+        background: #f8f9fa;
+      "
+    ></div>
+
+    <!-- Input area -->
+    <div
+      style="
+        padding: 8px 10px;
+        border-top: 1px solid #ddd;
+        background: white;
+        display: flex;
+        align-items: center;
+      "
+    >
+      <input
+        id="chatInput"
+        class="form-control form-control-sm me-2 rounded-pill"
+        placeholder="Nhập tin nhắn..."
+        onkeydown="if(event.key==='Enter') sendMessage()"
+      />
+
+      <button
+        class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+        onclick="sendMessage()"
+        style="background-color: rgb(215, 141, 160); width: 36px; height: 36px"
+      >
+        <i class="fas fa-paper-plane text-white"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- JS phải NẰM TRONG fragment -->
+  <script th:inline="javascript">
+    let socket = null;
+    let isConnected = false;
+    let hasShownWelcome = false;
+
+    function toggleChatWS() {
+      // Kiểm tra đăng nhập từ localStorage (giống header)
+      const userData = localStorage.getItem("liora_user");
+      const accessToken = localStorage.getItem("access_token");
+      if (!userData || !accessToken) {
+        // Chưa đăng nhập, mở modal đăng nhập
+        if (window.bootstrap && document.getElementById("authModal")) {
+          const modal = new bootstrap.Modal(
+            document.getElementById("authModal")
+          );
+          modal.show();
+        } else if (window.$ && $("#authModal").modal) {
+          // Nếu có jQuery/Bootstrap 4
+          $("#authModal").modal("show");
+        } else {
+          alert("Vui lòng đăng nhập để sử dụng tính năng chat!");
+        }
+        return;
+      }
+
+      // Kiểm tra role ADMIN
+      try {
+        const user = JSON.parse(userData);
+        let roles = user.roles;
+        // Nếu roles chưa có, parse từ accessToken (giống main.js)
+        if (!Array.isArray(roles) || roles.length === 0) {
+          const payload = parseJwt(accessToken);
+          roles = extractRolesFromPayload(payload);
+        }
+        if (
+          roles &&
+          roles.some(
+            (r) =>
+              r === "ADMIN" ||
+              r === "ROLE_ADMIN" ||
+              r === "MANAGER" ||
+              r === "ROLE_MANAGER"
+          )
+        ) {
+          // Chuyển hướng admin đến trang chat-list (đồng bộ controller)
+          window.location.href = "/api/admin/websocket/chat-list";
+          return;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+
+      const box = document.getElementById("chatBox");
+      if (!box) return;
+
+      const isHidden = window.getComputedStyle(box).display === "none";
+
+      closeAllChats(); // 🔥 đóng chatbot nếu đang mở
+
+      if (isHidden) {
+        box.style.display = "block";
+        showWelcomeMessage();
+        if (!isConnected) {
+          connectWebSocket();
+        }
+      }
+    }
+
+    // Helper parseJwt và extractRolesFromPayload giống main.js
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        );
+        return JSON.parse(jsonPayload);
+      } catch (_) {
+        return {};
+      }
+    }
+    function extractRolesFromPayload(payload) {
+      if (!payload) return [];
+      if (Array.isArray(payload.authorities)) return payload.authorities;
+      if (Array.isArray(payload.roles)) return payload.roles;
+      if (typeof payload.authorities === "string") return [payload.authorities];
+      if (typeof payload.roles === "string") return [payload.roles];
+      return [];
+    }
+
+    function connectWebSocket() {
+      socket = new WebSocket("ws://localhost:8080/chat");
+
+      socket.onopen = function () {
+        isConnected = true;
+        console.log("WebSocket connected");
+      };
+
+      socket.onmessage = function (event) {
+        const msgDiv = document.getElementById("chatContent");
+        msgDiv.insertAdjacentHTML(
+          "beforeend",
+          "<div style='margin-bottom:6px'>👤 " + event.data + "</div>"
+        );
+        msgDiv.scrollTop = msgDiv.scrollHeight;
+      };
+
+      socket.onclose = function () {
+        isConnected = false;
+        console.log("WebSocket closed");
+      };
+    }
+
+    function showWelcomeMessage() {
+      if (hasShownWelcome) return;
+
+      const msgDiv = document.getElementById("chatContent");
+      msgDiv.insertAdjacentHTML(
+        "beforeend",
+        `<div style="margin-bottom:10px; background:#fdecef; padding:8px 10px;
+                    border-radius:12px; color:#b94b6f;">
+            🌸 <b>Liora:</b><br>
+            Liora xin chào! Bạn cần tìm sản phẩm cho bé hay cho mẹ ạ?
+        </div>`
+      );
+      msgDiv.scrollTop = msgDiv.scrollHeight;
+      hasShownWelcome = true;
+    }
+    function sendMessage() {
+      const input = document.getElementById("chatInput");
+      if (socket && input.value.trim() !== "") {
+        socket.send(input.value);
+        input.value = "";
+      }
+    }
+
+    function closeAllChats() {
+      const chatbot = document.querySelector(".chatbot-window");
+      const chatWs = document.getElementById("chatBox");
+
+      if (chatbot) chatbot.style.display = "none";
+      if (chatWs) chatWs.style.display = "none";
+    }
+
+    function closeChatWS() {
+      const box = document.getElementById("chatBox");
+      if (box) box.style.display = "none";
+    }
+  </script>
+</div>

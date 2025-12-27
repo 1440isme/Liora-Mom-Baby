@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin | Danh sách phòng chat</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <style>
+      body {
+        background: var(--pink-soft, #fae9ed);
+        font-family: var(--font-family, "Nunito", sans-serif);
+      }
+      .chat-list-header {
+        background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+        color: #fff;
+        border-radius: 16px 16px 0 0;
+        padding: 24px 32px 16px 32px;
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.12);
+      }
+      .chat-list-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .chat-room-list {
+        background: #fff;
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.1);
+        padding: 0;
+        margin-bottom: 32px;
+      }
+      .chat-room-item {
+        border: none;
+        border-bottom: 1px solid #f5d7db;
+        padding: 20px 32px;
+        transition: background 0.2s;
+        cursor: pointer;
+      }
+      .chat-room-item:last-child {
+        border-bottom: none;
+      }
+      .chat-room-item:hover {
+        background: #fdecef;
+      }
+      .chat-room-title {
+        color: #d78da0;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+      .chat-room-desc {
+        color: #b85c7a;
+        font-size: 0.95rem;
+      }
+      .badge-custom {
+        background: #d78da0;
+        color: #fff;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        padding: 6px 14px;
+        margin-right: 8px;
+      }
+      .badge-online {
+        background: #6fd6b6;
+        color: #fff;
+      }
+      .badge-offline {
+        background: #bdbdbd;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-admin-wrapper">
+      <div class="chat-flex-container" id="chatFlexContainer">
+        <!-- Danh sách phòng (bên trái) -->
+        <div class="chat-sidebar" id="chatSidebar">
+          <div class="chat-list-header">
+            <div class="chat-list-title">Danh sách phòng chat</div>
+            <div style="font-size: 1rem; opacity: 0.85">
+              Quản lý & hỗ trợ khách hàng realtime
+            </div>
+          </div>
+          <ul class="chat-room-list list-group">
+            <li
+              th:each="room : ${rooms}"
+              class="chat-room-item list-group-item d-flex justify-content-between align-items-center"
+              th:classappend="${room == selectedRoom} ? 'active' : ''"
+              th:onclick="|window.location.href='@{/api/admin/websocket/chat-list(room=${room})}'|"
+            >
+              <div>
+                <div class="chat-room-title" th:text="${room}">Room</div>
+                <div class="chat-room-desc">Phòng chat khách hàng</div>
+              </div>
+              <div>
+                <span class="badge-custom badge-online">Online</span>
+              </div>
+            </li>
+            <li
+              th:if="${rooms == null or #lists.isEmpty(rooms)}"
+              class="chat-room-item list-group-item text-center"
+              style="color: #b85c7a"
+            >
+              Không có phòng chat nào.
+            </li>
+          </ul>
+        </div>
+        <!-- Thanh kéo resize -->
+        <div class="chat-resizer" id="chatResizer"></div>
+        <!-- Khung chat (bên phải) -->
+        <div class="chat-main" id="chatMain">
+          <div
+            th:if="${selectedRoom != null}"
+            style="
+              padding: 32px 32px 16px 32px;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+            "
+          >
+            <h4 style="color: #d78da0; font-weight: 700">
+              Room: <span th:text="${selectedRoom}"></span>
+            </h4>
+            <div
+              style="
+                flex: 1;
+                overflow-y: auto;
+                border: 1px solid #eee;
+                padding: 10px;
+                margin-bottom: 16px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                min-height: 300px;
+              "
+            >
+              <div th:each="msg : ${messages}">
+                <div style="margin-bottom: 8px">
+                  <span
+                    style="color: #b85c7a; font-weight: 600"
+                    th:text="${msg.sender}"
+                  ></span
+                  >:
+                  <span th:text="${msg.content}"></span>
+                  <span
+                    style="font-size: 0.85em; color: #aaa; margin-left: 8px"
+                    th:text="${#dates.format(msg.createdAt, 'HH:mm dd/MM')}"
+                  ></span>
+                </div>
+              </div>
+            </div>
+            <form
+              method="post"
+              th:action="@{/api/admin/websocket/chat-list}"
+              style="display: flex; gap: 8px"
+            >
+              <input type="hidden" name="room" th:value="${selectedRoom}" />
+              <input
+                name="content"
+                class="form-control"
+                placeholder="Nhập tin nhắn..."
+                style="border-radius: 20px"
+                required
+              />
+              <button
+                class="btn btn-primary"
+                style="background: #d78da0; border: none; border-radius: 20px"
+              >
+                Gửi
+              </button>
+            </form>
+          </div>
+          <div
+            th:if="${selectedRoom == null}"
+            style="
+              padding: 32px;
+              color: #b85c7a;
+              text-align: center;
+              font-size: 1.2rem;
+            "
+          >
+            Chọn một phòng chat để bắt đầu.
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      html,
+      body,
+      .chat-admin-wrapper,
+      .chat-flex-container {
+        height: 100%;
+        min-height: 100vh;
+      }
+      .chat-admin-wrapper {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--pink-soft, #fae9ed);
+      }
+      .chat-flex-container {
+        display: flex;
+        width: 90vw;
+        height: 85vh;
+        min-width: 900px;
+        min-height: 500px;
+        max-width: 1600px;
+        background: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(215, 141, 160, 0.1);
+        overflow: hidden;
+      }
+      .chat-sidebar {
+        width: 20%;
+        min-width: 220px;
+        max-width: 400px;
+        background: none;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .chat-main {
+        width: 80%;
+        background: #fff;
+        border-radius: 0 18px 18px 0;
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-resizer {
+        width: 7px;
+        background: linear-gradient(90deg, #e8a2b0 0%, #d78da0 100%);
+        cursor: ew-resize;
+        z-index: 10;
+        transition: background 0.2s;
+      }
+      .chat-resizer:hover {
+        background: #d78da0;
+      }
+      .chat-room-item.active,
+      .chat-room-item.active:hover {
+        background: #fdecef;
+        font-weight: 700;
+      }
+    </style>
+    <script>
+      // Thanh kéo resize sidebar/main
+      const resizer = document.getElementById("chatResizer");
+      const sidebar = document.getElementById("chatSidebar");
+      const main = document.getElementById("chatMain");
+      const container = document.getElementById("chatFlexContainer");
+      let isResizing = false;
+      resizer.addEventListener("mousedown", function (e) {
+        isResizing = true;
+        document.body.style.cursor = "ew-resize";
+      });
+      document.addEventListener("mousemove", function (e) {
+        if (!isResizing) return;
+        const rect = container.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        // Giới hạn min/max
+        if (x < 180) x = 180;
+        if (x > rect.width - 300) x = rect.width - 300;
+        const percent = (x / rect.width) * 100;
+        sidebar.style.width = percent + "%";
+        main.style.width = 100 - percent + "%";
+      });
+      document.addEventListener("mouseup", function () {
+        isResizing = false;
+        document.body.style.cursor = "";
+      });
+    </script>
+  </body>
+</html>

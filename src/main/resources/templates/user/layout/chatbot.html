@@ -27,7 +27,7 @@
         <!-- Header -->
         <div style="background-color:rgb(215, 141, 160); color:white; padding:12px 15px; font-weight:600;
                     display:flex; align-items:center; justify-content:space-between;">
-            <div><i class="fas fa-spa me-1"></i>   Liora Mẹ&Bé</div>
+            <div><i class="fas fa-spa me-1"></i>  Liora Chatbot</div>
             <button type="button"
                     onclick="document.querySelector('.chatbot-window').style.display='none'"
                     style="background:none;border:none;color:white;font-size:18px;">×</button>
@@ -160,8 +160,8 @@
                 msgDiv.innerHTML = `
                     <div class="message-bubble" style="
                         display:inline-block;
-                        background-color:#2196f3;
-                        color:white;
+                        background-color:#fdecef;
+                        color:#b94b6f;
                         padding:8px 12px;
                         border-radius:15px;
                         max-width:75%;
@@ -293,19 +293,20 @@
         sendBtn.addEventListener("click", handleOutgoingMessage);
         // Toggle chatbot window on button click
         openChatbotBtn.addEventListener("click", async () => {
+            closeAllChats();
             if (chatbotWindow.style.display === 'none' || chatbotWindow.style.display === '') {
                 // Open chatbot
                 chatbotWindow.style.display = 'block';
                 chatInput.focus();
-                
+
                 // Auto-load database when opening chatbot
                 if (!databaseData) {
                     const loadingMsg = createMessageElement('🔄 Đang tải dữ liệu database...', 'bot');
                     //chatContent.appendChild(loadingMsg);
                     chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
-                    
+
                     await loadDatabaseData();
-                    
+
                     if (databaseData) {
                         const successMsg = createMessageElement('🌸 Chào bạn! Mình là Liora – trợ lý tư vấn mẹ và bé của Liora. Bạn cần tìm sản phẩm cho bé hay cho mẹ ạ?');
                         chatContent.appendChild(successMsg);
@@ -321,7 +322,13 @@
                 chatbotWindow.style.display = 'none';
             }
         });
+        function closeAllChats() {
+            const chatbot = document.querySelector(".chatbot-window");
+            const chatWs = document.getElementById("chatBox");
 
+            if (chatbot) chatbot.style.display = "none";
+            if (chatWs) chatWs.style.display = "none";
+        }
 
     </script>
 </div>
