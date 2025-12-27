@@ -20,6 +20,9 @@ class SimilarProductsManager {
             maxPrice: '',
             brands: [],
             ratings: [],
+            ageRange: [], // Mom & Baby: age range filter
+            size: [],     // Mom & Baby: size filter
+            origin: [],   // Mom & Baby: origin filter
             sort: ''
         };
         
@@ -96,6 +99,25 @@ class SimilarProductsManager {
             }
         });
 
+        // Age Range, Size, Origin checkboxes (Mom & Baby)
+        document.addEventListener('change', (e) => {
+            if (e.target.name === 'ageRange') {
+                this.updateAgeRangeFilter();
+                this.currentPage = 0;
+                this.loadSimilarProducts();
+            }
+            if (e.target.name === 'size') {
+                this.updateSizeFilter();
+                this.currentPage = 0;
+                this.loadSimilarProducts();
+            }
+            if (e.target.name === 'origin') {
+                this.updateOriginFilter();
+                this.currentPage = 0;
+                this.loadSimilarProducts();
+            }
+        });
+
         // Apply filters button
         const applyFiltersBtn = document.getElementById('applyFilters');
         if (applyFiltersBtn) {
@@ -124,6 +146,30 @@ class SimilarProductsManager {
         const checkedBrands = document.querySelectorAll('.brand-filter:checked');
         this.currentFilters.brands = Array.from(checkedBrands).map(cb => cb.value);
         console.log('🔍 Updated brand filters:', this.currentFilters.brands);
+    }
+
+    updateAgeRangeFilter() {
+        const ageRangeCheckboxes = document.querySelectorAll('#ageRangeCollapse input[type="checkbox"]');
+        this.currentFilters.ageRange = Array.from(ageRangeCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        console.log('🔍 Updated age range filters:', this.currentFilters.ageRange);
+    }
+
+    updateSizeFilter() {
+        const sizeCheckboxes = document.querySelectorAll('#sizeCollapse input[type="checkbox"]');
+        this.currentFilters.size = Array.from(sizeCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        console.log('🔍 Updated size filters:', this.currentFilters.size);
+    }
+
+    updateOriginFilter() {
+        const originCheckboxes = document.querySelectorAll('#originCollapse input[type="checkbox"]');
+        this.currentFilters.origin = Array.from(originCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        console.log('🔍 Updated origin filters:', this.currentFilters.origin);
     }
 
     async loadBrands() {
@@ -177,6 +223,19 @@ class SimilarProductsManager {
         // Clear brand filter
         brandCheckboxes.forEach(cb => cb.checked = false);
         this.currentFilters.brands = [];
+
+        // Clear Mom & Baby filters
+        const ageRangeCheckboxes = document.querySelectorAll('#ageRangeCollapse input[type="checkbox"]');
+        ageRangeCheckboxes.forEach(cb => cb.checked = false);
+        this.currentFilters.ageRange = [];
+
+        const sizeCheckboxes = document.querySelectorAll('#sizeCollapse input[type="checkbox"]');
+        sizeCheckboxes.forEach(cb => cb.checked = false);
+        this.currentFilters.size = [];
+
+        const originCheckboxes = document.querySelectorAll('#originCollapse input[type="checkbox"]');
+        originCheckboxes.forEach(cb => cb.checked = false);
+        this.currentFilters.origin = [];
 
         console.log('🔍 All filters cleared');
         console.log('Final filters:', this.currentFilters);
@@ -288,6 +347,16 @@ class SimilarProductsManager {
             }
             if (this.currentFilters.ratings.length > 0) {
                 params.append('ratings', this.currentFilters.ratings.join(','));
+            }
+            // Mom & Baby filters
+            if (this.currentFilters.ageRange && this.currentFilters.ageRange.length > 0) {
+                this.currentFilters.ageRange.forEach(age => params.append('ageRange', age));
+            }
+            if (this.currentFilters.size && this.currentFilters.size.length > 0) {
+                this.currentFilters.size.forEach(s => params.append('sizeFilter', s)); // Use sizeFilter to avoid conflict with page size
+            }
+            if (this.currentFilters.origin && this.currentFilters.origin.length > 0) {
+                this.currentFilters.origin.forEach(o => params.append('origin', o));
             }
             if (this.currentFilters.sort) {
                 const [sortBy, sortDir] = this.currentFilters.sort.split(',');

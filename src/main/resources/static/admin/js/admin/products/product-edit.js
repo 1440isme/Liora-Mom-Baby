@@ -94,8 +94,13 @@ class ProductEditManager {
 
             if (data.result) {
                 console.log('Product data received, populating form...');
+                console.log('Full product data:', JSON.stringify(data.result, null, 2));
                 this.currentProduct = data.result;
-                this.populateForm(data.result);
+                
+                // Small delay to ensure form elements are ready
+                setTimeout(() => {
+                    this.populateForm(data.result);
+                }, 100);
 
                 console.log('Form populated, loading images...');
                 this.loadCurrentImages(data.result);
@@ -157,6 +162,69 @@ class ProductEditManager {
             const brandEl = document.getElementById('brandId');
             if (brandEl) brandEl.value = product.brandId || '';
         });
+
+        // Mom & Baby specific fields
+        console.log('Loading Mom & Baby fields:', {
+            ageRange: product.ageRange,
+            size: product.size,
+            volume: product.volume,
+            origin: product.origin
+        });
+
+        // Use a small delay to ensure form is fully rendered
+        setTimeout(() => {
+            const ageRangeEl = document.getElementById('ageRange');
+            if (ageRangeEl) {
+                ageRangeEl.value = product.ageRange || '';
+                console.log('ageRangeEl set to:', ageRangeEl.value);
+            } else {
+                console.warn('ageRangeEl not found! Retrying...');
+                // Retry after another delay
+                setTimeout(() => {
+                    const retryEl = document.getElementById('ageRange');
+                    if (retryEl) {
+                        retryEl.value = product.ageRange || '';
+                        console.log('ageRangeEl set on retry to:', retryEl.value);
+                    }
+                }, 200);
+            }
+
+            const sizeEl = document.getElementById('size');
+            if (sizeEl) {
+                sizeEl.value = product.size || '';
+                console.log('sizeEl set to:', sizeEl.value);
+            } else {
+                console.warn('sizeEl not found! Retrying...');
+                setTimeout(() => {
+                    const retryEl = document.getElementById('size');
+                    if (retryEl) retryEl.value = product.size || '';
+                }, 200);
+            }
+
+            const volumeEl = document.getElementById('volume');
+            if (volumeEl) {
+                volumeEl.value = product.volume || '';
+                console.log('volumeEl set to:', volumeEl.value);
+            } else {
+                console.warn('volumeEl not found! Retrying...');
+                setTimeout(() => {
+                    const retryEl = document.getElementById('volume');
+                    if (retryEl) retryEl.value = product.volume || '';
+                }, 200);
+            }
+
+            const originEl = document.getElementById('origin');
+            if (originEl) {
+                originEl.value = product.origin || '';
+                console.log('originEl set to:', originEl.value);
+            } else {
+                console.warn('originEl not found! Retrying...');
+                setTimeout(() => {
+                    const retryEl = document.getElementById('origin');
+                    if (retryEl) retryEl.value = product.origin || '';
+                }, 200);
+            }
+        }, 50);
     }
 
     // Load categories and brands for dropdowns
@@ -226,9 +294,9 @@ class ProductEditManager {
                 data.result.forEach((image, index) => {
                     imagesHTML += `
                         <div class="col-6">
-                            <div class="image-item position-relative">
+                            <div class="image-item position-relative" style="background-color: white; padding: 8px; border-radius: 4px;">
                                 <img src="${image.imageUrl}" alt="Product image" 
-                                    class="img-thumbnail" style="width: 100%; height: 120px; object-fit: contain;">
+                                    class="img-thumbnail" style="width: 100%; height: 120px; object-fit: contain; background-color: white; display: block;">
                                 
                                 <!-- Image actions -->
                                 <div class="image-actions position-absolute top-0 end-0 p-1">
@@ -398,7 +466,9 @@ class ProductEditManager {
             reader.onload = function (e) {
                 html += `
                     <div class="col-md-4 mb-2">
-                        <img src="${e.target.result}" class="img-fluid rounded" style="aspect-ratio: 4/3; object-fit: cover;">
+                        <div style="background-color: white; padding: 8px; border-radius: 4px;">
+                            <img src="${e.target.result}" class="img-fluid rounded" style="aspect-ratio: 4/3; object-fit: cover; background-color: white; display: block; width: 100%;">
+                        </div>
                     </div>
                 `;
                 preview.innerHTML = html + '</div>';

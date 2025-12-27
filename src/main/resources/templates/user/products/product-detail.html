@@ -437,6 +437,52 @@
             transition: width 0.3s ease;
         }
 
+        /* Product Specs Styles */
+        .product-specs {
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .product-specs .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            margin-bottom: 0 !important;
+        }
+
+        .product-specs .spec-item strong {
+            color: #495057;
+            min-width: auto;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .product-specs .spec-item span {
+            color: #212529;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Responsive: Stack vertically on small screens */
+        @media (max-width: 576px) {
+            .product-specs {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .product-specs .spec-item {
+                width: 100%;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .product-detail-main-image {
@@ -759,6 +805,31 @@
                                         style="color: var(--pink-primary) !important; transition: color 0.3s ease;"
                                         onmouseover="this.style.color='var(--pink-dark) !important'"
                                         onmouseout="this.style.color='var(--pink-primary) !important'">Category Name</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Specs (Mom & Baby specific) -->
+                        <div class="mb-4" th:if="${product.ageRange != null or product.size != null or product.volume != null or product.origin != null}">
+                            <div class="product-specs">
+                                <div class="spec-item" th:if="${product.ageRange != null and !#strings.isEmpty(product.ageRange)}">
+                                    <strong>Độ tuổi:</strong>
+                                    <span th:text="${product.ageRange}"></span>
+                                </div>
+                                
+                                <div class="spec-item" th:if="${product.size != null and !#strings.isEmpty(product.size)}">
+                                    <strong>Size:</strong>
+                                    <span th:text="${product.size}"></span>
+                                </div>
+                                
+                                <div class="spec-item" th:if="${product.volume != null and !#strings.isEmpty(product.volume)}">
+                                    <strong>Dung tích:</strong>
+                                    <span th:text="${product.volume}"></span>
+                                </div>
+                                
+                                <div class="spec-item" th:if="${product.origin != null and !#strings.isEmpty(product.origin)}">
+                                    <strong>Xuất xứ:</strong>
+                                    <span th:text="${product.origin}"></span>
                                 </div>
                             </div>
                         </div>

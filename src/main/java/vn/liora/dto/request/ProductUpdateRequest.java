@@ -31,4 +31,10 @@ public class ProductUpdateRequest {
 
     private Boolean available;
     private Boolean isActive;
+
+    // Mom & Baby specific fields
+    private String ageRange;
+    private String size;
+    private String volume;
+    private String origin;
 }

@@ -4,7 +4,16 @@ class SearchResultsManager {
         this.currentPage = 0;
         this.pageSize = 12;
         this.currentProductId = null; // Track current product for quick view
-        this.currentFilters = { minPrice: null, maxPrice: null, brands: [], ratings: [], sort: '' };
+        this.currentFilters = { 
+            minPrice: null, 
+            maxPrice: null, 
+            brands: [], 
+            ratings: [], 
+            ageRange: [], // Mom & Baby: age range filter
+            size: [], // Mom & Baby: size filter
+            origin: [], // Mom & Baby: origin filter
+            sort: '' 
+        };
         this.products = [];
         this.totalElements = 0;
         this.totalPages = 0;
@@ -39,6 +48,12 @@ class SearchResultsManager {
         document.addEventListener('change', (e) => {
             if (e.target && e.target.closest && e.target.closest('#brandFilters')) this.onBrandChange(e);
             if (e.target && String(e.target.id || '').startsWith('rating')) this.onRatingChange(e);
+            // Mom & Baby filters - chỉ update trong currentFilters, không auto apply
+            // Sẽ apply khi người dùng bấm nút "Áp dụng bộ lọc"
+            if (e.target && (e.target.name === 'ageRange' || e.target.name === 'size' || e.target.name === 'origin')) {
+                // Chỉ update filters, không load results
+                this.updateFiltersFromUI();
+            }
         });
     }
 
@@ -78,6 +93,27 @@ class SearchResultsManager {
             .map(cb => parseInt(cb.value));
         console.log('Selected ratings:', this.currentFilters.ratings);
 
+        // Update age range filters (Mom & Baby) - query from collapse container
+        const ageRangeCheckboxes = document.querySelectorAll('#ageRangeCollapse input[type="checkbox"][name="ageRange"]');
+        this.currentFilters.ageRange = Array.from(ageRangeCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        console.log('Selected age ranges:', this.currentFilters.ageRange);
+
+        // Update size filters (Mom & Baby) - query from collapse container
+        const sizeCheckboxes = document.querySelectorAll('#sizeCollapse input[type="checkbox"][name="size"]');
+        this.currentFilters.size = Array.from(sizeCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        console.log('Selected sizes:', this.currentFilters.size);
+
+        // Update origin filters (Mom & Baby) - query from collapse container
+        const originCheckboxes = document.querySelectorAll('#originCollapse input[type="checkbox"][name="origin"]');
+        this.currentFilters.origin = Array.from(originCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        console.log('Selected origins:', this.currentFilters.origin);
+
         // Update sort filter
         const sortSelect = document.getElementById('sortSelect');
         if (sortSelect) {
@@ -94,6 +130,9 @@ class SearchResultsManager {
             maxPrice: null,
             brands: [],
             ratings: [],
+            ageRange: [], // Mom & Baby: age range filter
+            size: [],     // Mom & Baby: size filter
+            origin: [],   // Mom & Baby: origin filter
             sort: ''
         };
 
@@ -113,6 +152,22 @@ class SearchResultsManager {
         // Uncheck all rating checkboxes
         const ratingCheckboxes = document.querySelectorAll('input[id^="rating"]');
         ratingCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Uncheck all Mom & Baby filter checkboxes
+        const ageRangeCheckboxes = document.querySelectorAll('#ageRangeCollapse input[type="checkbox"][name="ageRange"]');
+        ageRangeCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        const sizeCheckboxes = document.querySelectorAll('#sizeCollapse input[type="checkbox"][name="size"]');
+        sizeCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        const originCheckboxes = document.querySelectorAll('#originCollapse input[type="checkbox"][name="origin"]');
+        originCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
 
@@ -163,7 +218,18 @@ class SearchResultsManager {
                 params.append('brands', this.currentFilters.brands.join(','));
             }
             if (this.currentFilters.ratings && this.currentFilters.ratings.length > 0) {
-                params.append('ratings', this.currentFilters.ratings.join(','));
+                // Send each rating separately for List<BigDecimal> support
+                this.currentFilters.ratings.forEach(rating => params.append('ratings', String(rating)));
+            }
+            // Mom & Baby filters - only add if they have values
+            if (this.currentFilters.ageRange && this.currentFilters.ageRange.length > 0) {
+                this.currentFilters.ageRange.forEach(age => params.append('ageRange', age));
+            }
+            if (this.currentFilters.size && this.currentFilters.size.length > 0) {
+                this.currentFilters.size.forEach(s => params.append('sizeFilter', s)); // Use sizeFilter to avoid conflict with page size
+            }
+            if (this.currentFilters.origin && this.currentFilters.origin.length > 0) {
+                this.currentFilters.origin.forEach(o => params.append('origin', o));
             }
 
             const url = `/api/products/search?${params.toString()}`;

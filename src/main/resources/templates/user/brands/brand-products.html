@@ -33,6 +33,48 @@
             color: #E8A2B0 !important;
             text-decoration: none !important;
         }
+        
+        /* Collapsible filter button styles */
+        .btn[data-bs-toggle="collapse"] {
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .btn[data-bs-toggle="collapse"]:hover {
+            background-color: #f8f9fa;
+            border-color: #E8A2B0;
+        }
+        
+        .btn[data-bs-toggle="collapse"] .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+        
+        .btn[data-bs-toggle="collapse"][aria-expanded="true"] .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        
+        .collapse .card-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .collapse .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .collapse .card-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .collapse .card-body::-webkit-scrollbar-thumb {
+            background: #E8A2B0;
+            border-radius: 10px;
+        }
+        
+        .collapse .card-body::-webkit-scrollbar-thumb:hover {
+            background: #d88a9a;
+        }
     </style>
 </head>
 <body>
@@ -93,6 +135,138 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="1" id="rating1">
                                 <label class="form-check-label" for="rating1">★☆☆☆☆ & up</label>
+                            </div>
+                        </div>
+
+                        <!-- Age Range Filter (Mom & Baby) - Collapsible -->
+                        <div class="mb-3">
+                            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#ageRangeCollapse" aria-expanded="false" aria-controls="ageRangeCollapse">
+                                <span class="fw-bold">Độ tuổi</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="collapse mt-2" id="ageRangeCollapse">
+                                <div class="card card-body p-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="0-6M" id="age0-6M">
+                                        <label class="form-check-label" for="age0-6M">0-6M</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="0-12M" id="age0-12M">
+                                        <label class="form-check-label" for="age0-12M">0-12M</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="6-12M" id="age6-12M">
+                                        <label class="form-check-label" for="age6-12M">6-12M</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="6M+" id="age6M+">
+                                        <label class="form-check-label" for="age6M+">6M+</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="7M+" id="age7M+">
+                                        <label class="form-check-label" for="age7M+">7M+</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="12M+" id="age12M+">
+                                        <label class="form-check-label" for="age12M+">12M+</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="1Y+" id="age1Y+">
+                                        <label class="form-check-label" for="age1Y+">1Y+</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="1-2Y" id="age1-2Y">
+                                        <label class="form-check-label" for="age1-2Y">1-2Y</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="1-3Y" id="age1-3Y">
+                                        <label class="form-check-label" for="age1-3Y">1-3Y</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="2Y+" id="age2Y+">
+                                        <label class="form-check-label" for="age2Y+">2Y+</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="Mẹ bầu" id="agePregnant">
+                                        <label class="form-check-label" for="agePregnant">Mẹ bầu</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="Mẹ sau sinh" id="agePostpartum">
+                                        <label class="form-check-label" for="agePostpartum">Mẹ sau sinh</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ageRange" value="Mẹ cho con bú" id="ageBreastfeeding">
+                                        <label class="form-check-label" for="ageBreastfeeding">Mẹ cho con bú</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Size Filter (Mom & Baby) - Collapsible -->
+                        <div class="mb-3">
+                            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#sizeCollapse" aria-expanded="false" aria-controls="sizeCollapse">
+                                <span class="fw-bold">Size</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="collapse mt-2" id="sizeCollapse">
+                                <div class="card card-body p-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="size" value="NB" id="sizeNB">
+                                        <label class="form-check-label" for="sizeNB">NB (Newborn)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="size" value="S" id="sizeS">
+                                        <label class="form-check-label" for="sizeS">S</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="size" value="M" id="sizeM">
+                                        <label class="form-check-label" for="sizeM">M</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="size" value="L" id="sizeL">
+                                        <label class="form-check-label" for="sizeL">L</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="size" value="XL" id="sizeXL">
+                                        <label class="form-check-label" for="sizeXL">XL</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="size" value="XXL" id="sizeXXL">
+                                        <label class="form-check-label" for="sizeXXL">XXL</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Origin Filter (Mom & Baby) - Collapsible -->
+                        <div class="mb-3">
+                            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#originCollapse" aria-expanded="false" aria-controls="originCollapse">
+                                <span class="fw-bold">Xuất xứ</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="collapse mt-2" id="originCollapse">
+                                <div class="card card-body p-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="origin" value="Việt Nam" id="originVN">
+                                        <label class="form-check-label" for="originVN">Việt Nam</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="origin" value="Nhật Bản" id="originJP">
+                                        <label class="form-check-label" for="originJP">Nhật Bản</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="origin" value="Mỹ" id="originUS">
+                                        <label class="form-check-label" for="originUS">Mỹ</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="origin" value="Hàn Quốc" id="originKR">
+                                        <label class="form-check-label" for="originKR">Hàn Quốc</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="origin" value="Châu Âu" id="originEU">
+                                        <label class="form-check-label" for="originEU">Châu Âu</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

@@ -39,4 +39,10 @@ public class ProductResponse {
     // Image fields
     private String mainImageUrl;
     private List<String> imageUrls;
+
+    // Mom & Baby specific fields
+    private String ageRange;
+    private String size;
+    private String volume;
+    private String origin;
 }

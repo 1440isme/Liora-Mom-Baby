@@ -535,3 +535,36 @@ body.sidebar-icon-only .sidebar .nav .nav-item.pinned>.nav-link::after {
         max-width: none;
     }
 }
+
+/* Product Images - White Background for Transparent Images */
+/* Apply to image containers */
+.image-item,
+#currentImages,
+#imagePreview,
+#newImagePreview,
+.product-images-container,
+.main-image {
+    background-color: white !important;
+}
+
+/* Apply to all product images */
+.image-item img,
+.product-image img,
+.img-thumbnail,
+.img-thumbnail[src*="product"],
+.img-thumbnail[src*="upload"],
+#currentImages img,
+#imagePreview img,
+#newImagePreview img,
+.product-images-container img,
+.main-image img {
+    background-color: white !important;
+    background-image: none !important;
+}
+
+/* Ensure transparent PNG images display correctly on white background */
+img[src*=".png"],
+img[src*="product"],
+img[src*="upload"] {
+    background-color: white !important;
+}

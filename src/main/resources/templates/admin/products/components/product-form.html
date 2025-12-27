@@ -40,6 +40,75 @@
         <input type="number" class="form-control" id="stock" name="stock" min="0" required>
     </div>
 
+    <!-- Mom & Baby specific fields -->
+    <div class="mb-3">
+        <h4 class="card-title card-title-dash">Thông tin đặc thù mẹ bé</h4>
+    </div>
+
+    <!-- Độ tuổi phù hợp -->
+    <div class="mb-3">
+        <label for="ageRange" class="form-label">Độ tuổi phù hợp</label>
+        <select class="form-select" id="ageRange" name="ageRange">
+            <option value="">-- Chọn độ tuổi --</option>
+            <optgroup label="Trẻ sơ sinh">
+                <option value="0-6M">0-6M</option>
+                <option value="0-12M">0-12M</option>
+                <option value="6-12M">6-12M</option>
+            </optgroup>
+            <optgroup label="Trẻ nhỏ">
+                <option value="6M+">6M+</option>
+                <option value="7M+">7M+</option>
+                <option value="12M+">12M+</option>
+                <option value="1Y+">1Y+</option>
+            </optgroup>
+            <optgroup label="Trẻ tập đi">
+                <option value="1-2Y">1-2Y</option>
+                <option value="1-3Y">1-3Y</option>
+            </optgroup>
+            <optgroup label="Trẻ lớn">
+                <option value="2Y+">2Y+</option>
+            </optgroup>
+            <optgroup label="Mẹ">
+                <option value="Mẹ bầu">Mẹ bầu</option>
+                <option value="Mẹ sau sinh">Mẹ sau sinh</option>
+                <option value="Mẹ cho con bú">Mẹ cho con bú</option>
+            </optgroup>
+            <optgroup label="Người lớn">
+                <option value="Người lớn">Người lớn</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <!-- Size -->
+    <div class="mb-3">
+        <label for="size" class="form-label">Size (cho tã, quần áo)</label>
+        <input type="text" class="form-control" id="size" name="size" placeholder="VD: NB, S, M, L, XL">
+    </div>
+
+    <!-- Dung tích -->
+    <div class="mb-3">
+        <label for="volume" class="form-label">Dung tích (cho sữa, thực phẩm)</label>
+        <input type="text" class="form-control" id="volume" name="volume" placeholder="VD: 800g, 1.5kg">
+    </div>
+
+    <!-- Xuất xứ -->
+    <div class="mb-3">
+        <label for="origin" class="form-label">Xuất xứ</label>
+        <select class="form-select" id="origin" name="origin">
+            <option value="">-- Chọn xuất xứ --</option>
+            <option value="Việt Nam">Việt Nam</option>
+            <option value="Nhật Bản">Nhật Bản</option>
+            <option value="Mỹ">Mỹ</option>
+            <option value="Hàn Quốc">Hàn Quốc</option>
+            <option value="Châu Âu">Châu Âu</option>
+            <option value="Trung Quốc">Trung Quốc</option>
+            <option value="Thổ Nhĩ Kỳ">Thổ Nhĩ Kỳ</option>
+            <option value="Hồng Kông">Hồng Kông</option>
+            <option value="Thái Lan">Thái Lan</option>
+            <option value="Campuchia">Campuchia</option>
+        </select>
+    </div>
+
     <!-- Mô tả -->
     <div class="mb-3">
         <label for="description" class="form-label">Mô tả chi tiết <span class="text-danger">*</span></label>

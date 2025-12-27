@@ -31,6 +31,10 @@ public interface ProductMapper {
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "mainImageUrl", source = "images", qualifiedByName = "getMainImageUrl")
     @Mapping(target = "imageUrls", source = "images", qualifiedByName = "getAllImageUrls")
+    @Mapping(target = "ageRange", source = "ageRange")
+    @Mapping(target = "size", source = "size")
+    @Mapping(target = "volume", source = "volume")
+    @Mapping(target = "origin", source = "origin")
     ProductResponse toProductResponse(Product product);
     
     @org.mapstruct.Named("getMainImageUrl")
@@ -62,6 +66,10 @@ public interface ProductMapper {
     @Mapping(target = "stock", source = "stock", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "available", source = "available", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "isActive", source = "isActive", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "ageRange", source = "ageRange", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "size", source = "size", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "volume", source = "volume", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "origin", source = "origin", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "images", ignore = true)

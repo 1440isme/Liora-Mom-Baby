@@ -153,12 +153,12 @@ class ProductDetailManager {
         const otherImages = images.filter(img => img !== mainImage);
 
         let html = `
-            <div class="product-images-container">
+            <div class="product-images-container" style="background-color: white;">
                 <!-- Main Image -->
-                <div class="main-image mb-3 position-relative">
+                <div class="main-image mb-3 position-relative" style="background-color: white; padding: 20px; border-radius: 8px;">
                     <img src="${mainImage.imageUrl}" 
                          class="img-fluid rounded shadow-sm" 
-                         style="width: 100%; aspect-ratio: 4/3; object-fit: contain; cursor: pointer;"
+                         style="width: 100%; aspect-ratio: 4/3; object-fit: contain; cursor: pointer; background-color: white; display: block;"
                          alt="Hình ảnh chính"
                          onclick="this.style.transform = this.style.transform ? '' : 'scale(1.1)'; this.style.transition = 'transform 0.3s ease';"
                          onerror="this.src='https://placehold.co/300x300'">
@@ -177,12 +177,14 @@ class ProductDetailManager {
             otherImages.forEach((image, index) => {
                 html += `
                     <div class="col-6">
-                        <img src="${image.imageUrl}" 
-                             class="img-fluid rounded" 
-                             style="width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer;"
-                             alt="Hình ảnh ${index + 2}"
-                             onclick="this.style.transform = this.style.transform ? '' : 'scale(1.1)'; this.style.transition = 'transform 0.3s ease';"
-                             onerror="this.src='https://placehold.co/300x300'">
+                        <div style="background-color: white; padding: 8px; border-radius: 4px;">
+                            <img src="${image.imageUrl}" 
+                                 class="img-fluid rounded" 
+                                 style="width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; background-color: white; display: block;"
+                                 alt="Hình ảnh ${index + 2}"
+                                 onclick="this.style.transform = this.style.transform ? '' : 'scale(1.1)'; this.style.transition = 'transform 0.3s ease';"
+                                 onerror="this.src='https://placehold.co/300x300'">
+                        </div>
                     </div>
                 `;
             });
