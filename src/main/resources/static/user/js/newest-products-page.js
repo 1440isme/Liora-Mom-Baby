@@ -303,6 +303,10 @@ class NewestProductsPageManager {
             if (window.loadProductRatings) {
                 window.loadProductRatings();
             }
+            // Update compare buttons state
+            if (window.productComparisonManager) {
+                window.productComparisonManager.updateCompareButtons();
+            }
         }, 500);
 
         console.log(`Rendered ${this.products.length} products`);
@@ -323,6 +327,15 @@ class NewestProductsPageManager {
                         <img src="${imageUrl}" class="card-img-top" alt="${name}"
                              onerror="this.src='/user/img/default-product.jpg'"
                              style="cursor:pointer" onclick="window.location.href='/product/${productId}?from=newest'">
+                        <!-- Nút So sánh - Ở góc trái riêng biệt -->
+                        <button class="compare-btn" 
+                                data-product-id="${productId}"
+                                title="Thêm vào danh sách so sánh">
+                            <i class="fas fa-balance-scale"></i>
+                            <span class="d-none d-md-inline">So sánh</span>
+                        </button>
+                        
+                        <!-- Product Actions - Ở góc phải -->
                         <div class="product-actions">
                             <button class="quick-view-btn" title="Xem nhanh"
                                 onclick="window.newestProductsPageManager && window.newestProductsPageManager.showQuickView(${productId})">
