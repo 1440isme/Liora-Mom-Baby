@@ -1,4 +1,4 @@
-# 💅 Liora Beauty - E-Commerce Platform
+# 🛒 Liora Mom & Baby - E-Commerce Platform
 
 <div align="center">
 
@@ -8,111 +8,130 @@
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-red.svg)](https://www.microsoft.com/sql-server)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**An e-commerce platform specializing in beauty and skincare products built with Spring Boot**
+**Nền tảng thương mại điện tử chuyên về sản phẩm mẹ và bé được xây dựng với Spring Boot**
 
-[Introduction](#-introduction) • [Features](#-features) • [Installation](#-installation) • [Documentation](#-documentation) • [Contributing](#-contributing)
+[Giới thiệu](#-giới-thiệu) • [Tính năng](#-tính-năng) • [Cài đặt](#-cài-đặt) • [Tài liệu](#-tài-liệu) • [Đóng góp](#-đóng-góp)
 
 </div>
 
 ---
 
-## 📖 Introduction
+## 📖 Giới thiệu
 
-**Liora Beauty** is a comprehensive e-commerce platform specializing in beauty and skincare products. The project is built with **Spring Boot Framework** using a 3-layer architecture (Controller-Service-Repository), fully integrated with payment gateways, shipping services, and AI-powered customer support.
+**Liora Mom & Baby** là nền tảng thương mại điện tử toàn diện chuyên cung cấp các sản phẩm chăm sóc sức khỏe và làm đẹp cho mẹ và bé. Dự án được xây dựng bằng **Spring Boot Framework** sử dụng kiến trúc 3 lớp (Controller-Service-Repository), tích hợp đầy đủ các cổng thanh toán, dịch vụ vận chuyển và hỗ trợ khách hàng bằng AI.
 
-## ⚡ Features
+## ⚡ Tính năng
 
-### 🛒 User Module
-| Feature | Description |
+### 🛒 Module Người dùng (User Module)
+
+| Tính năng | Mô tả |
 |-----------|-------|
-| 🛍️ **Online Shopping** | User-friendly interface with modern UX/UI design |
-| 🔍 **Search & Filter** | Smart search with multi-criteria filtering (price, brand, category) |
-| 🛒 **Cart & Checkout** | Optimized checkout process with comprehensive validation |
-| 💳 **Multiple Payment Methods** | Support for COD, VNPay, MOMO Integration |
-| 📦 **Order Tracking** | Real-time tracking with automatic status updates |
-| ⭐ **Reviews & Ratings** | Product rating system with comments |
-| 🤖 **AI Chatbot** | 24/7 customer support with Google Gemini AI |
-| 🔐 **OAuth 2.0** | Social login with Google |
+| 🛍️ **Mua sắm trực tuyến** | Giao diện thân thiện với thiết kế UX/UI hiện đại |
+| 🔍 **Tìm kiếm & Lọc** | Tìm kiếm thông minh với bộ lọc đa tiêu chí (giá, thương hiệu, danh mục) |
+| 🛒 **Giỏ hàng & Thanh toán** | Quy trình thanh toán được tối ưu với xác thực toàn diện |
+| 💳 **Nhiều phương thức thanh toán** | Hỗ trợ COD, VNPay, MOMO |
+| 📦 **Theo dõi đơn hàng** | Theo dõi thời gian thực với cập nhật trạng thái tự động |
+| ⭐ **Đánh giá & Xếp hạng** | Hệ thống đánh giá sản phẩm với bình luận và hình ảnh |
+| 🤖 **AI Chatbot** | Hỗ trợ khách hàng 24/7 với Google Gemini AI |
+| 🔐 **OAuth 2.0** | Đăng nhập xã hội với Google |
+| 💰 **Ví tiền & Điểm tích lũy (Xu)** | Hệ thống tích điểm 0.1% giá trị đơn hàng, sử dụng Xu để thanh toán |
+| 🔄 **Yêu cầu đổi trả** | Tạo và quản lý yêu cầu đổi trả hàng |
+| 📍 **Quản lý địa chỉ** | Lưu nhiều địa chỉ giao hàng, đặt địa chỉ mặc định |
+| 👁️ **Sản phẩm đã xem** | Lưu lịch sử sản phẩm đã xem |
+| 📄 **Trang tĩnh** | Xem các trang thông tin như "Về chúng tôi", "Chính sách" |
 
-### ⚙️ Admin Module
-| Feature | Description |
+### ⚙️ Module Quản trị (Admin Module)
+
+| Tính năng | Mô tả |
 |-----------|-------|
-| 📊 **Analytics Dashboard** | Revenue and order statistics with visual charts |
-| 📈 **Multi-dimensional Reports** | Detailed report export by time, product, customer |
-| 🎯 **Product Management** | CRUD operations with auto image upload, variant management |
-| 👥 **User Management** | Customer management with detailed permissions |
-| 🚚 **GHN Integration** | Automatic shipping order creation with GHN Express |
-| 🎨 **Banner Management** | Create and edit advertising banners |
-| 💰 **Discount Management** | Create, apply and track discount codes |
-| 🔐 **Role-Based Access Control** | Detailed permission system with Spring Security |
+| 📊 **Bảng điều khiển Analytics** | Thống kê doanh thu và đơn hàng với biểu đồ trực quan |
+| 📈 **Báo cáo đa chiều** | Xuất báo cáo chi tiết theo thời gian, sản phẩm, khách hàng |
+| 🎯 **Quản lý sản phẩm** | CRUD với tự động upload ảnh, quản lý biến thể, tối ưu hình ảnh |
+| 👥 **Quản lý người dùng** | Quản lý khách hàng với quyền chi tiết |
+| 🚚 **Tích hợp GHN** | Tự động tạo đơn vận chuyển với GHN Express |
+| 🎨 **Quản lý Banner** | Tạo và chỉnh sửa banner quảng cáo |
+| 💰 **Quản lý Mã giảm giá** | Tạo, áp dụng và theo dõi mã giảm giá |
+| 🔐 **Kiểm soát truy cập dựa trên vai trò** | Hệ thống phân quyền chi tiết với Spring Security |
+| 📝 **Quản lý Đánh giá** | Duyệt, ẩn/hiện đánh giá sản phẩm |
+| 🔄 **Quản lý Yêu cầu đổi trả** | Xử lý yêu cầu đổi trả hàng từ khách hàng |
+| 💳 **Quản lý Ví tiền** | Xem và quản lý ví tiền của khách hàng |
+| 🏠 **Quản lý Header/Footer** | Tùy chỉnh menu điều hướng và footer |
+| 📄 **Quản lý Trang tĩnh** | Tạo và quản lý các trang thông tin |
 
-## 🛠️ Technologies
+## 🛠️ Công nghệ sử dụng
 
 ### Backend
-<div align="left">
 
-| Technology | Version | Purpose |
+| Công nghệ | Phiên bản | Mục đích |
 |-----------|-----------|----------|
-| Spring Boot | 3.5.6 | Core Framework |
-| Spring Security | 6.x | Authentication & Authorization |
-| Spring Data JPA | 3.x | Database ORM |
-| Thymeleaf | 3.x | Server-side Template Engine |
-| MapStruct | 1.6.3 | DTO Mapping |
-| Lombok | Latest | Boilerplate Reduction |
-| OAuth2 Client | 3.x | Social Login |
-| Spring Mail | 3.x | Email Service |
-
-</div>
+| Spring Boot | 3.5.6 | Framework chính |
+| Spring Security | 6.x | Xác thực & Phân quyền |
+| Spring Data JPA | 3.x | ORM Database |
+| Thymeleaf | 3.x | Template Engine phía server |
+| MapStruct | 1.6.3 | Mapping DTO |
+| Lombok | Latest | Giảm boilerplate code |
+| OAuth2 Client | 3.x | Đăng nhập xã hội |
+| Spring Mail | 3.x | Dịch vụ Email |
+| JWT | - | Xác thực token |
 
 ### Frontend
-- **Bootstrap 5** - Responsive CSS Framework
-- **JavaScript ES6+** - Client-side Logic
-- **Chart.js** - Data Visualization
-- **Material Design Icons** - Icon Library
-- **Custom CSS** - Themed Styling
+
+- **Bootstrap 5** - Framework CSS responsive
+- **JavaScript ES6+** - Logic phía client
+- **Chart.js** - Trực quan hóa dữ liệu
+- **Material Design Icons** - Thư viện icon
+- **Custom CSS** - Styling theo theme
 
 ### Database
-- **Microsoft SQL Server 2019+** - Production Database
-- **H2 Database** - Development & Testing
 
-### Third-party Integrations
-- **💳 VNPay** - Payment Gateway Integration
-- **💳 MOMO** - Mobile Payment
-- **🚚 GHN Express** - Shipping Integration
+- **Microsoft SQL Server 2019+** - Database sản xuất
+- **H2 Database** - Phát triển & Testing
+
+### Tích hợp bên thứ ba
+
+- **💳 VNPay** - Tích hợp cổng thanh toán
+- **💳 MOMO** - Thanh toán di động
+- **🚚 GHN Express** - Tích hợp vận chuyển
 - **🤖 Google Gemini AI** - AI Chatbot
-- **🔐 Google OAuth** - Social Authentication
+- **🔐 Google OAuth** - Xác thực xã hội
 
-## 🚀 Installation
+## 🚀 Cài đặt
 
-### System Requirements
-- ☕ **Java** 21 or higher
+### Yêu cầu hệ thống
+
+- ☕ **Java** 21 trở lên
 - 🛠️ **Maven** 3.6+
-- 🗄️ **SQL Server** 2019+ or SQL Server Express
+- 🗄️ **SQL Server** 2019+ hoặc SQL Server Express
 - 💻 **IDE** (IntelliJ IDEA / Eclipse / VS Code)
 
-### Installation Guide
+### Hướng dẫn cài đặt
 
 #### 1. Clone Repository
+
 ```bash
 git clone https://github.com/1440isme/Liora.git
 cd Liora
 ```
 
-#### 2. Database Configuration
-Create a new database in SQL Server:
+#### 2. Cấu hình Database
+
+Tạo database mới trong SQL Server:
+
 ```sql
 CREATE DATABASE LioraDB;
 ```
 
-Update connection information in `src/main/resources/application.properties`:
+Cập nhật thông tin kết nối trong `src/main/resources/application.properties`:
+
 ```properties
 spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=LioraDB
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-#### 3. Configure API Keys
-Update API keys in `application.properties`:
+#### 3. Cấu hình API Keys
+
+Cập nhật API keys trong `application.properties`:
 
 **VNPay:**
 ```properties
@@ -131,6 +150,9 @@ momo.secretKey=your_secret_key
 ```properties
 ghn.api.token=your_ghn_token
 ghn.api.shop-id=your_shop_id
+ghn.api.service-id=your_service_id
+ghn.api.from-district-id=your_district_id
+ghn.api.from-ward-code=your_ward_code
 ```
 
 **Google Services:**
@@ -140,37 +162,53 @@ spring.security.oauth2.client.registration.google.client-secret=your_google_clie
 google.gemini.api.key=your_gemini_api_key
 ```
 
-#### 4. Build and Run
+**Email:**
+```properties
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
+```
+
+**JWT:**
+```properties
+jwt.signerKey=${JWT_SIGNER_KEY}
+```
+
+> 💡 **Lưu ý:** Các giá trị cấu hình như API keys, mật khẩu nên được đặt trong file `.env` hoặc biến môi trường trong môi trường sản xuất.
+
+#### 4. Build và Chạy
+
 ```bash
 # Build project
 mvn clean install
 
-# Run application
+# Chạy ứng dụng
 mvn spring-boot:run
 
-# Or run directly from IDE
-# Run LioraApplication.java
+# Hoặc chạy trực tiếp từ IDE
+# Chạy LioraApplication.java
 ```
 
-### 📱 Access System
-- **🌐 Main Website:** http://localhost:8080
+### 📱 Truy cập hệ thống
+
+- **🌐 Website chính:** http://localhost:8080
 - **⚙️ Admin Panel:** http://localhost:8080/admin
 - **📊 Dashboard:** http://localhost:8080/admin/dashboard
 
+### 👤 Tài khoản mặc định
 
-### 👤 Default Account
-After the first run, you can create an admin account through the registration interface or directly query the database.
+Sau lần chạy đầu tiên, bạn có thể tạo tài khoản admin thông qua giao diện đăng ký hoặc truy vấn trực tiếp database.
 
-## 📚 Documentation
+## 📚 Tài liệu
 
-- 📖 [User Manual](User_Manual_Liora_Beauty.md) - Detailed user guide
-- 🔧 [Installation Guide](INSTALLATION_GUIDE.md) - Detailed installation guide
-- 🔌 [API Documentation](docs/api.md) - API endpoints documentation
-- 🗄️ [Database Schema](docs/database.md) - Database schema
+- 📖 [Chính sách hoạt động](docs/CHINH_SACH_HOAT_DONG.md) - Tài liệu chính sách và quy định chi tiết
+- 📄 [Về chúng tôi](docs/VE_CHUNG_TOI.md) - Giới thiệu về Liora Mom & Baby
+- 🔧 [Hướng dẫn cài đặt](INSTALLATION_GUIDE.md) - Hướng dẫn cài đặt chi tiết
+- 🔌 [API Documentation](docs/api.md) - Tài liệu API endpoints
+- 🗄️ [Database Schema](docs/database.md) - Sơ đồ database
 
-## 🏗️ System Architecture
+## 🏗️ Kiến trúc hệ thống
 
-The project is organized using standard **Layered Architecture** pattern:
+Dự án được tổ chức theo mô hình **Layered Architecture** chuẩn:
 
 ```
 src/main/java/vn/liora/
@@ -178,54 +216,57 @@ src/main/java/vn/liora/
 ├── config/              # Spring Configuration Classes
 │   ├── SecurityConfig.java
 │   ├── WebMvcConfig.java
-│   └── CloudStorageConfig.java
+│   └── StorageProperties.java
 ├── controller/          # Web Controllers (REST & MVC)
-│   ├── admin/           # Admin Controllers
-│   ├── user/            # User Controllers
+│   ├── admin/           # Admin Controllers (20+ controllers)
+│   ├── user/            # User Controllers (15+ controllers)
+│   ├── auth/            # Authentication Controllers
 │   └── api/             # REST API Controllers
-├── dto/                 # Data Transfer Objects
-├── entity/              # JPA Entities (26 entities)
+├── dto/                 # Data Transfer Objects (80+ DTOs)
+├── entity/              # JPA Entities (29 entities)
 ├── enums/               # Enum Classes
 ├── exception/           # Custom Exceptions
-├── mapper/              # MapStruct Mappers
-├── repository/          # JPA Repositories (26 repos)
-├── service/             # Business Logic Layer (54 services)
+├── mapper/              # MapStruct Mappers (16 mappers)
+├── repository/          # JPA Repositories (29 repos)
+├── service/             # Business Logic Layer (58 services)
 ├── util/                # Utility Classes
-└── validator/          # Custom Validators
+└── validator/           # Custom Validators
 ```
 
-### Architecture Overview
+### Tổng quan kiến trúc
+
 ```
 ┌─────────────────────────────────────────────┐
-│              Presentation Layer             │
+│          Presentation Layer                 │
 │  (Thymeleaf Templates + JavaScript + CSS)   │
 └──────────────────┬──────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────┐
-│            Controller Layer                 │
-│    (Spring MVC + REST Controllers)          │
+│          Controller Layer                  │
+│    (Spring MVC + REST Controllers)         │
 └──────────────────┬──────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────┐
-│             Service Layer                   │
-│          (Business Logic)                   │
+│           Service Layer                    │
+│          (Business Logic)                  │
 └──────────────────┬──────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────┐
-│           Repository Layer                  │
+│         Repository Layer                    │
 │          (Spring Data JPA)                  │
 └──────────────────┬──────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────┐
-│             Database Layer                  │
-│         (Microsoft SQL Server)              │
+│          Database Layer                     │
+│       (Microsoft SQL Server)                │
 └─────────────────────────────────────────────┘
 ```
 
-## ⚙️ Configuration
+## ⚙️ Cấu hình
 
-### Main Configuration File
-File `src/main/resources/application.properties` contains all project configurations:
+### File cấu hình chính
+
+File `src/main/resources/application.properties` chứa tất cả cấu hình của dự án:
 
 ```properties
 # ==================== Database ====================
@@ -236,26 +277,35 @@ spring.datasource.password=your_password
 # ==================== JPA Configuration ====================
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.format_sql=false
 
 # ==================== File Upload ====================
 spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
+spring.servlet.multipart.max-request-size=50MB
+storage.location=./uploads
+
+# ==================== Image Optimization ====================
+image.optimization.max-width=1200
+image.optimization.max-height=1200
+image.optimization.thumbnail-size=300
+image.optimization.quality=0.8
 
 # ==================== Email Configuration ====================
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=your_email@gmail.com
-spring.mail.password=your_password
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
 
 # ==================== Security ====================
-app.jwt.secret=your_jwt_secret_key
-app.jwt.expiration=86400000
+jwt.signerKey=${JWT_SIGNER_KEY}
+jwt.valid-duration=3600
+jwt.refreshable-duration=36000
 
 # ==================== Payment Gateways ====================
 # VNPay
 vnpay.tmnCode=your_tmn_code
 vnpay.hashSecret=your_hash_secret
+vnpay.payUrl=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 
 # MOMO
 momo.partnerCode=your_partner_code
@@ -264,98 +314,111 @@ momo.secretKey=your_secret_key
 
 # ==================== Shipping ====================
 # GHN Express
+ghn.api.base-url=https://dev-online-gateway.ghn.vn/shiip/public-api
 ghn.api.token=your_ghn_token
 ghn.api.shop-id=your_shop_id
 ghn.api.service-id=your_service_id
+ghn.api.from-district-id=your_district_id
+ghn.api.from-ward-code=your_ward_code
+
+# ==================== OAuth2 ====================
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
 
 # ==================== AI Integration ====================
-google.gemini.api.key=your_gemini_api_key
+google.gemini.api.key=${GOOGLE_GEMINI_API_KEY}
 ```
 
-> 💡 **Note:** Configuration values such as API keys, passwords should be placed in `.env` file or environment variables in production environment.
+## 📊 Thống kê dự án
+
+### Thống kê mã nguồn
+
+| Loại | Số lượng | Mô tả |
+|------|----------|-------|
+| 📦 **Entities** | 29 | JPA Entities với relationships |
+| 🔧 **Repositories** | 29 | Spring Data JPA Repositories |
+| ⚙️ **Services** | 58 | Business Logic Layer |
+| 🎮 **Controllers** | 53+ | REST & Web Controllers |
+| 🔄 **DTOs** | 80+ | Data Transfer Objects |
+| 🗺️ **Mappers** | 16 | MapStruct Mappers |
+| 📄 **Templates** | 100+ | Thymeleaf HTML Templates |
+| 🎨 **CSS Files** | 17+ | Custom Styling |
+| 📜 **JavaScript** | 49+ | Client-side Logic |
+| 🗄️ **Database Tables** | 29+ | Tables với relationships |
+
+### Tính năng chính
+
+- ✅ **Tích hợp Thanh toán:** VNPay, MOMO
+- ✅ **Tích hợp Vận chuyển:** GHN Express
+- ✅ **Tích hợp AI:** Google Gemini Chatbot
+- ✅ **Đăng nhập xã hội:** Google OAuth 2.0
+- ✅ **Kiểm soát truy cập:** Role-Based Access Control với Spring Security
+- ✅ **Upload File:** Hệ thống lưu trữ file với tối ưu hình ảnh tự động
+- ✅ **Dịch vụ Email:** Tích hợp Spring Mail
+- ✅ **Bảng điều khiển Analytics:** Tích hợp Chart.js
+- ✅ **Hệ thống Ví tiền:** Tích điểm và thanh toán bằng Xu
+- ✅ **Quản lý Đổi trả:** Xử lý yêu cầu đổi trả hàng
+- ✅ **Quản lý Nội dung:** Header/Footer, Banner, Trang tĩnh
 
 ## 🧪 Testing
 
-### Running Tests
+### Chạy Tests
+
 ```bash
-# Run all unit tests
+# Chạy tất cả unit tests
 mvn test
 
-# Run test with code coverage
+# Chạy test với code coverage
 mvn test jacoco:report
-# View report at: target/site/jacoco/index.html
+# Xem báo cáo tại: target/site/jacoco/index.html
 
-# Run integration tests
+# Chạy integration tests
 mvn verify
 
-# Run tests for a specific class
+# Chạy test cho một class cụ thể
 mvn test -Dtest=ProductServiceTest
 ```
 
 ### Test Coverage
-The project uses **JaCoCo** to track code coverage. Coverage reports are automatically generated after running tests.
 
-## 📊 Project Statistics
+Dự án sử dụng **JaCoCo** để theo dõi code coverage. Báo cáo coverage được tự động tạo sau khi chạy tests.
 
-### Code Statistics
-| Type | Count | Description |
-|------|----------|-------|
-| 📦 **Entities** | 26 | JPA Entities with relationships |
-| 🔧 **Repositories** | 26 | Spring Data JPA Repositories |
-| ⚙️ **Services** | 54 | Business Logic Layer |
-| 🎮 **Controllers** | 48 | REST & Web Controllers |
-| 🔄 **DTOs** | 75 | Data Transfer Objects |
-| 🗺️ **Mappers** | 14 | MapStruct Mappers |
-| 📄 **Templates** | 91+ | Thymeleaf HTML Templates |
-| 🎨 **CSS Files** | 17 | Custom Styling |
-| 📜 **JavaScript** | 49+ | Client-side Logic |
-| 🗄️ **Database Tables** | 26+ | Tables with relationships |
+## 🤝 Đóng góp
 
-### Key Features
-- ✅ **Payment Integration:** VNPay, MOMO
-- ✅ **Shipping Integration:** GHN Express
-- ✅ **AI Integration:** Google Gemini Chatbot
-- ✅ **Social Login:** Google OAuth 2.0
-- ✅ **Role-Based Access Control:** Spring Security
-- ✅ **File Upload:** Cloud Storage (Azure/AWS ready)
-- ✅ **Email Service:** Spring Mail Integration
-- ✅ **Analytics Dashboard:** Chart.js Integration
+Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng! Các bước để đóng góp:
 
-## 🤝 Contributing
+1. **Fork** repository này
+2. Tạo **feature branch** mới (`git checkout -b feature/AmazingFeature`)
+3. **Commit** các thay đổi (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** lên branch (`git push origin feature/AmazingFeature`)
+5. Mở một **Pull Request** mới
 
-We welcome contributions from the community! Steps to contribute:
+### 📋 Hướng dẫn
 
-1. **Fork** this repository
-2. Create a new **feature branch** (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. Open a new **Pull Request**
-
-### 📋 Guidelines
-- Follow the project's coding conventions
-- Write unit tests for new code
-- Update documentation if needed
-- Use clear commit messages
+- Tuân theo quy ước coding của dự án
+- Viết unit tests cho code mới
+- Cập nhật tài liệu nếu cần
+- Sử dụng commit message rõ ràng
 
 ## 📄 License
 
-This project is distributed under the **MIT License**. See [LICENSE](LICENSE) file for details.
+Dự án này được phân phối dưới **MIT License**. Xem file [LICENSE](LICENSE) để biết chi tiết.
 
-## 👥 Authors
+## 👥 Tác giả
 
-| Name | Student ID |
-|-----|------------|
-| **Truong Cong Binh** | 23110184 |
-| **Tran Le Quoc Dai** | 23110201 |
-| **Ninh Thi My Hanh** | 23110210 |
-| **Doan Quang Khoi** | 23110244 |
+| Tên | Mã số sinh viên |
+|-----|----------------|
+| **Trương Công Bình** | 23110184 |
+| **Trần Lê Quốc Đại** | 23110201 |
+| **Ninh Thị Mỹ Hạnh** | 23110210 |
+| **Đoàn Quang Khôi** | 23110244 |
 
-## 📞 Contact
+## 📞 Liên hệ
 
 <div align="center">
 
-| Channel | Link |
-|---------|------|
+| Kênh | Liên kết |
+|------|----------|
 | 📧 **Email** | support@liora.com |
 | 🌐 **Website** | [liora.azurewebsites.net](https://liora.azurewebsites.net/) |
 | 💻 **GitHub** | [github.com/1440isme/Liora](https://github.com/1440isme/Liora) |
@@ -366,13 +429,12 @@ This project is distributed under the **MIT License**. See [LICENSE](LICENSE) fi
 
 <div align="center">
 
-### Made with ❤️ by Liora Beauty Team
+### Made with ❤️ by Liora Mom & Baby Team
 
 ![Spring Boot](https://img.shields.io/badge/Built%20with-Spring%20Boot-brightgreen)
 ![Java](https://img.shields.io/badge/Powered%20by-Java-orange)
 ![Stars](https://img.shields.io/github/stars/1440isme/Liora?style=social)
 
-⭐ **Star** this project if you find it useful!
+⭐ **Star** dự án này nếu bạn thấy hữu ích!
 
 </div>
-
