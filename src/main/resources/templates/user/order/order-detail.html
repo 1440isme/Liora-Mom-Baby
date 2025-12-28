@@ -149,16 +149,11 @@
                             <i class="fas fa-undo me-1"></i> Trả hàng/Hoàn tiền
                         </button>
 
-                        <!-- Nút Đánh giá và Trả hàng cho COMPLETED -->
+                        <!-- Nút Đánh giá cho COMPLETED -->
                         <button class="btn btn-primary me-2" th:if="${order.orderStatus == 'COMPLETED'}"
                             th:onclick="'checkReviewStatusAndOpen(' + ${order.idOrder} + ')'"
                             id="reviewButtonCompleted">
                             <i class="fas fa-star me-1"></i> <span id="reviewButtonText">Đánh giá</span>
-                        </button>
-                        <button class="btn btn-warning text-white me-2"
-                            th:if="${order.orderStatus == 'COMPLETED' and returnRequest == null}"
-                            onclick="returnOrder()">
-                            <i class="fas fa-undo me-1"></i> Trả hàng/Hoàn tiền
                         </button>
 
                         <!-- Nút Mua lại cho CANCELLED và COMPLETED -->

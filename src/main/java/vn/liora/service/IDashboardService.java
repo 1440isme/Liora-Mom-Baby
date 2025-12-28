@@ -82,7 +82,7 @@ public interface IDashboardService {
 
     double getRepeatPurchaseRate(LocalDateTime startDate, LocalDateTime endDate);
 
-    BigDecimal getRevenuePerCustomer(LocalDateTime startDate, LocalDateTime endDate);
+    BigDecimal getRevenuePerCustomer(LocalDateTime startDate, LocalDateTime endDate); // Nguồn thu dự kiến
 
     // Dashboard quick stats
     BigDecimal getThisWeekRevenue();

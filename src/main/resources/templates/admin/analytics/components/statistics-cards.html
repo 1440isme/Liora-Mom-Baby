@@ -233,24 +233,24 @@
             </div>
         </div>
 
-        <!-- Revenue per Customer Card -->
+        <!-- Expected Revenue Card - Nguồn thu dự kiến -->
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card border-left-purple shadow-sm h-100 py-2" style="border-left: 3px solid #6f42c1 !important;">
                 <div class="card-body py-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <div class="text-xs font-weight-bold text-purple text-uppercase mb-1" style="font-size: 0.7rem;">
-                                <i class="fas fa-user-tag me-1"></i>Doanh thu/Khách hàng
+                                <i class="fas fa-chart-line me-1"></i>Nguồn thu dự kiến
                                 <i class="mdi mdi-information-outline ms-1" 
                                    style="font-size: 0.75rem; cursor: help; color: #6c757d; vertical-align: middle;" 
                                    data-bs-toggle="tooltip" 
                                    data-bs-placement="top" 
-                                   title="Giá trị trung bình mỗi khách hàng. Công thức: Tổng doanh thu / Số khách hàng unique"></i>
+                                   title="Tổng giá trị các đơn hàng đang xử lý (PENDING, CONFIRMED, SHIPPING, DELIVERED) chưa chuyển sang trạng thái hoàn thành. Các đơn hàng này có thể sẽ trở thành doanh thu thực tế."></i>
                             </div>
                             <span id="revenuePerCustomerDisplay" class="h6 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">0 ₫</span>
                         </div>
                         <div class="opacity-50" style="color: #6f42c1;">
-                            <i class="fas fa-users fa-lg"></i>
+                            <i class="fas fa-hourglass-half fa-lg"></i>
                         </div>
                     </div>
                 </div>

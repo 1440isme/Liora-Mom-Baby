@@ -444,7 +444,10 @@ class OrderManager {
                 const currentPaymentStatus = $('#updatePaymentStatus').val();
                 const currentOrderStatus = order.orderStatus;
 
-                if (selectedOrderStatus === 'COMPLETED' && currentPaymentStatus === 'PENDING') {
+                if (selectedOrderStatus === 'DELIVERED' && currentPaymentStatus === 'PENDING') {
+                    // Khi đơn hàng chuyển sang "Đã giao hàng", tự động cập nhật trạng thái thanh toán thành "Đã thanh toán"
+                    $('#updatePaymentStatus').val('PAID');
+                } else if (selectedOrderStatus === 'COMPLETED' && currentPaymentStatus === 'PENDING') {
                     $('#updatePaymentStatus').val('PAID');
                 } else if (selectedOrderStatus === 'CANCELLED' && currentPaymentStatus === 'PAID') {
                     $('#updatePaymentStatus').val('REFUNDED');
@@ -472,7 +475,12 @@ class OrderManager {
             const order = this.orders.find(o => o.idOrder == orderId);
             const currentOrderStatus = order ? order.orderStatus : '';
 
-            if (orderStatus === 'COMPLETED') {
+            if (orderStatus === 'DELIVERED') {
+                // Khi đơn hàng chuyển sang "Đã giao hàng", tự động cập nhật trạng thái thanh toán thành "Đã thanh toán"
+                if (paymentStatus === 'PENDING') {
+                    finalPaymentStatus = 'PAID';
+                }
+            } else if (orderStatus === 'COMPLETED') {
                 // Nếu đơn hàng hoàn tất, tự động đặt thanh toán thành "Đã thanh toán" nếu đang "Chờ thanh toán"
                 if (paymentStatus === 'PENDING') {
                     finalPaymentStatus = 'PAID';

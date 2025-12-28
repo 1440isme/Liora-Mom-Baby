@@ -214,7 +214,8 @@ public class AdminPageController {
         return result;
     }
 
-    // API lấy Revenue per Customer
+    // API lấy Nguồn thu dự kiến (Expected Revenue) - tổng giá trị các đơn hàng đang
+    // xử lý
     @GetMapping("/analytics/revenue-per-customer")
     @ResponseBody
     public Map<String, Object> getRevenuePerCustomerByDateRange(
@@ -298,7 +299,11 @@ public class AdminPageController {
         model.addAttribute("lowStockProducts", dashboardService.getLowStockProductsList(10));
 
         model.addAttribute("recentOrders", dashboardService.getRecentOrders(5));
-        model.addAttribute("topProducts", dashboardService.getTopProducts(5));
+
+        // Lấy sản phẩm bán chạy trong tuần (7 ngày gần nhất)
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        model.addAttribute("topProducts", dashboardService.getTopProductsByDateRange(5, startOfWeek, now));
 
         return "admin/dashboard/index";
     }

@@ -544,26 +544,24 @@ public class DashboardServiceImpl implements IDashboardService {
 
     @Override
     public BigDecimal getRevenuePerCustomer(LocalDateTime startDate, LocalDateTime endDate) {
-        List<Order> orders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
-        if (orders.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
+        // Tính nguồn thu dự kiến: tổng giá trị các đơn hàng đang xử lý (chưa hoàn
+        // thành)
+        // Các trạng thái: PENDING, CONFIRMED, SHIPPING, DELIVERED
+        List<Order> allOrders = orderRepository.findByOrderDateBetween(startDate, endDate);
 
-        BigDecimal totalRevenue = orders.stream()
+        BigDecimal expectedRevenue = allOrders.stream()
+                .filter(o -> {
+                    String status = o.getOrderStatus();
+                    // Chỉ tính các đơn hàng đang xử lý, chưa hoàn thành
+                    return "PENDING".equals(status)
+                            || "CONFIRMED".equals(status)
+                            || "SHIPPING".equals(status)
+                            || "DELIVERED".equals(status);
+                })
                 .map(o -> o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long uniqueCustomers = orders.stream()
-                .map(o -> o.getUser() != null ? o.getUser().getUserId() : null)
-                .filter(userId -> userId != null)
-                .distinct()
-                .count();
-
-        if (uniqueCustomers == 0) {
-            return BigDecimal.ZERO;
-        }
-
-        return totalRevenue.divide(BigDecimal.valueOf(uniqueCustomers), 2, java.math.RoundingMode.HALF_UP);
+        return expectedRevenue;
     }
 
     @Override

@@ -423,7 +423,14 @@ public class OrderServiceImpl implements IOrderService {
         // Tự động cập nhật trạng thái thanh toán và sold count dựa trên trạng thái đơn
         // hàng
         String newOrderStatus = request.getOrderStatus();
-        if ("COMPLETED".equals(newOrderStatus)) {
+        if ("DELIVERED".equals(newOrderStatus)) {
+            // Khi đơn hàng chuyển sang "Đã giao hàng", tự động cập nhật trạng thái thanh
+            // toán thành "Đã thanh toán"
+            if ("PENDING".equals(currentPaymentStatus)) {
+                order.setPaymentStatus("PAID");
+                log.info("Auto-updated payment status to PAID for order {} when status changed to DELIVERED", idOrder);
+            }
+        } else if ("COMPLETED".equals(newOrderStatus)) {
             // Nếu đơn hàng hoàn tất và đã thanh toán, giữ nguyên trạng thái thanh toán
             // Nếu chưa thanh toán, tự động đặt thành "Đã thanh toán"
             if ("PENDING".equals(currentPaymentStatus)) {
