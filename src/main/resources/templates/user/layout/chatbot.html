@@ -74,7 +74,7 @@
         /* Floating button */
 .chatbot-btn {
   position: fixed;
-  bottom: 20px;
+  bottom: 80px;
   right: 20px;
   z-index: 9999;
 }
@@ -107,7 +107,7 @@
   display: none;
   position: fixed;
   bottom: 90px;
-  right: 20px;
+  right: 90px;
   width: 380px;
   height: 520px;
   max-height: 80vh;
@@ -415,9 +415,18 @@
         sendBtn.addEventListener("click", handleOutgoingMessage);
         // Toggle chatbot window on button click
         openChatbotBtn.addEventListener("click", async () => {
-            closeAllChats();
-            if (chatbotWindow.style.display === 'none' || chatbotWindow.style.display === '') {
-                // Open chatbot
+            // Check current state before closing other chats
+            const isCurrentlyOpen = chatbotWindow.style.display === 'block';
+            
+            // Close other chat windows (like chatWs)
+            const chatWs = document.getElementById("chatBox");
+            if (chatWs) chatWs.style.display = "none";
+            
+            if (isCurrentlyOpen) {
+                // Close chatbot if it's currently open
+                chatbotWindow.style.display = 'none';
+            } else {
+                // Open chatbot if it's currently closed
                 chatbotWindow.style.display = 'block';
                 chatInput.focus();
 
@@ -439,9 +448,6 @@
                         chatContent.scrollTo({ behavior: 'smooth', top: chatContent.scrollHeight });
                     }
                 }
-            } else {
-                // Close chatbot
-                chatbotWindow.style.display = 'none';
             }
         });
         function closeAllChats() {

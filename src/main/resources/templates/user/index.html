@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -34,8 +34,10 @@
     <div th:replace="user/layout/user-header :: header"></div>
     <!-- Chatbot -->
     <div th:replace="user/layout/chatbot :: chatbot-button"></div>
-    <!-- Chat websocket -->
-    <div th:replace="user/layout/chat-ws :: chat-ws-button"></div>
+    <!-- Chat websocket - Only show for non-admin users -->
+    <div sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
+        <div th:replace="user/layout/chat-ws :: chat-ws-button"></div>
+    </div>
     <!-- Main Content -->
     <main id="main-content">
         <!-- Home Page -->
