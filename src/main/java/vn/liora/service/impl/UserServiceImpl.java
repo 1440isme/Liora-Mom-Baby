@@ -253,4 +253,8 @@ public class UserServiceImpl implements IUserService {
         user.setActive(false);
         save(user);
     }
+    @Override
+    public Optional<User> findByUsernameFetchRoles(String username) {
+        return userRepository.findByUsernameFetchRoles(username);
+    }
 }

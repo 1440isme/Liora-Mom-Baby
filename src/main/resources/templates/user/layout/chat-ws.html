@@ -1,0 +1,863 @@
+<div th:fragment="chat-ws-button">
+  <style>
+    /* Floating Button Animation */
+    .chat-float-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 90px;
+      z-index: 9999;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.4);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 25px rgba(215, 141, 160, 0.6);
+      }
+    }
+    
+    .chat-float-btn button {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #d78da0 0%, #e8a2b0 100%);
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 4px 20px rgba(215, 141, 160, 0.4);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .chat-unread-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ff4757;
+      color: #fff;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0 6px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+      animation: pulse-badge 2s infinite;
+      z-index: 10000;
+    }
+    
+    @keyframes pulse-badge {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+    
+    .chat-float-btn button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(215, 141, 160, 0.6);
+    }
+    
+    .chat-float-btn button i {
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    /* Chat Box Styles */
+    #chatBox {
+      font-family: 'Nunito', sans-serif;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Custom Scrollbar */
+    #chatContent::-webkit-scrollbar {
+      width: 6px;
+    }
+    #chatContent::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    #chatContent::-webkit-scrollbar-thumb {
+      background: #d78da0;
+      border-radius: 10px;
+    }
+    #chatContent::-webkit-scrollbar-thumb:hover {
+      background: #b85c7a;
+    }
+    
+    /* Message Animation */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message-item {
+      animation: slideIn 0.3s ease;
+    }
+  </style>
+  
+  <!-- Floating Chat Button -->
+  <div class="chat-float-btn">
+    <button
+      class="btn rounded-circle shadow-lg"
+      onclick="toggleChatWS()"
+      id="chatFloatButton"
+    >
+      <i class="fas fa-headset"></i>
+    </button>
+    <span class="chat-unread-badge" id="chatUnreadBadge" style="display: none;">0</span>
+  </div>
+
+  <!-- Floating Chat Box -->
+  <div
+    id="chatBox"
+    style="
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 380px;
+      height: 520px;
+      max-height: 80vh;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(215, 141, 160, 0.3);
+      z-index: 9999;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    "
+  >
+    <!-- Header -->
+    <div
+      style="
+        background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+        color: white;
+        padding: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(215, 141, 160, 0.2);
+      "
+    >
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+        ">
+          <i class="fas fa-spa" style="font-size: 1.2rem;"></i>
+        </div>
+        <div>
+          <div style="font-size: 1.1rem; font-weight: 700;">Liora CSKH</div>
+          <div style="font-size: 0.85rem; opacity: 0.9;">Hỗ trợ trực tuyến</div>
+        </div>
+      </div>
+      <button
+        type="button"
+        onclick="closeChatWS()"
+        style="
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          font-size: 24px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+        "
+        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.2)'"
+      >
+        ×
+      </button>
+    </div>
+
+    <!-- Chat content -->
+    <div
+      id="chatContent"
+      style="
+        height: calc(520px - 140px);
+        max-height: calc(80vh - 140px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 20px;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      "
+    ></div>
+
+    <!-- Input area -->
+    <div
+      style="
+        padding: 16px 20px;
+        border-top: 1px solid #f5d7db;
+        background: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      "
+    >
+      <input
+        id="chatInput"
+        class="form-control"
+        placeholder="Nhập tin nhắn..."
+        onkeydown="if(event.key==='Enter') sendMessage()"
+        style="
+          border-radius: 24px;
+          border: 2px solid #f5d7db;
+          padding: 10px 18px;
+          font-size: 0.9rem;
+          flex: 1;
+          transition: all 0.2s;
+        "
+        onfocus="this.style.borderColor='#d78da0'"
+        onblur="this.style.borderColor='#f5d7db'"
+      />
+
+      <button
+        class="btn rounded-circle d-flex align-items-center justify-content-center"
+        onclick="sendMessage()"
+        style="
+          background: linear-gradient(135deg, #d78da0 0%, #e8a2b0 100%);
+          width: 44px;
+          height: 44px;
+          border: none;
+          box-shadow: 0 2px 8px rgba(215, 141, 160, 0.3);
+          transition: all 0.2s;
+        "
+        onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(215, 141, 160, 0.4)'"
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(215, 141, 160, 0.3)'"
+      >
+        <i class="fas fa-paper-plane text-white" style="font-size: 0.9rem;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- JS phải NẰM TRONG fragment -->
+  <script th:inline="javascript">
+    let socket = null;
+    let isConnected = false;
+    let hasShownWelcome = false;
+    let pendingMessages = new Map(); // Track messages đang chờ server response (key: content+timestamp, value: element)
+    let renderedMessageIds = new Set(); // Track messages đã render để tránh duplicate
+    let unreadCount = 0; // Số tin nhắn chưa đọc
+
+    // Hàm cập nhật badge số đếm
+    function updateUnreadBadge() {
+      const badge = document.getElementById("chatUnreadBadge");
+      if (badge) {
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+
+    // Tăng unread count
+    function incrementUnreadCount() {
+      unreadCount++;
+      updateUnreadBadge();
+    }
+
+    // Reset unread count
+    function resetUnreadCount() {
+      unreadCount = 0;
+      updateUnreadBadge();
+    }
+
+    function toggleChatWS() {
+      // Kiểm tra đăng nhập từ localStorage (giống header)
+      const userData = localStorage.getItem("liora_user");
+      const accessToken = localStorage.getItem("access_token");
+      if (!userData || !accessToken) {
+        // Chưa đăng nhập, mở modal đăng nhập
+        if (window.bootstrap && document.getElementById("authModal")) {
+          const modal = new bootstrap.Modal(
+            document.getElementById("authModal")
+          );
+          modal.show();
+        } else if (window.$ && $("#authModal").modal) {
+          // Nếu có jQuery/Bootstrap 4
+          $("#authModal").modal("show");
+        } else {
+          alert("Vui lòng đăng nhập để sử dụng tính năng chat!");
+        }
+        return;
+      }
+
+      // Kiểm tra role ADMIN
+      try {
+        const user = JSON.parse(userData);
+        let roles = user.roles;
+        // Nếu roles chưa có, parse từ accessToken (giống main.js)
+        if (!Array.isArray(roles) || roles.length === 0) {
+          const payload = parseJwt(accessToken);
+          roles = extractRolesFromPayload(payload);
+        }
+        if (
+          roles &&
+          roles.some(
+            (r) =>
+              r === "ADMIN" ||
+              r === "ROLE_ADMIN" ||
+              r === "MANAGER" ||
+              r === "ROLE_MANAGER"
+          )
+        ) {
+          // Chuyển hướng admin đến trang chat-list (đồng bộ controller)
+          window.location.href = "/api/admin/websocket/chat-list";
+          return;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+
+      const box = document.getElementById("chatBox");
+      if (!box) return;
+
+      const isHidden = window.getComputedStyle(box).display === "none";
+
+      closeAllChats(); // 🔥 đóng chatbot nếu đang mở
+
+      if (isHidden) {
+        box.style.display = "flex";
+        box.style.flexDirection = "column";
+        // Reset unread count khi mở chat box
+        resetUnreadCount();
+        showWelcomeMessage();
+        if (!isConnected || !socket || socket.readyState !== WebSocket.OPEN) {
+          // Đảm bảo WebSocket kết nối trước khi hiển thị chat
+          connectWebSocket().catch(err => {
+            console.error("Failed to connect WebSocket:", err);
+            alert("Không thể kết nối chat. Vui lòng thử lại.");
+          });
+        }
+      }
+    }
+
+    // Helper parseJwt và extractRolesFromPayload giống main.js
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        );
+        return JSON.parse(jsonPayload);
+      } catch (_) {
+        return {};
+      }
+    }
+    function extractRolesFromPayload(payload) {
+      if (!payload) return [];
+      if (Array.isArray(payload.authorities)) return payload.authorities;
+      if (Array.isArray(payload.roles)) return payload.roles;
+      if (typeof payload.authorities === "string") return [payload.authorities];
+      if (typeof payload.roles === "string") return [payload.roles];
+      return [];
+    }
+
+    async function connectWebSocket() {
+      const accessToken = localStorage.getItem("access_token");
+      const userData = localStorage.getItem("liora_user");
+      
+      // Lấy userId để kết nối vào room của chính user đó
+      let userId = null;
+      try {
+        if (userData) {
+          const user = JSON.parse(userData);
+          // Thử lấy từ user object
+          userId = user.userId || user.id || user.user_id;
+        }
+        
+        // Nếu không có trong user object, thử lấy từ JWT token
+        if (!userId && accessToken) {
+          try {
+            const payload = parseJwt(accessToken);
+            // JWT có thể có userId, id, hoặc sub là username
+            userId = payload.userId || payload.id || payload.user_id;
+            
+            // Nếu vẫn không có, thử lấy từ API
+            if (!userId) {
+              const meRes = await fetch('/users/myInfo', {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              if (meRes.ok) {
+                const meData = await meRes.json();
+                const me = meData.result || meData.data || meData;
+                userId = me.userId || me.id;
+                
+                console.log("Got userId from API:", userId, me);
+                
+                // Cập nhật lại localStorage với userId và avatar
+                if (userId) {
+                  try {
+                    const user = userData ? JSON.parse(userData) : {};
+                    user.userId = userId;
+                    // Cập nhật avatar nếu có
+                    if (me.avatar) {
+                      user.avatar = me.avatar;
+                    }
+                    localStorage.setItem('liora_user', JSON.stringify(user));
+                  } catch (e) {
+                    console.error("Error updating localStorage:", e);
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error getting userId from token/API:", e);
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing user data for WebSocket:", e);
+      }
+      
+      // Bắt buộc phải có userId để kết nối (mỗi user có room riêng)
+      if (!userId) {
+        console.error("Cannot connect WebSocket: userId is required. User data:", userData);
+        alert("Không thể kết nối chat. Vui lòng đăng nhập lại.");
+        return;
+      }
+      
+      // Sử dụng userId làm room (mỗi user có room riêng)
+      const roomId = String(userId);
+      
+      // Lấy hostname động thay vì hardcode localhost
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      let wsUrl = `${protocol}//${host}/ws/chat/${roomId}`;
+      
+      if (accessToken) {
+        wsUrl += `?token=${encodeURIComponent(accessToken)}`;
+      }
+      
+      console.log("Connecting to WebSocket:", wsUrl);
+      
+      // Đóng connection cũ nếu có
+      if (socket && socket.readyState !== WebSocket.CLOSED) {
+        socket.close();
+      }
+      
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = function () {
+        isConnected = true;
+        console.log("WebSocket connected successfully to room:", roomId);
+        // Đảm bảo chat box hiển thị khi kết nối
+        const box = document.getElementById("chatBox");
+        if (box && window.getComputedStyle(box).display === "none") {
+          box.style.display = "flex";
+          box.style.flexDirection = "column";
+        }
+      };
+
+      socket.onmessage = function (event) {
+        const msgDiv = document.getElementById("chatContent");
+        if (!msgDiv) return;
+        
+        const userData = localStorage.getItem("liora_user");
+        let myId = null,
+          myAvatar = null,
+          myUsername = null;
+        try {
+          if (userData) {
+            const user = JSON.parse(userData);
+            // Thử nhiều cách để lấy userId
+            myId = user.userId || user.id || user.user_id || null;
+            myAvatar = user.avatar || null;
+            myUsername = user.username || user.userName || null;
+          }
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+        }
+        
+        function renderMsg(m) {
+          // Tạo unique ID cho message
+          const msgId = m.id ? `msg_${m.id}` : `${m.type}_${m.senderId}_${m.content}_${m.timestamp}`;
+          
+          // So sánh bằng userId hoặc username để xác định tin nhắn của mình
+          let isMine = false;
+          if (myId && m.senderId) {
+            isMine = String(m.senderId) === String(myId);
+          } else if (myUsername && m.senderName) {
+            isMine = String(m.senderName).toLowerCase() === String(myUsername).toLowerCase();
+          }
+          if (m.type === "CHAT") {
+            if (isMine) {
+              // My message - right side (không hiển thị avatar)
+              return `<div class="message-item" data-msg-id="${msgId}" data-sender-id="${m.senderId || ''}" data-content="${(m.content || '').replace(/"/g, '&quot;')}" style="display:flex; justify-content:flex-end; align-items:flex-end; gap:8px;">
+                <div style="max-width:75%; background:linear-gradient(135deg, #d78da0 0%, #e8a2b0 100%); color:#fff; border-radius:18px 18px 4px 18px; padding:12px 16px; box-shadow:0 2px 8px rgba(215, 141, 160, 0.2);">
+                  <div style="font-size:0.95rem; line-height:1.5; word-wrap:break-word;">${m.content || ''}</div>
+                  ${m.timestamp ? `<div data-timestamp="${m.timestamp}" style="font-size:0.7rem; opacity:0.8; margin-top:6px; text-align:right;">${formatTime(m.timestamp)}</div>` : ''}
+                </div>
+              </div>`;
+            } else {
+              // Other's message - left side
+              const avatarUrl = m.avatar || '/user/img/default-product.jpg';
+              const initial = m.senderName ? m.senderName[0].toUpperCase() : '?';
+              return `<div class="message-item" data-msg-id="${msgId}" data-sender-id="${m.senderId || ''}" data-content="${(m.content || '').replace(/"/g, '&quot;')}" style="display:flex; align-items:flex-end; gap:8px; justify-content:flex-start;">
+                <img 
+                  src="${avatarUrl}" 
+                  style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #f5d7db;flex-shrink:0;"
+                  onerror="this.src='/user/img/default-product.jpg'"
+                />
+                <div style="max-width:75%; background:#fff; border:1px solid #f5d7db; color:#333; border-radius:18px 18px 18px 4px; padding:12px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                  <div style="font-weight:600; color:#d78da0; font-size:0.85rem; margin-bottom:4px;">${m.senderName || 'User'}</div>
+                  <div style="font-size:0.95rem; line-height:1.5; word-wrap:break-word; color:#333;">${m.content || ''}</div>
+                  ${m.timestamp ? `<div data-timestamp="${m.timestamp}" style="font-size:0.7rem; opacity:0.6; margin-top:6px; color:#666;">${formatTime(m.timestamp)}</div>` : ''}
+                </div>
+              </div>`;
+            }
+          } else if (m.type === "JOIN") {
+            // Tắt hiển thị thông báo JOIN
+            return "";
+          }
+          return "";
+        }
+        
+        function formatTime(timestamp) {
+          if (!timestamp) return '';
+          try {
+            const date = new Date(timestamp);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${hours}:${minutes} ${day}/${month}`;
+          } catch (e) {
+            return '';
+          }
+        }
+        try {
+          const msg = JSON.parse(event.data);
+          console.log("Received WebSocket message:", msg); // Debug log
+          
+          if (msg.type === "CHAT") {
+            // Tạo unique ID cho message - CHỈ dùng DB ID nếu có
+            const msgId = msg.id ? `msg_${msg.id}` : null;
+            
+            // CÁCH MỚI: Chỉ render nếu có DB ID và chưa render, hoặc không có DB ID thì kiểm tra kỹ hơn
+            let shouldRender = false;
+            
+            if (msg.type === "CHAT") {
+              // Nếu có DB ID (message đã được lưu vào database)
+              if (msg.id) {
+                // Kiểm tra xem đã render chưa
+                if (!renderedMessageIds.has(`msg_${msg.id}`)) {
+                  // Kiểm tra trong DOM xem đã có chưa
+                  const existingInDOM = msgDiv.querySelector(`[data-msg-id="msg_${msg.id}"]`);
+                  if (!existingInDOM) {
+                    shouldRender = true;
+                  } else {
+                    console.log("Message already in DOM:", msg.id);
+                  }
+                } else {
+                  console.log("Message already in tracking Set:", msg.id);
+                }
+              } else {
+                // Nếu không có DB ID (message chưa được lưu), kiểm tra kỹ hơn
+                // Tạo temporary ID từ content + senderId + timestamp
+                const tempId = `${msg.senderId}_${msg.content}_${msg.timestamp}`;
+                
+                // Kiểm tra trong DOM xem đã có message với cùng content, senderId và timestamp gần nhau chưa
+                const allMessages = msgDiv.querySelectorAll('.message-item[data-content]');
+                let foundSimilar = false;
+                
+                for (let msgEl of allMessages) {
+                  const existingContent = msgEl.getAttribute('data-content');
+                  const existingSenderId = msgEl.getAttribute('data-sender-id');
+                  
+                  if (existingContent === msg.content && 
+                      existingSenderId === String(msg.senderId || '')) {
+                    // Kiểm tra timestamp
+                    const existingTime = msgEl.querySelector('[data-timestamp]');
+                    if (existingTime && msg.timestamp) {
+                      const existingTimestamp = existingTime.getAttribute('data-timestamp');
+                      const timeDiff = Math.abs(new Date(msg.timestamp).getTime() - new Date(existingTimestamp).getTime());
+                      // Nếu timestamp khác nhau < 3 giây, coi như duplicate
+                      if (timeDiff < 3000) {
+                        foundSimilar = true;
+                        break;
+                      }
+                    } else {
+                      // Nếu không có timestamp, coi như duplicate nếu content và senderId giống
+                      foundSimilar = true;
+                      break;
+                    }
+                  }
+                }
+                
+                if (!foundSimilar && !renderedMessageIds.has(tempId)) {
+                  shouldRender = true;
+                  renderedMessageIds.add(tempId);
+                }
+              }
+            } else if (msg.type === "JOIN") {
+              // Tắt hiển thị thông báo JOIN
+              return;
+            }
+            
+            // Render message nếu được phép
+            if (shouldRender) {
+              // Đánh dấu đã render bằng DB ID nếu có
+              if (msg.id) {
+                renderedMessageIds.add(`msg_${msg.id}`);
+              }
+              
+              // Giới hạn size của Set
+              if (renderedMessageIds.size > 200) {
+                // Xóa 50 phần tử cũ nhất
+                const idsArray = Array.from(renderedMessageIds);
+                for (let i = 0; i < 50; i++) {
+                  renderedMessageIds.delete(idsArray[i]);
+                }
+              }
+              
+              const renderedMsg = renderMsg(msg);
+              if (renderedMsg) {
+                msgDiv.insertAdjacentHTML("beforeend", renderedMsg);
+                setTimeout(() => {
+                  msgDiv.scrollTop = msgDiv.scrollHeight;
+                }, 50);
+                
+                // Tăng unread count nếu chat box đang đóng và tin nhắn không phải từ chính user
+                const chatBox = document.getElementById("chatBox");
+                const isChatBoxOpen = chatBox && window.getComputedStyle(chatBox).display !== "none";
+                if (!isChatBoxOpen) {
+                  // Kiểm tra xem tin nhắn có phải từ chính user không
+                  let isMine = false;
+                  if (myId && msg.senderId) {
+                    isMine = String(msg.senderId) === String(myId);
+                  } else if (myUsername && msg.senderName) {
+                    isMine = String(msg.senderName).toLowerCase() === String(myUsername).toLowerCase();
+                  }
+                  // Chỉ tăng unread count nếu tin nhắn không phải từ chính user
+                  if (!isMine) {
+                    incrementUnreadCount();
+                  }
+                }
+              }
+            } else {
+              console.log("Skipping duplicate message:", msg);
+            }
+          } else if (msg.type === "HISTORY" && Array.isArray(msg.messages)) {
+            // Clear existing messages first
+            msgDiv.innerHTML = '';
+            renderedMessageIds.clear(); // Clear tracking khi load history
+            pendingMessages.clear(); // Clear pending messages
+            
+            // Reverse để hiển thị từ cũ đến mới (oldest first)
+            const reversedMessages = [...msg.messages].reverse();
+            reversedMessages.forEach((m) => {
+              // Tạo unique ID cho mỗi message trong history (sử dụng format giống với CHAT messages)
+              const msgId = m.id ? `msg_${m.id}` : `${m.type || 'CHAT'}_${m.senderId}_${m.content}_${m.timestamp}`;
+              if (!renderedMessageIds.has(msgId)) {
+                renderedMessageIds.add(msgId);
+                const renderedMsg = renderMsg(m);
+                if (renderedMsg) {
+                  msgDiv.insertAdjacentHTML("beforeend", renderedMsg);
+                }
+              }
+            });
+            // Scroll to bottom after loading all history (newest messages)
+            setTimeout(() => {
+              msgDiv.scrollTop = msgDiv.scrollHeight;
+            }, 200);
+          }
+        } catch (e) {
+          console.error("Error parsing message:", e, event.data);
+          msgDiv.insertAdjacentHTML(
+            "beforeend",
+            `<div class="message-item" style='margin-bottom:12px; padding:12px; background:#fff; border-radius:12px; color:#666;'>${event.data}</div>`
+          );
+          setTimeout(() => {
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+          }, 50);
+        }
+      };
+
+      socket.onerror = function (error) {
+        console.error("WebSocket error:", error);
+        isConnected = false;
+      };
+
+      socket.onclose = function (event) {
+        isConnected = false;
+        console.log("WebSocket closed", event.code, event.reason);
+        // Tự động reconnect sau 3 giây nếu bị đóng không mong muốn
+        if (event.code !== 1000) {
+          setTimeout(() => {
+            if (document.getElementById("chatBox") && 
+                window.getComputedStyle(document.getElementById("chatBox")).display !== "none") {
+              console.log("Attempting to reconnect...");
+              connectWebSocket();
+            }
+          }, 3000);
+        }
+      };
+    }
+
+    function showWelcomeMessage() {
+      if (hasShownWelcome) return;
+
+      const msgDiv = document.getElementById("chatContent");
+      if (!msgDiv) return;
+      
+      msgDiv.insertAdjacentHTML(
+        "beforeend",
+        `<div class="message-item" style="margin-bottom:12px; background:linear-gradient(135deg, #fdecef 0%, #fce8ed 100%); padding:16px; border-radius:18px; color:#b85c7a; border-left:4px solid #d78da0; box-shadow:0 2px 8px rgba(215, 141, 160, 0.1);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg, #d78da0 0%, #e8a2b0 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">🌸</div>
+              <div style="font-weight:700; font-size:1rem;">Liora CSKH</div>
+            </div>
+            <div style="font-size:0.95rem; line-height:1.6;">
+              Liora xin chào! Bạn cần tìm sản phẩm cho bé hay cho mẹ ạ? Chúng tôi sẵn sàng hỗ trợ bạn! 💕
+            </div>
+        </div>`
+      );
+      // Scroll to bottom after welcome message
+      setTimeout(() => {
+        if (msgDiv) {
+          msgDiv.scrollTop = msgDiv.scrollHeight;
+        }
+      }, 100);
+      hasShownWelcome = true;
+    }
+    async function sendMessage() {
+      const input = document.getElementById("chatInput");
+      const msgDiv = document.getElementById("chatContent");
+      
+      if (!input || !msgDiv) return;
+      
+      const messageText = input.value.trim();
+      if (!messageText) return;
+      
+      // Lấy thông tin user để hiển thị tin nhắn ngay
+      const userData = localStorage.getItem("liora_user");
+      let myId = null, myAvatar = null, myUsername = null;
+      try {
+        if (userData) {
+          const user = JSON.parse(userData);
+          myId = user.userId || user.id || user.user_id || null;
+          myAvatar = user.avatar || null;
+          myUsername = user.username || user.userName || null;
+        }
+      } catch (e) {}
+      
+      // Kiểm tra và đảm bảo WebSocket đã kết nối
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        console.warn("WebSocket not connected, attempting to connect...");
+        await connectWebSocket();
+        // Đợi một chút để WebSocket kết nối
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Kiểm tra lại
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+          alert("Không thể kết nối chat. Vui lòng thử lại sau.");
+          return;
+        }
+      }
+      
+      try {
+        // KHÔNG render optimistic update nữa - chỉ gửi và đợi server response
+        // Tạo key để track message đang chờ
+        const pendingKey = `${messageText}_${Date.now()}`;
+        
+        // Gửi qua WebSocket
+        socket.send(JSON.stringify({ content: messageText }));
+        input.value = "";
+        
+        // Focus lại input sau khi gửi
+        setTimeout(() => {
+          input.focus();
+        }, 50);
+        
+        // Timeout sau 5 giây nếu không nhận được response từ server
+        setTimeout(() => {
+          if (pendingMessages.has(pendingKey)) {
+            pendingMessages.delete(pendingKey);
+          }
+        }, 5000);
+      } catch (e) {
+        console.error("Error sending message:", e);
+        alert("Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại.");
+      }
+    }
+    
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      try {
+        const date = new Date(timestamp);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `${hours}:${minutes} ${day}/${month}`;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function closeAllChats() {
+      const chatbot = document.querySelector(".chatbot-window");
+      const chatWs = document.getElementById("chatBox");
+
+      if (chatbot) chatbot.style.display = "none";
+      if (chatWs) chatWs.style.display = "none";
+    }
+
+    function closeChatWS() {
+      const box = document.getElementById("chatBox");
+      if (box) box.style.display = "none";
+    }
+  </script>
+</div>

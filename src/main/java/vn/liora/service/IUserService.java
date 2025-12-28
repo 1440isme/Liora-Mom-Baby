@@ -57,4 +57,6 @@ public interface IUserService {
 
     // Deactivate account
     void deactivateAccount(Long userId);
+
+    Optional<User> findByUsernameFetchRoles(String username);
 }

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin | Danh sách phòng chat</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <style>
+      body {
+        background: var(--pink-soft, #fae9ed);
+        font-family: var(--font-family, "Nunito", sans-serif);
+        position: relative;
+      }
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #d78da0 0%, #e8a2b0 100%);
+        border: none;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(215, 141, 160, 0.3);
+        transition: all 0.3s ease;
+      }
+      .back-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(215, 141, 160, 0.4);
+        background: linear-gradient(135deg, #b85c7a 0%, #d78da0 100%);
+      }
+      .back-button:active {
+        transform: scale(0.95);
+      }
+      .chat-list-header {
+        background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+        color: #fff;
+        border-radius: 16px 16px 0 0;
+        padding: 24px 32px 16px 32px;
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.12);
+      }
+      .chat-list-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .chat-room-list {
+        background: #fff;
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.1);
+        padding: 0;
+        margin-bottom: 32px;
+      }
+      .chat-room-item {
+        border: none;
+        border-bottom: 1px solid #f5d7db;
+        padding: 16px 24px;
+        transition: all 0.2s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .chat-room-item:last-child {
+        border-bottom: none;
+      }
+      .chat-room-item:hover {
+        background: #fdecef;
+        transform: translateX(2px);
+      }
+      .chat-room-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f5d7db;
+        flex-shrink: 0;
+      }
+      .chat-room-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .chat-room-title {
+        color: #d78da0;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .chat-room-desc {
+        color: #b85c7a;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .badge-custom {
+        background: #d78da0;
+        color: #fff;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        padding: 6px 14px;
+        margin-right: 8px;
+      }
+      .badge-online {
+        background: #6fd6b6;
+        color: #fff;
+      }
+      .badge-offline {
+        background: #bdbdbd;
+        color: #fff;
+      }
+      .unread-badge {
+        background: #ff4757;
+        color: #fff;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0 6px;
+        margin-left: auto;
+        flex-shrink: 0;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Nút back về trang chủ -->
+    <button class="back-button" onclick="window.location.href='/home'" title="Về trang chủ">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    
+    <div class="chat-admin-wrapper">
+      <div class="chat-flex-container" id="chatFlexContainer">
+        <!-- Danh sách phòng (bên trái) -->
+        <div class="chat-sidebar" id="chatSidebar">
+          <div class="chat-list-header">
+            <div class="chat-list-title">Danh sách phòng chat</div>
+            <div style="font-size: 1rem; opacity: 0.85">
+              Quản lý & hỗ trợ khách hàng realtime
+            </div>
+          </div>
+          <ul class="chat-room-list list-group">
+            <li
+              th:each="roomInfo : ${rooms}"
+              class="chat-room-item list-group-item"
+              th:data-room-id="${roomInfo.roomId}"
+              onclick="loadChatRoom(this)"
+            >
+              <img 
+                th:src="${roomInfo.avatar != null and !#strings.isEmpty(roomInfo.avatar)} ? ${roomInfo.avatar} : '/user/img/default-product.jpg'"
+                alt="Avatar"
+                class="chat-room-avatar"
+                onerror="this.src='/user/img/default-product.jpg'"
+              />
+              <div class="chat-room-info">
+                <div class="chat-room-title" th:text="${roomInfo.displayName}">User Name</div>
+                <div class="chat-room-desc" th:if="${roomInfo.username != null}" th:text="|@${roomInfo.username}|">@username</div>
+                <div class="chat-room-desc" th:if="${roomInfo.username == null}">Phòng chat khách hàng</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="unread-badge" th:id="|unread-badge-${roomInfo.roomId}|" style="display: none;">0</span>
+              </div>
+            </li>
+            <li
+              th:if="${rooms == null or #lists.isEmpty(rooms)}"
+              class="chat-room-item list-group-item text-center"
+              style="color: #b85c7a"
+            >
+              Không có phòng chat nào.
+            </li>
+          </ul>
+        </div>
+        <!-- Thanh kéo resize -->
+        <div class="chat-resizer" id="chatResizer"></div>
+        <!-- Khung chat (bên phải) -->
+        <div class="chat-main" id="chatMain">
+          <div
+            id="chatRoomContent"
+            style="
+              padding: 0;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              display: none;
+            "
+          >
+            <!-- Chat Header -->
+            <div style="
+              background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+              color: #fff;
+              padding: 12px 16px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              box-shadow: 0 2px 8px rgba(215, 141, 160, 0.1);
+            ">
+              <img 
+                id="chatRoomAvatar"
+                src="/user/img/default-product.jpg"
+                alt="Avatar"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);"
+                onerror="this.src='/user/img/default-product.jpg'"
+              />
+              <div style="flex: 1;">
+                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 2px;">
+                  <span id="chatRoomTitle">Room</span>
+                </div>
+                <div id="chatRoomSubtitle" style="font-size: 0.85rem; opacity: 0.9;">Phòng chat</div>
+              </div>
+            </div>
+            
+            <!-- Messages Container -->
+            <div
+              id="chatMessages"
+              style="
+                flex: 1;
+                overflow-y: auto;
+                padding: 24px;
+                background: #f8f9fa;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+              "
+            >
+              <!-- Messages will be loaded here -->
+            </div>
+            
+            <!-- Input Form -->
+            <div style="
+              padding: 20px 32px;
+              background: #fff;
+              border-top: 1px solid #f5d7db;
+            ">
+              <form
+                id="chatForm"
+                method="post"
+                th:action="@{/api/admin/websocket/chat-list}"
+                style="display: flex; gap: 12px; align-items: center;"
+              >
+                <input type="hidden" name="room" id="currentRoomId" />
+                <input
+                  name="content"
+                  id="messageInput"
+                  class="form-control"
+                  placeholder="Nhập tin nhắn..."
+                  style="
+                    border-radius: 24px;
+                    border: 2px solid #f5d7db;
+                    padding: 12px 20px;
+                    font-size: 0.95rem;
+                    flex: 1;
+                  "
+                  required
+                />
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  style="
+                    background: linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%);
+                    border: none;
+                    border-radius: 24px;
+                    padding: 12px 32px;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'"
+                  onmouseout="this.style.transform='scale(1)'"
+                >
+                  Gửi
+                </button>
+              </form>
+            </div>
+          </div>
+          <div
+            id="chatRoomEmpty"
+            style="
+              padding: 32px;
+              color: #b85c7a;
+              text-align: center;
+              font-size: 1.2rem;
+            "
+          >
+            Chọn một phòng chat để bắt đầu.
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      html,
+      body,
+      .chat-admin-wrapper,
+      .chat-flex-container {
+        height: 100%;
+        min-height: 100vh;
+      }
+      .chat-admin-wrapper {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--pink-soft, #fae9ed);
+      }
+      .chat-flex-container {
+        display: flex;
+        width: 90vw;
+        height: 85vh;
+        min-width: 900px;
+        min-height: 500px;
+        max-width: 1600px;
+        background: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(215, 141, 160, 0.1);
+        overflow: hidden;
+      }
+      .chat-sidebar {
+        width: 20%;
+        min-width: 220px;
+        max-width: 400px;
+        background: none;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .chat-main {
+        width: 80%;
+        background: #fff;
+        border-radius: 0 18px 18px 0;
+        box-shadow: 0 4px 20px rgba(215, 141, 160, 0.1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-resizer {
+        width: 7px;
+        background: linear-gradient(90deg, #e8a2b0 0%, #d78da0 100%);
+        cursor: ew-resize;
+        z-index: 10;
+        transition: background 0.2s;
+      }
+      .chat-resizer:hover {
+        background: #d78da0;
+      }
+      .chat-room-item.active,
+      .chat-room-item.active:hover {
+        background: #fdecef;
+        font-weight: 700;
+        border-left: 4px solid #d78da0;
+        padding-left: 20px;
+      }
+      
+      /* Custom scrollbar */
+      #chatMessages::-webkit-scrollbar {
+        width: 8px;
+      }
+      #chatMessages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      #chatMessages::-webkit-scrollbar-thumb {
+        background: #d78da0;
+        border-radius: 10px;
+      }
+      #chatMessages::-webkit-scrollbar-thumb:hover {
+        background: #b85c7a;
+      }
+      
+      /* Smooth transitions */
+      .chat-room-item {
+        transition: all 0.2s ease;
+      }
+      
+      /* Message animations */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .message-item {
+        animation: slideIn 0.3s ease;
+      }
+    </style>
+    <script>
+      // WebSocket connection
+      let adminSocket = null;
+      let currentRoomId = null;
+      let isConnected = false;
+      
+      // Track unread messages count for each room
+      const unreadCounts = new Map(); // roomId -> count
+      
+      // Track all room WebSocket connections để nhận tin nhắn từ tất cả rooms
+      const roomConnections = new Map(); // roomId -> WebSocket
+      
+      // Initialize WebSocket connection cho một room cụ thể
+      function connectToRoom(roomId) {
+        if (!roomId) return;
+        
+        // Nếu đã có connection cho room này, không cần tạo lại
+        if (roomConnections.has(roomId)) {
+          const existingSocket = roomConnections.get(roomId);
+          if (existingSocket && existingSocket.readyState === WebSocket.OPEN) {
+            currentRoomId = roomId;
+            adminSocket = existingSocket; // Set làm socket chính
+            return;
+          }
+        }
+        
+        // Đóng connection chính nếu có (nhưng giữ các connections khác)
+        if (adminSocket && adminSocket.readyState !== WebSocket.CLOSED && adminSocket !== roomConnections.get(roomId)) {
+          // Không đóng, chỉ set làm socket chính
+        }
+        
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host;
+        
+        // Lấy access token từ cookie hoặc localStorage (nếu có)
+        // Admin thường authenticate qua session, nhưng WebSocket cần token
+        // Thử lấy từ cookie hoặc từ meta tag
+        let token = null;
+        try {
+          // Thử lấy từ cookie
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'access_token' || name === 'token') {
+              token = value;
+              break;
+            }
+          }
+          // Nếu không có trong cookie, có thể lấy từ localStorage (nếu admin dùng JWT)
+          if (!token) {
+            token = localStorage.getItem('access_token');
+          }
+        } catch (e) {
+          console.warn("Could not get token:", e);
+        }
+        
+        let wsUrl = `${protocol}//${host}/ws/chat/${roomId}`;
+        if (token) {
+          wsUrl += `?token=${encodeURIComponent(token)}`;
+        }
+        
+        console.log("Admin connecting to WebSocket room:", wsUrl);
+        
+        adminSocket = new WebSocket(wsUrl);
+        
+        adminSocket.onopen = function() {
+          isConnected = true;
+          currentRoomId = roomId;
+          roomConnections.set(roomId, adminSocket);
+          console.log("Admin WebSocket connected to room:", roomId);
+        };
+        
+        adminSocket.onmessage = function(event) {
+          try {
+            const msg = JSON.parse(event.data);
+            console.log("Admin received message:", msg);
+            
+            // Nếu là tin nhắn CHAT
+            if (msg.type === "CHAT") {
+              // Nếu đang ở đúng room, hiển thị tin nhắn
+              if (currentRoomId && msg.room === currentRoomId) {
+                // Kiểm tra xem có phải là tin nhắn vừa gửi không (để tránh duplicate)
+                const isDuplicate = lastSentMessage && 
+                                     msg.content === lastSentMessage.content &&
+                                     Math.abs(new Date(msg.timestamp) - new Date(lastSentMessage.timestamp)) < 5000; // 5 giây
+                
+                if (!isDuplicate) {
+                  addMessageToChat(msg);
+                } else {
+                  console.log("Skipping duplicate message from WebSocket");
+                }
+              } else {
+                // Nếu không phải room đang mở, tăng unread count
+                // Chỉ tăng nếu tin nhắn không phải từ admin/manager (tức là từ user)
+                const isFromAdmin = msg.role === "ADMIN" || msg.role === "ROLE_ADMIN" || 
+                                    msg.role === "MANAGER" || msg.role === "ROLE_MANAGER";
+                if (!isFromAdmin && msg.room) {
+                  incrementUnreadCount(msg.room);
+                }
+              }
+            } else if (msg.type === "HISTORY") {
+              // History đã được load qua AJAX, không cần xử lý ở đây
+              console.log("History received via WebSocket");
+            }
+          } catch (e) {
+            console.error("Error parsing WebSocket message:", e);
+          }
+        };
+        
+        adminSocket.onerror = function(error) {
+          console.error("Admin WebSocket error:", error);
+          isConnected = false;
+        };
+        
+        adminSocket.onclose = function(event) {
+          isConnected = false;
+          console.log("Admin WebSocket closed", event.code, event.reason);
+          // Auto reconnect sau 3 giây nếu đang có room được chọn
+          if (event.code !== 1000 && currentRoomId) {
+            setTimeout(() => {
+              connectToRoom(currentRoomId);
+            }, 3000);
+          }
+        };
+      }
+      
+      // Lưu admin info khi load page
+      let adminAvatar = "/user/img/default-product.jpg";
+      let adminRole = "ADMIN"; // Default
+      let adminUsername = "admin"; // Default
+      
+      // Load admin info từ API
+      async function loadAdminInfo() {
+        try {
+          const response = await fetch('/users/myInfo', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const user = data.result || data;
+            if (user.avatar && user.avatar.trim() !== '') {
+              adminAvatar = user.avatar;
+            }
+            // Lấy role từ user.roles (array) hoặc từ authorities
+            if (user.roles && Array.isArray(user.roles) && user.roles.length > 0) {
+              // Lấy role đầu tiên, ưu tiên ADMIN > MANAGER
+              const roles = user.roles.map(r => typeof r === 'string' ? r : (r.name || r));
+              if (roles.includes("ADMIN")) {
+                adminRole = "ADMIN";
+              } else if (roles.includes("MANAGER")) {
+                adminRole = "MANAGER";
+              } else {
+                adminRole = roles[0].toUpperCase();
+              }
+            }
+            if (user.username) {
+              adminUsername = user.username;
+            }
+          }
+        } catch (e) {
+          console.error("Error loading admin info:", e);
+        }
+      }
+      
+      // Load admin info khi page load
+      loadAdminInfo();
+      
+      // Thêm tin nhắn mới vào chat
+      function addMessageToChat(msg) {
+        const messagesContainer = document.getElementById("chatMessages");
+        if (!messagesContainer) return;
+        
+        const isAdmin = msg.role === "ADMIN" || msg.role === "ROLE_ADMIN" || msg.role === "MANAGER" || msg.role === "ROLE_MANAGER";
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message-item";
+        messageDiv.style.display = "flex";
+        messageDiv.style.gap = "12px";
+        messageDiv.style.marginBottom = "16px";
+        messageDiv.style.justifyContent = isAdmin ? "flex-end" : "flex-start";
+        
+        if (!isAdmin) {
+          // Avatar for user messages (left side)
+          const avatarImg = document.createElement("img");
+          avatarImg.src = msg.avatar || "/user/img/default-product.jpg";
+          avatarImg.style.width = "36px";
+          avatarImg.style.height = "36px";
+          avatarImg.style.borderRadius = "50%";
+          avatarImg.style.objectFit = "cover";
+          avatarImg.style.flexShrink = "0";
+          avatarImg.onerror = function() {
+            this.src = "/user/img/default-product.jpg";
+          };
+          messageDiv.appendChild(avatarImg);
+        }
+        
+        // Message bubble
+        const bubbleDiv = document.createElement("div");
+        bubbleDiv.style.maxWidth = "70%";
+        bubbleDiv.style.padding = "12px 16px";
+        bubbleDiv.style.borderRadius = isAdmin ? "18px 18px 4px 18px" : "18px 18px 18px 4px";
+        bubbleDiv.style.background = isAdmin ? "linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%)" : "#fff";
+        bubbleDiv.style.color = isAdmin ? "#fff" : "#333";
+        bubbleDiv.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+        
+        // Sender name - hiển thị role thay vì username
+        const senderDiv = document.createElement("div");
+        senderDiv.style.fontSize = "0.85rem";
+        senderDiv.style.fontWeight = "600";
+        senderDiv.style.marginBottom = "4px";
+        senderDiv.style.opacity = isAdmin ? "0.9" : "0.7";
+        // Hiển thị role (lowercase) thay vì senderName
+        const displayRole = msg.role ? msg.role.toLowerCase() : (msg.senderName || "user");
+        senderDiv.textContent = displayRole;
+        bubbleDiv.appendChild(senderDiv);
+        
+        // Message content
+        const contentDiv = document.createElement("div");
+        contentDiv.style.fontSize = "0.95rem";
+        contentDiv.style.lineHeight = "1.5";
+        contentDiv.textContent = msg.content || "";
+        bubbleDiv.appendChild(contentDiv);
+        
+        // Timestamp
+        const timeDiv = document.createElement("div");
+        timeDiv.style.fontSize = "0.75rem";
+        timeDiv.style.opacity = "0.7";
+        timeDiv.style.marginTop = "6px";
+        timeDiv.style.textAlign = "right";
+        
+        if (msg.timestamp) {
+          const date = new Date(msg.timestamp);
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          timeDiv.textContent = `${hours}:${minutes} ${day}/${month}`;
+        }
+        bubbleDiv.appendChild(timeDiv);
+        
+        messageDiv.appendChild(bubbleDiv);
+        
+        if (isAdmin) {
+          // Avatar for admin messages (right side) - sử dụng adminAvatar hoặc msg.avatar
+          const avatarImg = document.createElement("img");
+          avatarImg.src = msg.avatar || adminAvatar || "/user/img/default-product.jpg";
+          avatarImg.style.width = "36px";
+          avatarImg.style.height = "36px";
+          avatarImg.style.borderRadius = "50%";
+          avatarImg.style.objectFit = "cover";
+          avatarImg.style.flexShrink = "0";
+          avatarImg.onerror = function() {
+            this.src = "/user/img/default-product.jpg";
+          };
+          messageDiv.appendChild(avatarImg);
+        }
+        
+        messagesContainer.appendChild(messageDiv);
+        
+        // Scroll to bottom
+        setTimeout(() => {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 100);
+      }
+      
+      // WebSocket sẽ được kết nối khi load room
+      
+      // Thanh kéo resize sidebar/main
+      const resizer = document.getElementById("chatResizer");
+      const sidebar = document.getElementById("chatSidebar");
+      const main = document.getElementById("chatMain");
+      const container = document.getElementById("chatFlexContainer");
+      let isResizing = false;
+      resizer.addEventListener("mousedown", function (e) {
+        isResizing = true;
+        document.body.style.cursor = "ew-resize";
+      });
+      document.addEventListener("mousemove", function (e) {
+        if (!isResizing) return;
+        const rect = container.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        // Giới hạn min/max
+        if (x < 180) x = 180;
+        if (x > rect.width - 300) x = rect.width - 300;
+        const percent = (x / rect.width) * 100;
+        sidebar.style.width = percent + "%";
+        main.style.width = 100 - percent + "%";
+      });
+      document.addEventListener("mouseup", function () {
+        isResizing = false;
+        document.body.style.cursor = "";
+      });
+
+      // Hàm quản lý unread count
+      function incrementUnreadCount(roomId) {
+        if (!roomId) return;
+        const currentCount = unreadCounts.get(roomId) || 0;
+        unreadCounts.set(roomId, currentCount + 1);
+        updateUnreadBadge(roomId, currentCount + 1);
+      }
+      
+      function resetUnreadCount(roomId) {
+        if (!roomId) return;
+        unreadCounts.set(roomId, 0);
+        updateUnreadBadge(roomId, 0);
+      }
+      
+      function updateUnreadBadge(roomId, count) {
+        const badge = document.getElementById(`unread-badge-${roomId}`);
+        if (badge) {
+          if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'flex';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      }
+
+      // Load chat room bằng AJAX
+      function loadChatRoom(element) {
+        const roomId = element.getAttribute("data-room-id");
+        if (!roomId) return;
+
+        // Reset unread count khi mở room
+        resetUnreadCount(roomId);
+
+        // Remove active class from all items
+        document.querySelectorAll(".chat-room-item").forEach(item => {
+          item.classList.remove("active");
+        });
+        // Add active class to clicked item
+        element.classList.add("active");
+
+        // Show loading state
+        const chatRoomContent = document.getElementById("chatRoomContent");
+        const chatRoomEmpty = document.getElementById("chatRoomEmpty");
+        chatRoomContent.style.display = "none";
+        chatRoomEmpty.style.display = "block";
+        chatRoomEmpty.textContent = "Đang tải...";
+
+        // Fetch room data
+        fetch(`/api/admin/websocket/chat-room/${roomId}`)
+          .then(response => response.json())
+          .then(data => {
+            // Update room title and avatar
+            const roomInfo = data.roomInfo;
+            const title = roomInfo.displayName || roomInfo.roomId;
+            document.getElementById("chatRoomTitle").textContent = title;
+            
+            // Update avatar
+            const avatarImg = document.getElementById("chatRoomAvatar");
+            if (roomInfo.avatar && roomInfo.avatar.trim() !== "") {
+              avatarImg.src = roomInfo.avatar;
+            } else {
+              avatarImg.src = "/user/img/default-product.jpg";
+            }
+            
+            // Update subtitle
+            const subtitle = document.getElementById("chatRoomSubtitle");
+            if (roomInfo.username) {
+              subtitle.textContent = "@" + roomInfo.username;
+            } else {
+              subtitle.textContent = "Phòng chat";
+            }
+
+            // Update current room ID
+            document.getElementById("currentRoomId").value = roomId;
+            currentRoomId = roomId; // Lưu roomId hiện tại để WebSocket filter messages
+            
+            // Kết nối WebSocket vào room này để nhận tin nhắn mới
+            connectToRoom(roomId);
+
+            // Render messages
+            const messagesContainer = document.getElementById("chatMessages");
+            messagesContainer.innerHTML = "";
+            
+            if (data.messages && data.messages.length > 0) {
+              data.messages.reverse().forEach(msg => {
+                const isAdmin = msg.role === "ADMIN" || msg.role === "ROLE_ADMIN" || msg.role === "MANAGER" || msg.role === "ROLE_MANAGER";
+                const messageDiv = document.createElement("div");
+                messageDiv.className = "message-item";
+                messageDiv.style.display = "flex";
+                messageDiv.style.gap = "12px";
+                messageDiv.style.marginBottom = "16px";
+                messageDiv.style.justifyContent = isAdmin ? "flex-end" : "flex-start";
+                
+                if (!isAdmin) {
+                  // Avatar for user messages (left side) - lấy từ msg.avatar hoặc roomInfo.avatar
+                  const avatarImg = document.createElement("img");
+                  avatarImg.src = msg.avatar || roomInfo.avatar || "/user/img/default-product.jpg";
+                  avatarImg.style.width = "36px";
+                  avatarImg.style.height = "36px";
+                  avatarImg.style.borderRadius = "50%";
+                  avatarImg.style.objectFit = "cover";
+                  avatarImg.style.flexShrink = "0";
+                  avatarImg.onerror = function() {
+                    this.src = "/user/img/default-product.jpg";
+                  };
+                  messageDiv.appendChild(avatarImg);
+                }
+                
+                // Message bubble
+                const bubbleDiv = document.createElement("div");
+                bubbleDiv.style.maxWidth = "70%";
+                bubbleDiv.style.padding = "12px 16px";
+                bubbleDiv.style.borderRadius = isAdmin ? "18px 18px 4px 18px" : "18px 18px 18px 4px";
+                bubbleDiv.style.background = isAdmin ? "linear-gradient(90deg, #d78da0 0%, #e8a2b0 100%)" : "#fff";
+                bubbleDiv.style.color = isAdmin ? "#fff" : "#333";
+                bubbleDiv.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+                
+                // Sender name - hiển thị role thay vì username
+                const senderDiv = document.createElement("div");
+                senderDiv.style.fontSize = "0.85rem";
+                senderDiv.style.fontWeight = "600";
+                senderDiv.style.marginBottom = "4px";
+                senderDiv.style.opacity = isAdmin ? "0.9" : "0.7";
+                // Hiển thị role (lowercase) thay vì senderName
+                const displayRole = msg.role ? msg.role.toLowerCase() : (msg.senderName || "user");
+                senderDiv.textContent = displayRole;
+                bubbleDiv.appendChild(senderDiv);
+                
+                // Message content
+                const contentDiv = document.createElement("div");
+                contentDiv.style.fontSize = "0.95rem";
+                contentDiv.style.lineHeight = "1.5";
+                contentDiv.textContent = msg.content || "";
+                bubbleDiv.appendChild(contentDiv);
+                
+                // Timestamp
+                const timeDiv = document.createElement("div");
+                timeDiv.style.fontSize = "0.75rem";
+                timeDiv.style.opacity = "0.7";
+                timeDiv.style.marginTop = "6px";
+                timeDiv.style.textAlign = "right";
+                
+                // Sử dụng timestamp từ DTO hoặc createdAt từ entity (backward compatible)
+                const timestamp = msg.timestamp || msg.createdAt;
+                if (timestamp) {
+                  const date = new Date(timestamp);
+                  const hours = String(date.getHours()).padStart(2, '0');
+                  const minutes = String(date.getMinutes()).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  timeDiv.textContent = `${hours}:${minutes} ${day}/${month}`;
+                }
+                bubbleDiv.appendChild(timeDiv);
+                
+                messageDiv.appendChild(bubbleDiv);
+                
+                if (isAdmin) {
+                  // Avatar for admin messages (right side) - sử dụng adminAvatar hoặc msg.avatar
+                  const avatarImg = document.createElement("img");
+                  avatarImg.src = msg.avatar || adminAvatar || "/user/img/default-product.jpg";
+                  avatarImg.style.width = "36px";
+                  avatarImg.style.height = "36px";
+                  avatarImg.style.borderRadius = "50%";
+                  avatarImg.style.objectFit = "cover";
+                  avatarImg.style.flexShrink = "0";
+                  avatarImg.onerror = function() {
+                    this.src = "/user/img/default-product.jpg";
+                  };
+                  messageDiv.appendChild(avatarImg);
+                }
+                
+                messagesContainer.appendChild(messageDiv);
+              });
+              
+              // Scroll to bottom
+              setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+              }, 100);
+            } else {
+              messagesContainer.innerHTML = "<div style='text-align: center; color: #aaa; padding: 40px; font-size: 1rem;'>Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</div>";
+            }
+
+            // Show chat room content
+            chatRoomContent.style.display = "flex";
+            chatRoomEmpty.style.display = "none";
+          })
+          .catch(error => {
+            console.error("Error loading chat room:", error);
+            chatRoomEmpty.textContent = "Có lỗi xảy ra khi tải phòng chat.";
+            chatRoomContent.style.display = "none";
+            chatRoomEmpty.style.display = "block";
+          });
+      }
+
+      // Track last sent message to avoid duplicates
+      let lastSentMessage = null;
+      
+      // Handle form submission
+      document.getElementById("chatForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const roomId = document.getElementById("currentRoomId").value;
+        const content = document.getElementById("messageInput").value.trim();
+        
+        if (!roomId || !content) return;
+
+        // Optimistic update: Hiển thị tin nhắn ngay lập tức
+        const tempMessage = {
+          type: "CHAT",
+          room: roomId,
+          senderId: null, // Sẽ được set từ server
+          senderName: adminUsername, // Lấy từ adminUsername đã load
+          role: adminRole, // Lấy từ adminRole đã load
+          content: content,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Lưu để tránh duplicate khi WebSocket broadcast trả về
+        lastSentMessage = {
+          content: content,
+          timestamp: tempMessage.timestamp
+        };
+        
+        // Hiển thị tin nhắn ngay
+        addMessageToChat(tempMessage);
+        
+        // Clear input
+        document.getElementById("messageInput").value = "";
+
+        // Send message via AJAX
+        const formData = new FormData();
+        formData.append("room", roomId);
+        formData.append("content", content);
+
+        fetch("/api/admin/websocket/chat-list", {
+          method: "POST",
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            // Clear lastSentMessage sau 5 giây
+            setTimeout(() => {
+              lastSentMessage = null;
+            }, 5000);
+          } else {
+            alert("Có lỗi xảy ra khi gửi tin nhắn.");
+            // Remove optimistic message nếu gửi thất bại
+            const messagesContainer = document.getElementById("chatMessages");
+            if (messagesContainer && messagesContainer.lastChild) {
+              messagesContainer.removeChild(messagesContainer.lastChild);
+            }
+          }
+        })
+        .catch(error => {
+          console.error("Error sending message:", error);
+          alert("Có lỗi xảy ra khi gửi tin nhắn.");
+          // Remove optimistic message nếu gửi thất bại
+          const messagesContainer = document.getElementById("chatMessages");
+          if (messagesContainer && messagesContainer.lastChild) {
+            messagesContainer.removeChild(messagesContainer.lastChild);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
