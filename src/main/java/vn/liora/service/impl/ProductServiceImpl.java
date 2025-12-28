@@ -85,7 +85,14 @@ public class ProductServiceImpl implements IProductService {
     public ProductResponse findById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        return productMapper.toProductResponse(product);
+        ProductResponse response = productMapper.toProductResponse(product);
+        
+        // Set ratingCount từ review repository
+        Long ratingCountLong = reviewRepository.getTotalReviewCountByProductId(id);
+        Integer ratingCount = ratingCountLong != null ? ratingCountLong.intValue() : 0;
+        response.setRatingCount(ratingCount);
+        
+        return response;
     }
 
     @Transactional
