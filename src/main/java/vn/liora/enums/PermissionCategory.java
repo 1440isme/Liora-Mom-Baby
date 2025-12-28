@@ -16,6 +16,7 @@ public enum PermissionCategory {
     STATIC_PAGES("Trang tĩnh", "static_page"),
     HEADER_FOOTER("Header & Footer", "header_footer"),
     DISCOUNTS("Mã giảm giá", "discount"),
+    WALLET("Ví Liora Xu", "wallet"),
     SYSTEM("Hệ thống", "system");
 
     private final String displayName;

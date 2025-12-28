@@ -34,8 +34,8 @@ public class HomeController {
         // Thêm danh sách thương hiệu active cho section thương hiệu
         model.addAttribute("activeBrands", brandService.findActiveBrands());
 
-        // Lấy 3 bài viết mới nhất của section "lam-dep-cung-liora"
-        List<StaticPageResponse> beautyPages = staticPageService.getPublishedPagesBySection("lam-dep-cung-liora");
+        // Lấy 3 bài viết mới nhất của section "nang-cao-ky-nang-nuoi-be"
+        List<StaticPageResponse> beautyPages = staticPageService.getPublishedPagesBySection("nang-cao-ky-nang-nuoi-be");
         if (beautyPages != null && beautyPages.size() > 3) {
             beautyPages = beautyPages.subList(0, 3);
         }

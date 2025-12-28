@@ -8,79 +8,92 @@
 </head>
 
 <body>
-    <!-- Statistics Cards -->
+    <!-- Statistics Cards - Dashboard Quick Stats -->
     <div class="row">
-        <!-- Total Revenue Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Tổng doanh thu
+        <!-- Today's Revenue Card - QUAN TRỌNG NHẤT -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-primary shadow-sm h-100 py-2"
+                style="border-left: 3px solid #007bff !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-calendar-day me-1"></i>Doanh thu hôm nay
                             </div>
-                            <span th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
-
+                            <span class="h6 mb-0 font-weight-bold text-gray-800"
+                                th:text="${#numbers.formatDecimal(todayRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                                style="font-size: 1.1rem;">0 ₫</span>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        <div class="text-primary opacity-50">
+                            <i class="fas fa-calendar-day fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Orders Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Tổng đơn hàng
+        <!-- This Week Revenue Card -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-success shadow-sm h-100 py-2"
+                style="border-left: 3px solid #28a745 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-calendar-week me-1"></i>Doanh thu tuần này
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalOrders}">0</div>
+                            <span class="h6 mb-0 font-weight-bold text-gray-800"
+                                th:text="${#numbers.formatDecimal(thisWeekRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                                style="font-size: 1.1rem;">0 ₫</span>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-calendar-week fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Products Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Tổng sản phẩm
+        <!-- This Month Revenue Card -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-info shadow-sm h-100 py-2" style="border-left: 3px solid #17a2b8 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-calendar-alt me-1"></i>Doanh thu tháng này
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalProducts}">0</div>
+                            <span class="h6 mb-0 font-weight-bold text-gray-800"
+                                th:text="${#numbers.formatDecimal(thisMonthRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                                style="font-size: 1.1rem;">0 ₫</span>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        <div class="text-info opacity-50">
+                            <i class="fas fa-calendar-alt fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Customers Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Tổng khách hàng
+        <!-- Today Orders Card -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow-sm h-100 py-2"
+                style="border-left: 3px solid #ffc107 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-shopping-cart me-1"></i>Đơn hàng hôm nay
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalCustomers}">0</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800" th:text="${todayOrders}"
+                                style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        <div class="text-warning opacity-50">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -88,78 +101,90 @@
         </div>
     </div>
 
-    <!-- Additional Statistics Row -->
-    <div class="row">
-        <!-- Pending Orders Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-danger shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                Đơn hàng chờ xử lý
+    <!-- Action Required Row - Cần xử lý ngay -->
+    <div class="row mt-2">
+        <!-- Pending Orders Card - CẦN ACTION -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-danger shadow-sm h-100 py-2"
+                style="border-left: 3px solid #dc3545 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-clock me-1"></i>Chờ xử lý
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${pendingOrders}">0</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800" th:text="${pendingOrders}"
+                                style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        <div class="text-danger opacity-50">
+                            <i class="fas fa-clock fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Low Stock Products Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Sản phẩm sắp hết hàng
+        <!-- Confirmed Orders Card - CẦN ACTION -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow-sm h-100 py-2"
+                style="border-left: 3px solid #ff9800 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-check-circle me-1"></i>Đã xác nhận
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${#lists.size(lowStockProducts)}">0</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800" th:text="${confirmedOrders}"
+                                style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        <div class="text-warning opacity-50">
+                            <i class="fas fa-check-circle fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Today's Revenue Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Doanh thu hôm nay
+        <!-- Low Stock Products Card - CẦN ACTION -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow-sm h-100 py-2"
+                style="border-left: 3px solid #ffc107 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Sắp hết hàng
                             </div>
-                            <span th:text="${#numbers.formatDecimal(todayRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800"
+                                th:text="${#lists.size(lowStockProducts)}" style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        <div class="text-warning opacity-50">
+                            <i class="fas fa-exclamation-triangle fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Conversion Rate Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Tỷ lệ chuyển đổi
+        <!-- New Customers This Month Card - Đồng bộ với Analytics -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-success shadow-sm h-100 py-2"
+                style="border-left: 3px solid #28a745 !important;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                                style="font-size: 0.7rem;">
+                                <i class="fas fa-user-plus me-1"></i>Khách hàng mới trong tháng này
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${conversionRate != null ? #numbers.formatDecimal(conversionRate, 1, 'COMMA', 2, 'POINT') + '%' : '0%'}">0%</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800" th:text="${newCustomersThisMonth}"
+                                style="font-size: 1.1rem;">0</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-user-plus fa-lg"></i>
                         </div>
                     </div>
                 </div>

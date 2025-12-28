@@ -9,37 +9,86 @@ import java.util.Map;
 
 public interface IDashboardService {
     BigDecimal getTotalRevenue();
+
     BigDecimal getTotalRevenueByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
     long getTotalOrders();
+
     long getTotalOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
     long getTotalProducts();
+
     long getTotalCustomers();
+
     long getTotalCustomersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
     long getPendingOrders();
+
     long getLowStockProducts();
+
     BigDecimal getTodayRevenue();
+
     double getConversionRate();
 
     List<RecentOrderResponse> getRecentOrders(int limit);
+
     List<RecentOrderResponse> getRecentOrdersByDateRange(int limit, LocalDateTime startDate, LocalDateTime endDate);
+
     List<TopProductResponse> getTopProducts(int limit);
+
     List<TopProductResponse> getTopProductsByDateRange(int limit, LocalDateTime startDate, LocalDateTime endDate);
+
     List<LowStockProductResponse> getLowStockProductsList(int threshold);
 
     Map<String, Double> getRevenueByTime(String type, LocalDateTime startDate, LocalDateTime endDate);
+
     Map<String, Double> getRevenueByCategory(LocalDateTime startDate, LocalDateTime endDate);
+
     Map<String, Double> getRevenueByBrand(LocalDateTime startDate, LocalDateTime endDate);
 
     long getNewCustomersThisMonth();
+
     long getNewCustomersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
     double getReturningCustomers();
+
     double getReturningCustomersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
     List<TopCustomerResponse> getTopCustomers(int limit);
+
     List<TopCustomerResponse> getTopCustomersByDateRange(int limit, LocalDateTime startDate, LocalDateTime endDate);
-    
+
     long countSoldProductsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
     long countSoldBrandsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
-    
+
     Map<String, Long> getNewCustomersByMonth();
+
+    // 3 chỉ số mới cho Analytics
+    BigDecimal getGrossRevenue(LocalDateTime startDate, LocalDateTime endDate);
+
+    BigDecimal getMarketingSpend(LocalDateTime startDate, LocalDateTime endDate);
+
+    BigDecimal getNetRevenue(LocalDateTime startDate, LocalDateTime endDate);
+
+    // Metrics nghiệp vụ bổ sung
+    BigDecimal getAverageOrderValue(LocalDateTime startDate, LocalDateTime endDate);
+
+    double getReturnRate(LocalDateTime startDate, LocalDateTime endDate);
+
+    Map<String, BigDecimal> getRevenueByPaymentMethod(LocalDateTime startDate, LocalDateTime endDate);
+
+    Map<String, Long> getOrderStatusDistribution(LocalDateTime startDate, LocalDateTime endDate);
+
+    double getRepeatPurchaseRate(LocalDateTime startDate, LocalDateTime endDate);
+
+    BigDecimal getRevenuePerCustomer(LocalDateTime startDate, LocalDateTime endDate); // Nguồn thu dự kiến
+
+    // Dashboard quick stats
+    BigDecimal getThisWeekRevenue();
+    BigDecimal getThisMonthRevenue();
+    long getTodayOrders();
+    long getTodayNewCustomers();
+    long getConfirmedOrders();
 
 }

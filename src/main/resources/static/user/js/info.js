@@ -13,6 +13,7 @@ class UserInfoManager {
         this.currentOrderPage = 0;
         this.orderPageSize = 5;
         this.totalOrderPages = 0;
+        this.currentOrderStatus = 'ALL'; // Current filter status
         this.init();
     }
 
@@ -85,6 +86,8 @@ class UserInfoManager {
 
             this.populateUserData();
             this.loadOrderStats();
+            // Load wallet data ngay khi vào trang để hiển thị trong thống kê chung
+            this.loadWalletDataForStats();
         } catch (error) {
             console.error('Error loading user info:', error);
             this.showError('Không thể tải thông tin người dùng');
@@ -443,7 +446,7 @@ class UserInfoManager {
 
         // Load data for specific tabs
         if (tabId === '#orders') {
-            this.loadOrders();
+            this.loadOrders(0, this.currentOrderStatus);
         } else if (tabId === '#address') {
             this.loadAddresses();
         }
@@ -466,9 +469,14 @@ class UserInfoManager {
         }
     }
 
-    async loadOrders(page = 0) {
+    async loadOrders(page = 0, status = null) {
         const ordersContainer = document.getElementById('ordersList');
         if (!ordersContainer) return;
+
+        // Use current status if not provided
+        if (status === null) {
+            status = this.currentOrderStatus;
+        }
 
         try {
             const token = localStorage.getItem('access_token');
@@ -486,7 +494,13 @@ class UserInfoManager {
                 </div>
             `;
 
-            const response = await fetch(`/users/myOrdersWithProducts?page=${page}&size=${this.orderPageSize}`, {
+            // Build URL with status filter
+            let url = `/users/myOrdersWithProducts?page=${page}&size=${this.orderPageSize}`;
+            if (status && status !== 'ALL') {
+                url += `&status=${status}`;
+            }
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -512,12 +526,13 @@ class UserInfoManager {
             this.totalOrderPages = paginatedData.totalPages;
 
             if (ordersWithProducts.length === 0 && page === 0) {
+                const statusText = status && status !== 'ALL' ? this.getOrderStatusText(status) : '';
                 ordersContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="mdi mdi-shopping"></i>
-                        <h5>Chưa có đơn hàng nào</h5>
-                        <p>Hãy mua sắm để xem lịch sử đơn hàng của bạn</p>
-                        <a href="/" class="btn btn-primary">Mua sắm ngay</a>
+                        <h5>${statusText ? `Chưa có đơn hàng ${statusText.toLowerCase()}` : 'Chưa có đơn hàng nào'}</h5>
+                        <p>${statusText ? `Bạn chưa có đơn hàng nào ở trạng thái ${statusText.toLowerCase()}` : 'Hãy mua sắm để xem lịch sử đơn hàng của bạn'}</p>
+                        ${!statusText ? '<a href="/" class="btn btn-primary">Mua sắm ngay</a>' : ''}
                     </div>
                 `;
             } else {
@@ -526,7 +541,7 @@ class UserInfoManager {
                         await this.createCompactOrderCard(orderWithProduct)
                     )
                 );
-                const paginationHTML = this.createPaginationHTML(paginatedData);
+                const paginationHTML = this.createPaginationHTML(paginatedData, status);
                 ordersContainer.innerHTML = ordersHTML.join('') + paginationHTML;
             }
 
@@ -537,10 +552,30 @@ class UserInfoManager {
                     <i class="mdi mdi-alert"></i>
                     <h5>Lỗi tải đơn hàng</h5>
                     <p>Vui lòng thử lại sau</p>
-                    <button class="btn btn-primary" onclick="userInfoManager.loadOrders()">Thử lại</button>
+                    <button class="btn btn-primary" onclick="userInfoManager.loadOrders(0, userInfoManager.currentOrderStatus)">Thử lại</button>
                 </div>
             `;
         }
+    }
+
+    filterOrdersByStatus(status) {
+        // Update current status
+        this.currentOrderStatus = status;
+
+        // Reset to first page when filtering
+        this.currentOrderPage = 0;
+
+        // Update active tab
+        const tabs = document.querySelectorAll('#orderStatusTabs .nav-link');
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('data-status') === status) {
+                tab.classList.add('active');
+            }
+        });
+
+        // Load orders with new status
+        this.loadOrders(0, status);
     }
 
     async createCompactOrderCard(orderWithProduct) {
@@ -606,32 +641,56 @@ class UserInfoManager {
                         <i class="mdi mdi-cursor-pointer"></i>
                         <span>Xem chi tiết</span>
                     </div>
+                    
+                    ${/* Nút Hủy đơn cho PENDING và CONFIRMED */ ''}
+                    ${order.orderStatus === 'PENDING' || order.orderStatus === 'CONFIRMED' ? `
+                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); userInfoManager.cancelOrder(${order.idOrder})">
+                        <i class="mdi mdi-close-circle"></i> Hủy đơn
+                    </button>
+                    ` : ''}
+                    
+                    ${/* Nút Đánh giá và Trả hàng cho DELIVERED */ ''}
+                    ${order.orderStatus === 'DELIVERED' ? `
+                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
+                        <i class="mdi mdi-star"></i> Đánh giá
+                    </button>
+                    <button class="btn btn-warning btn-sm text-white" onclick="event.stopPropagation(); userInfoManager.returnOrder(${order.idOrder})">
+                        <i class="mdi mdi-undo-variant"></i> Trả hàng
+                    </button>
+                    ` : ''}
+                    
+                    ${/* Nút Mua lại cho CANCELLED */ ''}
+                    ${order.orderStatus === 'CANCELLED' ? `
+                    <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); userInfoManager.reorder(${order.idOrder})">
+                        <i class="mdi mdi-redo"></i> Mua lại
+                    </button>
+                    ` : ''}
+                    
+                    ${/* Nút Xem đánh giá và Mua lại cho COMPLETED */ ''}
                     ${order.orderStatus === 'COMPLETED' ? `
                         ${reviewStatus.allReviewed ? `
-                        <button class="btn btn-success btn-sm" disabled>
-                            <i class="mdi mdi-check"></i> Đã đánh giá
+                        <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
+                            <i class="mdi mdi-eye"></i> Xem đánh giá
                         </button>
                         ` : reviewStatus.hasAnyReview ? `
                         <button class="btn btn-warning btn-sm text-white" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
                             <i class="mdi mdi-star"></i> Xem đánh giá
                         </button>
                         ` : `
-                        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
+                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); userInfoManager.openReviewModal(${order.idOrder})">
                             <i class="mdi mdi-star"></i> Đánh giá
                         </button>
                         `}
-                        ` : ''}
-                    ${order.orderStatus === 'COMPLETED' || order.orderStatus === 'CANCELLED' ? `
-                    <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); userInfoManager.reorder(${order.idOrder})">
-                        <i class="mdi mdi-redo"></i> Mua lại
-                    </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); userInfoManager.reorder(${order.idOrder})">
+                            <i class="mdi mdi-redo"></i> Mua lại
+                        </button>
                     ` : ''}
                 </div>
             </div>
         `;
     }
 
-    createPaginationHTML(paginatedData) {
+    createPaginationHTML(paginatedData, status = null) {
         if (paginatedData.totalPages <= 1) {
             return '';
         }
@@ -640,6 +699,7 @@ class UserInfoManager {
         const totalPages = paginatedData.totalPages;
         const hasNext = paginatedData.hasNext;
         const hasPrevious = paginatedData.hasPrevious;
+        const statusParam = status && status !== 'ALL' ? `, '${status}'` : '';
 
         let paginationHTML = `
             <div class="pagination-container mt-4">
@@ -651,7 +711,7 @@ class UserInfoManager {
         if (hasPrevious) {
             paginationHTML += `
                 <li class="page-item">
-                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage - 1})">
+                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage - 1}${statusParam})">
                         <i class="mdi mdi-chevron-left"></i> Trước
                     </button>
                 </li>
@@ -680,7 +740,7 @@ class UserInfoManager {
             } else {
                 paginationHTML += `
                     <li class="page-item">
-                        <button class="page-link" onclick="userInfoManager.loadOrders(${i})">${i + 1}</button>
+                        <button class="page-link" onclick="userInfoManager.loadOrders(${i}${statusParam})">${i + 1}</button>
                     </li>
                 `;
             }
@@ -690,7 +750,7 @@ class UserInfoManager {
         if (hasNext) {
             paginationHTML += `
                 <li class="page-item">
-                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage + 1})">
+                    <button class="page-link" onclick="userInfoManager.loadOrders(${currentPage + 1}${statusParam})">
                         Sau <i class="mdi mdi-chevron-right"></i>
                     </button>
                 </li>
@@ -787,8 +847,11 @@ class UserInfoManager {
         const statusMap = {
             'PENDING': 'status-pending',
             'CONFIRMED': 'status-confirmed',
+            'SHIPPING': 'status-shipping',
+            'DELIVERED': 'status-delivered',
             'COMPLETED': 'status-completed',
-            'CANCELLED': 'status-cancelled'
+            'CANCELLED': 'status-cancelled',
+            'RETURNED': 'status-returned'
         };
         return statusMap[status] || 'status-pending';
     }
@@ -797,8 +860,11 @@ class UserInfoManager {
         const statusMap = {
             'PENDING': 'Chờ xử lý',
             'CONFIRMED': 'Đã xác nhận',
-            'COMPLETED': 'Hoàn tất',
-            'CANCELLED': 'Đã hủy'
+            'SHIPPING': 'Đang giao hàng',
+            'DELIVERED': 'Đã giao hàng',
+            'COMPLETED': 'Hoàn thành',
+            'CANCELLED': 'Đã hủy',
+            'RETURNED': 'Đã trả hàng'
         };
         return statusMap[status] || status;
     }
@@ -900,6 +966,98 @@ class UserInfoManager {
     async openReviewModal(orderId) {
         // Chuyển đến trang chi tiết đơn hàng với modal đánh giá
         window.location.href = `/user/order-detail/${orderId}#review`;
+    }
+
+    async cancelOrder(orderId) {
+        // Xác nhận trước khi hủy
+        const confirmed = confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');
+        if (!confirmed) return;
+
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                this.showError('Vui lòng đăng nhập để thực hiện thao tác này');
+                return;
+            }
+
+            // Hiển thị loading
+            this.showLoading();
+
+            const response = await fetch(`/order/${orderId}/cancel`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Không thể hủy đơn hàng');
+            }
+
+            this.showToast('Đơn hàng đã được hủy thành công', 'success');
+
+            // Reload orders list
+            setTimeout(() => {
+                this.loadOrders(this.currentOrderPage, this.currentOrderStatus);
+            }, 1000);
+
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+            this.showError(error.message || 'Có lỗi xảy ra khi hủy đơn hàng');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async returnOrder(orderId) {
+        // Hiển thị form để user nhập lý do trả hàng
+        const reason = prompt('Vui lòng nhập lý do trả hàng:');
+        if (!reason || reason.trim() === '') {
+            this.showToast('Vui lòng nhập lý do trả hàng', 'warning');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                this.showError('Vui lòng đăng nhập để thực hiện thao tác này');
+                return;
+            }
+
+            // Hiển thị loading
+            this.showLoading();
+
+            const response = await fetch(`/api/orders/${orderId}/return`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason: reason.trim()
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Không thể tạo yêu cầu trả hàng');
+            }
+
+            this.showToast('Yêu cầu trả hàng đã được gửi thành công. Chúng tôi sẽ xử lý trong thời gian sớm nhất.', 'success');
+
+            // Reload orders list
+            setTimeout(() => {
+                this.loadOrders(this.currentOrderPage, this.currentOrderStatus);
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error creating return request:', error);
+            this.showError(error.message || 'Có lỗi xảy ra khi tạo yêu cầu trả hàng');
+        } finally {
+            this.hideLoading();
+        }
     }
 
     async enrichOrderItemsWithCurrentStatus(orderItems, token) {
@@ -1385,6 +1543,22 @@ class UserInfoManager {
         } catch (error) {
             // Silently fail for stats - not critical
             console.log('Could not load order stats:', error);
+        }
+    }
+
+    async loadWalletDataForStats() {
+        try {
+            // Load wallet balance để hiển thị trong header
+            if (typeof loadWalletData === 'function') {
+                await loadWalletData();
+            }
+            // Load all transactions để tính toán stats chính xác
+            if (typeof loadAllTransactionsForStats === 'function') {
+                await loadAllTransactionsForStats();
+            }
+        } catch (error) {
+            // Silently fail for wallet stats - not critical
+            console.log('Could not load wallet stats:', error);
         }
     }
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
 import java.util.Map;
 import vn.liora.entity.User;
 import vn.liora.exception.AppException;
@@ -31,6 +32,7 @@ public class OrderDetailController {
 
     private final IOrderService orderService;
     private final UserRepository userRepository;
+    private final vn.liora.service.IReturnRequestService returnRequestService;
 
     // Các endpoint cụ thể phải đặt TRƯỚC endpoint có path variable
     @GetMapping("/order-detail/access")
@@ -48,17 +50,66 @@ public class OrderDetailController {
             }
 
             if (orderId == null) {
+                log.warn("Order ID is null in order-detail-view");
                 return "error/404";
             }
 
-            // Lấy token từ session
-            String token = (String) httpRequest.getSession().getAttribute("authToken");
-            if (token == null) {
+            // Sử dụng authentication hiện tại thay vì yêu cầu token từ session
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = null;
+
+            // Kiểm tra nếu là user đã đăng nhập
+            if (authentication != null && authentication.isAuthenticated()
+                    && !"anonymousUser".equals(authentication.getName())) {
+                user = findUserByPrincipal(authentication);
+            }
+
+            if (user == null) {
+                log.warn("No authenticated user found for order-detail-view");
                 return "error/404";
             }
 
-            // Xử lý tương tự như viewOrderDetail nhưng với token từ session
-            return viewOrderDetailWithToken(orderId, token, httpRequest, model);
+            // Lấy thông tin đơn hàng
+            var orderResponse = orderService.getOrderById(orderId);
+            if (orderResponse == null) {
+                log.warn("Order not found: {}", orderId);
+                return "error/404";
+            }
+
+            if (!orderResponse.getUserId().equals(user.getUserId())) {
+                log.warn("Order {} not owned by user {}", orderId, user.getUserId());
+                return "error/404";
+            }
+
+            // Lấy danh sách sản phẩm trong đơn hàng
+            var orderProducts = orderService.getProductsByOrderId(orderId);
+            if (orderProducts == null) {
+                log.warn("Order products is null for order: {}", orderId);
+                orderProducts = new ArrayList<>(); // Empty list thay vì null
+            }
+
+            // Đảm bảo xuUsed không null
+            if (orderResponse.getXuUsed() == null) {
+                orderResponse.setXuUsed(java.math.BigDecimal.ZERO);
+            }
+
+            // Lấy return request nếu có
+            vn.liora.dto.response.ReturnRequestResponse returnRequest = null;
+            try {
+                returnRequest = returnRequestService.getReturnRequestByOrderId(orderId);
+            } catch (Exception e) {
+                log.debug("No return request found for order: {}", orderId);
+            }
+
+            // Thêm thông tin vào model
+            model.addAttribute("order", orderResponse);
+            model.addAttribute("orderProducts", orderProducts);
+            model.addAttribute("user", user);
+            model.addAttribute("isGuest", false);
+            model.addAttribute("returnRequest", returnRequest);
+
+            log.info("Successfully loaded order detail for orderId: {}, userId: {}", orderId, user.getUserId());
+            return "user/order/order-detail";
 
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.ORDER_NOT_FOUND) {
@@ -194,11 +245,20 @@ public class OrderDetailController {
             // Lấy danh sách sản phẩm trong đơn hàng
             var orderProducts = orderService.getProductsByOrderId(orderId);
 
+            // Lấy return request nếu có
+            vn.liora.dto.response.ReturnRequestResponse returnRequest = null;
+            try {
+                returnRequest = returnRequestService.getReturnRequestByOrderId(orderId);
+            } catch (Exception e) {
+                log.debug("No return request found for order: {}", orderId);
+            }
+
             // Thêm thông tin vào model
             model.addAttribute("order", orderResponse);
             model.addAttribute("orderProducts", orderProducts);
             model.addAttribute("user", user);
             model.addAttribute("isGuest", false); // User đã đăng nhập
+            model.addAttribute("returnRequest", returnRequest);
 
             return "user/order/order-detail";
 
@@ -276,12 +336,31 @@ public class OrderDetailController {
 
             // Lấy danh sách sản phẩm trong đơn hàng
             var orderProducts = orderService.getProductsByOrderId(orderId);
+            if (orderProducts == null) {
+                log.warn("Order products is null for order: {}", orderId);
+                orderProducts = new ArrayList<>(); // Empty list thay vì null
+            }
+
+            // Đảm bảo xuUsed không null
+            if (orderResponse.getXuUsed() == null) {
+                orderResponse.setXuUsed(java.math.BigDecimal.ZERO);
+            }
+
+            // Lấy return request nếu có
+            vn.liora.dto.response.ReturnRequestResponse returnRequest = null;
+            try {
+                returnRequest = returnRequestService.getReturnRequestByOrderId(orderId);
+            } catch (Exception e) {
+                log.debug("No return request found for order: {}", orderId);
+            }
 
             model.addAttribute("order", orderResponse);
             model.addAttribute("orderProducts", orderProducts);
             model.addAttribute("user", user);
             model.addAttribute("isGuest", false); // User đã đăng nhập
+            model.addAttribute("returnRequest", returnRequest);
 
+            log.info("Successfully loaded order detail for orderId: {}, userId: {}", orderId, user.getUserId());
             return "user/order/order-detail";
 
         } catch (AppException e) {
@@ -364,6 +443,15 @@ public class OrderDetailController {
 
             // Lấy danh sách sản phẩm trong đơn hàng
             var orderProducts = orderService.getProductsByOrderId(orderId);
+            if (orderProducts == null) {
+                log.warn("Order products is null for guest order: {}", orderId);
+                orderProducts = new java.util.ArrayList<>(); // Empty list thay vì null
+            }
+
+            // Đảm bảo xuUsed không null
+            if (orderResponse.getXuUsed() == null) {
+                orderResponse.setXuUsed(java.math.BigDecimal.ZERO);
+            }
 
             // Tạo user giả cho guest để hiển thị
             User guestUser = new User();
@@ -378,6 +466,7 @@ public class OrderDetailController {
             model.addAttribute("user", guestUser);
             model.addAttribute("isGuest", true);
 
+            log.info("Successfully loaded guest order detail for orderId: {}, email: {}", orderId, guestEmail);
             return "user/order/order-detail";
 
         } catch (Exception e) {

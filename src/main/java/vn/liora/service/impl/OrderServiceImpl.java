@@ -31,6 +31,7 @@ import vn.liora.service.IOrderService;
 import vn.liora.service.IProductService;
 import vn.liora.service.IGhnShippingService;
 import vn.liora.service.EmailService;
+import vn.liora.service.IWalletService;
 import vn.liora.entity.Discount;
 import vn.liora.repository.DiscountRepository;
 
@@ -59,6 +60,7 @@ public class OrderServiceImpl implements IOrderService {
     IGhnShippingService ghnShippingService;
     EmailService emailService;
     GhnShippingRepository ghnShippingRepository;
+    IWalletService walletService;
 
     @Override
     @Transactional
@@ -176,12 +178,42 @@ public class OrderServiceImpl implements IOrderService {
             }
             order.setShippingFee(shippingFee);
 
-            // 10. Set tổng tiền cho order (bao gồm phí ship)
+            // 10. Set xuUsed vào order trước khi tính total
+            BigDecimal xuUsed = BigDecimal.ZERO;
+            if (request.getXuUsed() != null && request.getXuUsed().compareTo(BigDecimal.ZERO) > 0) {
+                xuUsed = request.getXuUsed();
+                order.setXuUsed(xuUsed);
+            } else {
+                order.setXuUsed(BigDecimal.ZERO);
+            }
+
+            // 11. Set tổng tiền cho order theo công thức: Total = (Subtotal + ShippingFee)
+            // - (Voucher + Xu)
             order.setTotalDiscount(totalDiscount);
-            BigDecimal computedTotal = total.add(shippingFee);
+            // total hiện tại = subtotal - totalDiscount (đã trừ voucher)
+            // Cần trừ thêm xuUsed: Total = (subtotal - totalDiscount) + shippingFee -
+            // xuUsed
+            // Hoặc: Total = (Subtotal + ShippingFee) - (Voucher + Xu)
+            BigDecimal computedTotal = total.add(shippingFee).subtract(xuUsed);
             order.setTotal(computedTotal);
 
             final Order savedOrder = orderRepository.save(order);
+
+            // 12. Process Xu Payment if xuUsed > 0 (trừ xu từ wallet sau khi order đã được
+            // lưu)
+            if (xuUsed.compareTo(BigDecimal.ZERO) > 0 && user != null) {
+                try {
+                    walletService.useXuForPayment(
+                            user.getUserId(),
+                            savedOrder.getIdOrder(),
+                            xuUsed);
+                    log.info("Used {} xu for payment in order {}", xuUsed, savedOrder.getIdOrder());
+                } catch (Exception e) {
+                    log.error("Failed to use xu for payment in order {}: {}", savedOrder.getIdOrder(), e.getMessage());
+                    // Don't rollback order, just log the error
+                }
+            }
+
             // After order persisted, increment discount usage (if a discount was applied)
             try {
                 if (savedOrder.getDiscount() != null) {
@@ -286,10 +318,14 @@ public class OrderServiceImpl implements IOrderService {
         // Tính discount amount
         BigDecimal discountAmount = discountService.calculateDiscountAmount(discountId, subTotal);
 
-        // Cập nhật order
+        // Cập nhật order theo công thức: Total = (Subtotal + ShippingFee) - (Voucher +
+        // Xu)
         order.setDiscount(discount);
         order.setTotalDiscount(discountAmount);
-        order.setTotal(subTotal.subtract(discountAmount));
+        BigDecimal xuUsed = order.getXuUsed() != null ? order.getXuUsed() : BigDecimal.ZERO;
+        BigDecimal shippingFee = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal computedTotal = subTotal.add(shippingFee).subtract(discountAmount).subtract(xuUsed);
+        order.setTotal(computedTotal);
 
         orderRepository.save(order);
 
@@ -320,10 +356,14 @@ public class OrderServiceImpl implements IOrderService {
         // Tính subtotal từ OrderProducts (nhất quán với applyDiscountToOrder)
         BigDecimal subTotal = calculateOrderSubTotal(order);
 
-        // Remove discount from order
+        // Remove discount from order theo công thức: Total = (Subtotal + ShippingFee) -
+        // (Voucher + Xu)
         order.setDiscount(null);
         order.setTotalDiscount(BigDecimal.ZERO);
-        order.setTotal(subTotal); // total = subtotal (không có discount)
+        BigDecimal xuUsed = order.getXuUsed() != null ? order.getXuUsed() : BigDecimal.ZERO;
+        BigDecimal shippingFee = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal computedTotal = subTotal.add(shippingFee).subtract(xuUsed); // Không có discount nữa
+        order.setTotal(computedTotal);
 
         orderRepository.save(order);
 
@@ -383,7 +423,14 @@ public class OrderServiceImpl implements IOrderService {
         // Tự động cập nhật trạng thái thanh toán và sold count dựa trên trạng thái đơn
         // hàng
         String newOrderStatus = request.getOrderStatus();
-        if ("COMPLETED".equals(newOrderStatus)) {
+        if ("DELIVERED".equals(newOrderStatus)) {
+            // Khi đơn hàng chuyển sang "Đã giao hàng", tự động cập nhật trạng thái thanh
+            // toán thành "Đã thanh toán"
+            if ("PENDING".equals(currentPaymentStatus)) {
+                order.setPaymentStatus("PAID");
+                log.info("Auto-updated payment status to PAID for order {} when status changed to DELIVERED", idOrder);
+            }
+        } else if ("COMPLETED".equals(newOrderStatus)) {
             // Nếu đơn hàng hoàn tất và đã thanh toán, giữ nguyên trạng thái thanh toán
             // Nếu chưa thanh toán, tự động đặt thành "Đã thanh toán"
             if ("PENDING".equals(currentPaymentStatus)) {
@@ -392,6 +439,24 @@ public class OrderServiceImpl implements IOrderService {
 
             // Cập nhật sold count = số lượng sản phẩm trong đơn hàng khi hoàn tất
             updateSoldCountForOrder(order, true);
+
+            // ✅ THÊM: Cộng xu thưởng vào ví (0.1% tổng đơn hàng - phí ship)
+            if (order.getUser() != null) {
+                try {
+                    // Xu thưởng tính trên giá trị đơn hàng KHÔNG bao gồm phí ship
+                    java.math.BigDecimal orderValueForReward = order.getTotal()
+                            .subtract(order.getShippingFee() != null ? order.getShippingFee()
+                                    : java.math.BigDecimal.ZERO);
+                    walletService.addRewardPoints(
+                            order.getUser().getUserId(),
+                            order.getIdOrder(),
+                            orderValueForReward);
+                    log.info("Added reward points to wallet for order {}", order.getIdOrder());
+                } catch (Exception e) {
+                    log.error("Failed to add reward points for order {}: {}", order.getIdOrder(), e.getMessage());
+                    // Không throw exception để không rollback đơn hàng
+                }
+            }
         } else {
             // Cập nhật trạng thái thanh toán cho các trường hợp khác
             if ("CANCELLED".equals(newOrderStatus)) {
@@ -403,7 +468,30 @@ public class OrderServiceImpl implements IOrderService {
                 // Nếu chuyển từ COMPLETED về CANCELLED, cần giảm sold count
                 if ("COMPLETED".equals(currentOrderStatus)) {
                     updateSoldCountForOrder(order, false);
+
+                    // ✅ THÊM: Trừ xu thưởng đã cộng (chỉ trừ tối đa số dư hiện có)
+                    if (order.getUser() != null) {
+                        try {
+                            // Xu thưởng tính trên giá trị đơn hàng KHÔNG bao gồm phí ship
+                            java.math.BigDecimal orderValueForReward = order.getTotal()
+                                    .subtract(order.getShippingFee() != null ? order.getShippingFee()
+                                            : java.math.BigDecimal.ZERO);
+                            java.math.BigDecimal rewardAmount = orderValueForReward
+                                    .multiply(new java.math.BigDecimal("0.001"));
+                            walletService.deductPoints(
+                                    order.getUser().getUserId(),
+                                    order.getIdOrder(),
+                                    rewardAmount);
+                            log.info("Deducted reward points from wallet for cancelled order {}", order.getIdOrder());
+                        } catch (Exception e) {
+                            log.error("Failed to deduct reward points for order {}: {}", order.getIdOrder(),
+                                    e.getMessage());
+                        }
+                    }
                 }
+
+                // ✅ BỎ: Không hoàn tiền vào ví khi đơn hàng bị hủy
+                // Tiền sẽ được hoàn qua ngân hàng khi duyệt yêu cầu trả hàng
             } else if ("PENDING".equals(newOrderStatus) || "CONFIRMED".equals(newOrderStatus)) {
                 // Nếu đơn hàng từ COMPLETED chuyển về PENDING/CONFIRMED và đã hoàn tiền, chuyển
                 // về "Đã thanh toán"
@@ -577,10 +665,47 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public List<OrderResponse> getMyOrdersPaginatedByStatus(Long userId, String orderStatus, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        List<Order> orders;
+        if (orderStatus == null || orderStatus.isEmpty() || "ALL".equals(orderStatus)) {
+            orders = orderRepository.findByUserOrderByOrderDateDesc(user);
+        } else {
+            orders = orderRepository.findByUserAndOrderStatus(user, orderStatus);
+        }
+
+        // Manual pagination
+        int start = page * size;
+        int end = Math.min(start + size, orders.size());
+
+        if (start >= orders.size()) {
+            return new ArrayList<>();
+        }
+
+        List<Order> paginatedOrders = orders.subList(start, end);
+        return orderMapper.toOrderResponseList(paginatedOrders);
+    }
+
+    @Override
     public Long countMyOrders(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return orderRepository.countByUser(user);
+    }
+
+    @Override
+    public Long countMyOrdersByStatus(Long userId, String orderStatus) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (orderStatus == null || orderStatus.isEmpty() || "ALL".equals(orderStatus)) {
+            return orderRepository.countByUser(user);
+        } else {
+            List<Order> orders = orderRepository.findByUserAndOrderStatus(user, orderStatus);
+            return (long) orders.size();
+        }
     }
 
     @Override
@@ -657,8 +782,9 @@ public class OrderServiceImpl implements IOrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang PENDING)
-        if (!"PENDING".equals(order.getOrderStatus())) {
+        // Kiểm tra xem đơn hàng có thể hủy không (chỉ hủy được khi đang PENDING hoặc
+        // CONFIRMED)
+        if (!"PENDING".equals(order.getOrderStatus()) && !"CONFIRMED".equals(order.getOrderStatus())) {
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_CANCELLED);
         }
 

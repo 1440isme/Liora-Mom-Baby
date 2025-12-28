@@ -193,8 +193,16 @@ class OrderDetailManager {
         $('#discount').text(discount);
         $('#summaryDiscount').text(`-${discount}`);
 
-        // Calculate subtotal
-        const subtotal = (order.total || 0) - (order.shippingFee || 0) + (order.totalDiscount || 0);
+        // Xu đã sử dụng
+        const xuUsed = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            minimumFractionDigits: 0
+        }).format(order.xuUsed || 0).replace('₫', '₫');
+        $('#summaryXuUsed').text(`-${xuUsed}`);
+
+        // Calculate subtotal: Subtotal = Total + Voucher + Xu - Shipping
+        const subtotal = (order.total || 0) + (order.totalDiscount || 0) + (order.xuUsed || 0) - (order.shippingFee || 0);
         $('#subtotal').text(new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND',
@@ -206,6 +214,19 @@ class OrderDetailManager {
 
         // Load order items - cần API riêng
         this.loadOrderItems(order.idOrder);
+
+        // Hiển thị/Xóa dòng giảm giá và xu nếu không có
+        if (order.totalDiscount && order.totalDiscount > 0) {
+            $('#summaryDiscountRow').show();
+        } else {
+            $('#summaryDiscountRow').hide();
+        }
+
+        if (order.xuUsed && order.xuUsed > 0) {
+            $('#summaryXuUsedRow').show();
+        } else {
+            $('#summaryXuUsedRow').hide();
+        }
 
         // Hiển thị thông tin mã giảm giá và %
         if (order.discountId && order.discountName) {

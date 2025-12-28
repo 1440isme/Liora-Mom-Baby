@@ -123,7 +123,7 @@ class OrderManager {
 
             this.renderOrderTable();
             // Không gọi updatePagination() ở đây vì filterOrders() đã gọi rồi
-            
+
             // Thêm delay nhỏ để đảm bảo DOM đã sẵn sàng
             setTimeout(() => {
                 this.updatePagination();
@@ -202,37 +202,52 @@ class OrderManager {
             const totalOrders = filteredOrdersForStats.length;
             const cancelledOrders = filteredOrdersForStats.filter(order => order.orderStatus === 'CANCELLED').length;
             const pendingOrders = filteredOrdersForStats.filter(order => order.orderStatus === 'PENDING').length;
+            // Tính doanh thu từ đơn hàng COMPLETED (theo logic mới: chỉ tính đơn hàng hoàn thành)
             const totalRevenue = filteredOrdersForStats
                 .filter(order => order.orderStatus === 'COMPLETED')
-                .reduce((sum, order) => sum + (order.total || 0), 0);
+                .reduce((sum, order) => {
+                    // Đảm bảo order.total là số, không phải null/undefined
+                    const orderTotal = order.total ? parseFloat(order.total) : 0;
+                    return sum + orderTotal;
+                }, 0);
 
             this.updateStatistics({
-                total: totalOrders,
-                cancelled: cancelledOrders,
-                pending: pendingOrders,
-                revenue: totalRevenue
+                totalOrders: totalOrders,
+                cancelledOrders: cancelledOrders,
+                pendingOrders: pendingOrders,
+                totalRevenue: totalRevenue
             });
 
         } catch (error) {
             console.error('Error calculating statistics:', error);
             // Set default values nếu có lỗi
             this.updateStatistics({
-                total: 0,
-                cancelled: 0,
-                pending: 0,
-                revenue: 0
+                totalOrders: 0,
+                cancelledOrders: 0,
+                pendingOrders: 0,
+                totalRevenue: 0
             });
         }
     }
 
     updateStatistics(stats) {
-        $('#totalOrders').text(stats.total.toLocaleString());
-        $('#paidOrders').text((stats.cancelled || 0).toLocaleString());
-        $('#pendingOrders').text(stats.pending.toLocaleString());
+        // Đảm bảo stats object và các giá trị tồn tại
+        const safeStats = stats || {};
+
+        // Hỗ trợ cả format từ API (totalOrders, cancelledOrders, ...) và format từ calculateStatisticsFromFilteredData (total, cancelled, ...)
+        const total = safeStats.totalOrders || safeStats.total || 0;
+        const cancelled = safeStats.cancelledOrders || safeStats.cancelled || 0;
+        const pending = safeStats.pendingOrders || safeStats.pending || 0;
+        const revenue = safeStats.totalRevenue || safeStats.completedRevenue || safeStats.revenue || 0;
+
+        $('#totalOrders').text(total.toLocaleString());
+        $('#paidOrders').text(cancelled.toLocaleString());
+        $('#pendingOrders').text(pending.toLocaleString());
         $('#totalRevenue').text(new Intl.NumberFormat('vi-VN', {
             style: 'currency',
-            currency: 'VND'
-        }).format(stats.revenue));
+            currency: 'VND',
+            minimumFractionDigits: 0
+        }).format(revenue));
     }
 
     renderOrderTable() {
@@ -422,14 +437,17 @@ class OrderManager {
             $('#updateOrderId').val(orderId);
             $('#updateOrderStatus').val(order.orderStatus || 'PENDING'); // Set string value
             $('#updatePaymentStatus').val(order.paymentStatus || 'PENDING'); // Set payment status
-            
+
             // Bind event để tự động cập nhật trạng thái thanh toán khi thay đổi trạng thái đơn hàng
-            $('#updateOrderStatus').off('change').on('change', function() {
+            $('#updateOrderStatus').off('change').on('change', function () {
                 const selectedOrderStatus = $(this).val();
                 const currentPaymentStatus = $('#updatePaymentStatus').val();
                 const currentOrderStatus = order.orderStatus;
-                
-                if (selectedOrderStatus === 'COMPLETED' && currentPaymentStatus === 'PENDING') {
+
+                if (selectedOrderStatus === 'DELIVERED' && currentPaymentStatus === 'PENDING') {
+                    // Khi đơn hàng chuyển sang "Đã giao hàng", tự động cập nhật trạng thái thanh toán thành "Đã thanh toán"
+                    $('#updatePaymentStatus').val('PAID');
+                } else if (selectedOrderStatus === 'COMPLETED' && currentPaymentStatus === 'PENDING') {
                     $('#updatePaymentStatus').val('PAID');
                 } else if (selectedOrderStatus === 'CANCELLED' && currentPaymentStatus === 'PAID') {
                     $('#updatePaymentStatus').val('REFUNDED');
@@ -437,7 +455,7 @@ class OrderManager {
                     $('#updatePaymentStatus').val('PAID');
                 }
             });
-            
+
             $('#updateStatusModal').modal('show');
 
         } catch (error) {
@@ -456,8 +474,13 @@ class OrderManager {
             let finalPaymentStatus = paymentStatus;
             const order = this.orders.find(o => o.idOrder == orderId);
             const currentOrderStatus = order ? order.orderStatus : '';
-            
-            if (orderStatus === 'COMPLETED') {
+
+            if (orderStatus === 'DELIVERED') {
+                // Khi đơn hàng chuyển sang "Đã giao hàng", tự động cập nhật trạng thái thanh toán thành "Đã thanh toán"
+                if (paymentStatus === 'PENDING') {
+                    finalPaymentStatus = 'PAID';
+                }
+            } else if (orderStatus === 'COMPLETED') {
                 // Nếu đơn hàng hoàn tất, tự động đặt thanh toán thành "Đã thanh toán" nếu đang "Chờ thanh toán"
                 if (paymentStatus === 'PENDING') {
                     finalPaymentStatus = 'PAID';
@@ -616,7 +639,7 @@ class OrderManager {
 
     updatePaginationInfo() {
         const paginationInfoElement = $('#paginationInfo');
-        
+
         if (this.filteredOrders.length === 0) {
             paginationInfoElement.html('Hiển thị 0-0 trong tổng số 0 đơn hàng');
         } else {
@@ -653,7 +676,7 @@ class OrderManager {
         try {
             // Lấy danh sách đơn hàng hiện tại
             const orders = this.filteredOrders.length > 0 ? this.filteredOrders : this.orders;
-            
+
             if (!orders || orders.length === 0) {
                 this.showAlert('warning', 'Cảnh báo', 'Không có dữ liệu để xuất Excel');
                 return;
@@ -679,13 +702,13 @@ class OrderManager {
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
-            
+
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
             link.setAttribute('href', url);
             link.setAttribute('download', `danh_sach_don_hang_${dateStr}.csv`);
             link.style.visibility = 'hidden';
-            
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -711,7 +734,7 @@ class OrderManager {
 
             // Tạo cửa sổ in
             const printWindow = window.open('', '_blank');
-            
+
             // Lấy thông tin thống kê
             // Chỉ tính các đơn đã hoàn tất để phù hợp với thống kê trên trang
             const completedOrders = orders.filter(order => order.orderStatus === 'COMPLETED');
@@ -777,10 +800,10 @@ class OrderManager {
                 </body>
                 </html>
             `);
-            
+
             printWindow.document.close();
             printWindow.focus();
-            
+
             // Đợi nội dung load xong rồi mới in
             setTimeout(() => {
                 printWindow.print();
@@ -809,10 +832,16 @@ class OrderManager {
                 return 'bg-warning';
             case 'CONFIRMED':
                 return 'bg-info';
-            case 'CANCELLED':
-                return 'bg-danger';
+            case 'SHIPPING':
+                return 'bg-primary';
+            case 'DELIVERED':
+                return 'bg-success';
             case 'COMPLETED':
                 return 'bg-success';
+            case 'CANCELLED':
+                return 'bg-danger';
+            case 'RETURNED':
+                return 'bg-warning';
             default:
                 return 'bg-secondary';
         }
@@ -824,10 +853,16 @@ class OrderManager {
                 return 'Chờ xử lý';
             case 'CONFIRMED':
                 return 'Đã xác nhận';
+            case 'SHIPPING':
+                return 'Đang giao hàng';
+            case 'DELIVERED':
+                return 'Đã giao hàng';
+            case 'COMPLETED':
+                return 'Hoàn thành';
             case 'CANCELLED':
                 return 'Đã hủy';
-            case 'COMPLETED':
-                return 'Hoàn tất';
+            case 'RETURNED':
+                return 'Đã trả hàng';
             default:
                 return 'Không xác định';
         }

@@ -50,7 +50,7 @@ public class AdminPageController {
             default -> dashboardService.getRevenueByTime(groupType, startDate, endDate);
         };
     }
-    
+
     // API lấy đơn hàng gần đây theo khoảng thời gian
     @GetMapping("/analytics/recent-orders")
     @ResponseBody
@@ -71,7 +71,7 @@ public class AdminPageController {
                 })
                 .collect(Collectors.toList());
     }
-    
+
     // API lấy sản phẩm bán chạy theo khoảng thời gian
     @GetMapping("/analytics/top-products")
     @ResponseBody
@@ -92,7 +92,7 @@ public class AdminPageController {
                 })
                 .collect(Collectors.toList());
     }
-    
+
     // API lấy tổng doanh thu theo khoảng thời gian
     @GetMapping("/analytics/total-revenue")
     @ResponseBody
@@ -103,7 +103,7 @@ public class AdminPageController {
         result.put("totalRevenue", dashboardService.getTotalRevenueByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy tổng đơn hàng theo khoảng thời gian
     @GetMapping("/analytics/total-orders")
     @ResponseBody
@@ -114,7 +114,7 @@ public class AdminPageController {
         result.put("totalOrders", dashboardService.getTotalOrdersByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy tổng số khách hàng theo khoảng thời gian
     @GetMapping("/analytics/total-customers")
     @ResponseBody
@@ -125,14 +125,114 @@ public class AdminPageController {
         result.put("totalCustomers", dashboardService.getTotalCustomersByDateRange(startDate, endDate));
         return result;
     }
-    
+
+    // API lấy Tổng doanh thu gộp (Gross Revenue)
+    @GetMapping("/analytics/gross-revenue")
+    @ResponseBody
+    public Map<String, Object> getGrossRevenueByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("grossRevenue", dashboardService.getGrossRevenue(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Chi phí Marketing (Marketing Spend)
+    @GetMapping("/analytics/marketing-spend")
+    @ResponseBody
+    public Map<String, Object> getMarketingSpendByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("marketingSpend", dashboardService.getMarketingSpend(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Doanh thu thực tế (Net Revenue)
+    @GetMapping("/analytics/net-revenue")
+    @ResponseBody
+    public Map<String, Object> getNetRevenueByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("netRevenue", dashboardService.getNetRevenue(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Average Order Value (AOV)
+    @GetMapping("/analytics/average-order-value")
+    @ResponseBody
+    public Map<String, Object> getAverageOrderValueByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("averageOrderValue", dashboardService.getAverageOrderValue(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Return Rate
+    @GetMapping("/analytics/return-rate")
+    @ResponseBody
+    public Map<String, Object> getReturnRateByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("returnRate", dashboardService.getReturnRate(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Revenue by Payment Method
+    @GetMapping("/analytics/revenue-by-payment-method")
+    @ResponseBody
+    public Map<String, Object> getRevenueByPaymentMethodByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("revenueByPaymentMethod", dashboardService.getRevenueByPaymentMethod(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Order Status Distribution
+    @GetMapping("/analytics/order-status-distribution")
+    @ResponseBody
+    public Map<String, Object> getOrderStatusDistributionByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderStatusDistribution", dashboardService.getOrderStatusDistribution(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Repeat Purchase Rate
+    @GetMapping("/analytics/repeat-purchase-rate")
+    @ResponseBody
+    public Map<String, Object> getRepeatPurchaseRateByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("repeatPurchaseRate", dashboardService.getRepeatPurchaseRate(startDate, endDate));
+        return result;
+    }
+
+    // API lấy Nguồn thu dự kiến (Expected Revenue) - tổng giá trị các đơn hàng đang
+    // xử lý
+    @GetMapping("/analytics/revenue-per-customer")
+    @ResponseBody
+    public Map<String, Object> getRevenuePerCustomerByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("revenuePerCustomer", dashboardService.getRevenuePerCustomer(startDate, endDate));
+        return result;
+    }
+
     // API lấy dữ liệu khách hàng mới theo tháng
     @GetMapping("/customers/new-by-month")
     @ResponseBody
     public Map<String, Long> getNewCustomersByMonth() {
         return dashboardService.getNewCustomersByMonth();
     }
-    
+
     // API lấy số sản phẩm được bán theo khoảng thời gian
     @GetMapping("/analytics/total-products-sold")
     @ResponseBody
@@ -143,7 +243,7 @@ public class AdminPageController {
         result.put("totalProductsSold", dashboardService.countSoldProductsByDateRange(startDate, endDate));
         return result;
     }
-    
+
     // API lấy số thương hiệu được bán theo khoảng thời gian
     @GetMapping("/analytics/total-brands-sold")
     @ResponseBody
@@ -164,7 +264,7 @@ public class AdminPageController {
         Map<String, Object> result = new HashMap<>();
         result.put("newCustomers", dashboardService.getNewCustomersByDateRange(startDate, endDate));
         result.put("returningCustomers", dashboardService.getReturningCustomersByDateRange(startDate, endDate));
-        
+
         // Convert List<TopCustomerResponse> to List<Map>
         List<TopCustomerResponse> topCustomers = dashboardService.getTopCustomersByDateRange(10, startDate, endDate);
         result.put("topCustomers", topCustomers.stream()
@@ -178,7 +278,7 @@ public class AdminPageController {
                     return map;
                 })
                 .collect(Collectors.toList()));
-        
+
         return result;
     }
 
@@ -186,17 +286,24 @@ public class AdminPageController {
     @GetMapping({ "", "/", "/dashboard" })
     public String dashboard(Model model) {
         addCurrentUserToModel(model);
-        model.addAttribute("totalRevenue", dashboardService.getTotalRevenue());
-        model.addAttribute("totalOrders", dashboardService.getTotalOrders());
-        model.addAttribute("totalProducts", dashboardService.getTotalProducts());
-        model.addAttribute("totalCustomers", dashboardService.getTotalCustomers());
-        model.addAttribute("pendingOrders", dashboardService.getPendingOrders());
-        model.addAttribute("lowStockProducts", dashboardService.getLowStockProductsList(10));
+
+        // Quick stats - các thông số quan trọng để xem nhanh
         model.addAttribute("todayRevenue", dashboardService.getTodayRevenue());
-        model.addAttribute("conversionRate", dashboardService.getConversionRate());
+        model.addAttribute("thisWeekRevenue", dashboardService.getThisWeekRevenue());
+        model.addAttribute("thisMonthRevenue", dashboardService.getThisMonthRevenue());
+        model.addAttribute("todayOrders", dashboardService.getTodayOrders());
+        model.addAttribute("newCustomersThisMonth", dashboardService.getNewCustomersThisMonth()); // Đồng bộ với
+                                                                                                  // analytics
+        model.addAttribute("pendingOrders", dashboardService.getPendingOrders());
+        model.addAttribute("confirmedOrders", dashboardService.getConfirmedOrders());
+        model.addAttribute("lowStockProducts", dashboardService.getLowStockProductsList(10));
 
         model.addAttribute("recentOrders", dashboardService.getRecentOrders(5));
-        model.addAttribute("topProducts", dashboardService.getTopProducts(5));
+
+        // Lấy sản phẩm bán chạy trong tuần (7 ngày gần nhất)
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        model.addAttribute("topProducts", dashboardService.getTopProductsByDateRange(5, startOfWeek, now));
 
         return "admin/dashboard/index";
     }
@@ -299,6 +406,14 @@ public class AdminPageController {
         return "admin/users/edit";
     }
 
+    @GetMapping("/users/wallet")
+    @PreAuthorize("hasAuthority('wallet.view')")
+    public String userWallet(@RequestParam Long userId, Model model) {
+        addCurrentUserToModel(model);
+        model.addAttribute("userId", userId);
+        return "admin/users/wallet";
+    }
+
     // Roles
     @GetMapping("/roles")
     @PreAuthorize("hasAuthority('role.view')")
@@ -329,7 +444,7 @@ public class AdminPageController {
         return "admin/permissions/manage";
     }
 
-    //Analytics
+    // Analytics
     @GetMapping("/analytics")
     public String analytics(Model model) {
         addCurrentUserToModel(model);

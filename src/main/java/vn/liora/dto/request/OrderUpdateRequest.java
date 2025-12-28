@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 public class OrderUpdateRequest {
 
     @NotBlank(message = "Trạng thái đơn hàng không được để trống")
-    @Pattern(regexp = "^(PENDING|CONFIRMED|COMPLETED|CANCELLED)$", message = "Trạng thái đơn hàng không hợp lệ")
+    @Pattern(regexp = "^(PENDING|CONFIRMED|SHIPPING|DELIVERED|COMPLETED|CANCELLED|RETURNED)$", message = "Trạng thái đơn hàng không hợp lệ")
     String orderStatus;
 
     @Pattern(regexp = "^(PENDING|PAID|FAILED|CANCELLED|REFUNDED)$", message = "Trạng thái thanh toán không hợp lệ")

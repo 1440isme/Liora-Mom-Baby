@@ -25,9 +25,25 @@ class CheckoutPage {
 
     bindEvents() {
         // Form submission
-        $('#checkoutForm').on('submit', (e) => {
+        console.log('[CheckoutPage] Binding checkout form submit event');
+        const self = this;
+        $('#checkoutForm').on('submit', async function (e) {
+            console.log('[CheckoutPage] Form submit event triggered');
             e.preventDefault();
-            this.handlePlaceOrder();
+            console.log('[CheckoutPage] Calling handlePlaceOrder');
+            console.log('[CheckoutPage] self:', self);
+            console.log('[CheckoutPage] self.handlePlaceOrder:', typeof self.handlePlaceOrder);
+            try {
+                if (typeof self.handlePlaceOrder === 'function') {
+                    await self.handlePlaceOrder();
+                } else {
+                    console.error('[CheckoutPage] handlePlaceOrder is not a function!');
+                }
+            } catch (error) {
+                console.error('[CheckoutPage] Error in handlePlaceOrder:', error);
+                console.error('[CheckoutPage] Error stack:', error.stack);
+                self.showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!', 'error');
+            }
         });
 
         // Apply/Remove promo code (ensure single binding and prevent bubbling)
@@ -133,7 +149,7 @@ class CheckoutPage {
                 // Lấy danh sách sản phẩm đã chọn từ cart
                 const selectedItemsResponse = await this.apiCall(`/CartProduct/${this.cartId}/selected-products`, 'GET');
                 this.selectedItems = selectedItemsResponse;
-                
+
                 this.renderSelectedItems();
                 this.updateOrderSummary();
             } else {
@@ -1337,7 +1353,18 @@ class CheckoutPage {
 
             $('#summary-subtotal').text(this.formatCurrency(subtotal));
             $('#summary-shipping').text(this.shippingFee === 0 ? '0đ' : this.formatCurrency(this.shippingFee));
+
+            // ✅ Reset orderTotalBeforeXu và cập nhật total
+            if (window.checkoutXu && window.checkoutXu.resetOrderTotalBeforeXu) {
+                window.checkoutXu.resetOrderTotalBeforeXu();
+            }
             $('#summary-total').text(this.formatCurrency(total));
+
+            // ✅ Nếu đang sử dụng xu, tính lại xu discount
+            const useXuToggle = document.getElementById('useXuToggle');
+            if (useXuToggle && useXuToggle.checked && window.checkoutXu) {
+                window.checkoutXu.calculateXuDiscount();
+            }
 
             // Luôn hiển thị dòng giảm giá
             if (!$('#discount-row').length) {
@@ -1512,7 +1539,7 @@ class CheckoutPage {
         } catch (error) {
             console.warn('API subtotal failed, using local calculation:', error);
         }
-        
+
         // Fallback: tính từ selectedItems
         return this.calculateSubtotalFromSelectedItems();
     }
@@ -1520,7 +1547,7 @@ class CheckoutPage {
     handleRemovePromo() {
         this.appliedDiscount = null;
         this.updateOrderSummary();
-        
+
         this.showToast('Đã gỡ mã giảm giá', 'info');
 
         // ✅ SỬA: Reset UI về trạng thái ban đầu
@@ -1529,24 +1556,47 @@ class CheckoutPage {
     }
 
     async handlePlaceOrder() {
-        if (this.selectedItems.length === 0) {
-            this.showToast('Không có sản phẩm nào để đặt hàng', 'warning');
-            return;
-        }
+        try {
+            console.log('handlePlaceOrder START');
+            console.log('selectedItems length:', this.selectedItems.length);
+            console.log('this object:', this);
+            console.log('this.selectedItems:', this.selectedItems);
 
-        // Validate all products before checkout (with server revalidation)
-        const isValid = await this.validateAllProducts();
-        if (!isValid) {
-            return;
-        }
+            if (this.selectedItems.length === 0) {
+                console.log('No selected items, returning');
+                this.showToast('Không có sản phẩm nào để đặt hàng', 'warning');
+                return;
+            }
 
-        // Validate form
-        if (!this.validateCheckoutForm()) {
-            return;
+            console.log('Validating products...');
+            // Validate all products before checkout (with server revalidation)
+            const isValid = await this.validateAllProducts();
+            console.log('Product validation result:', isValid);
+            if (!isValid) {
+                console.log('Product validation failed, returning');
+                return;
+            }
+
+            console.log('Validating form...');
+            // Validate form
+            if (!this.validateCheckoutForm()) {
+                console.log('Form validation failed, returning');
+                return;
+            }
+            console.log('Form validation passed');
+        } catch (error) {
+            console.error('Error in handlePlaceOrder (early stage):', error);
+            console.error('Error stack:', error.stack);
+            this.showToast('Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!', 'error');
+            throw error;
         }
 
         try {
             this.showLoading(true);
+
+            // Get xu discount amount
+            const xuUsed = window.checkoutXu ? window.checkoutXu.getXuDiscount() : 0;
+            console.log('Xu used:', xuUsed);
 
             // lấy đầy đủ thông tin
             const orderData = this.collectOrderData();
@@ -1557,9 +1607,24 @@ class CheckoutPage {
                 return;
             }
 
-            console.log('Order data with discount:', orderData);
+            // Thêm xuUsed vào orderData
+            if (xuUsed > 0) {
+                orderData.xuUsed = xuUsed;
+            }
 
             const response = await this.apiCall(`/order/${this.cartId}`, 'POST', orderData);
+            console.log('Order created, response:', response);
+            console.log('response.idOrder:', response?.idOrder);
+
+            // Kiểm tra response có idOrder không
+            if (!response || !response.idOrder) {
+                console.error('Response không có idOrder:', response);
+                this.showLoading(false);
+                this.showToast('Đặt hàng thành công nhưng không lấy được mã đơn hàng. Vui lòng kiểm tra lại!', 'error');
+                return;
+            }
+
+            console.log('Order ID found:', response.idOrder);
 
             // Nếu phương thức là VNPAY thì gọi tạo URL thanh toán và redirect
             if (orderData.paymentMethod && orderData.paymentMethod.toUpperCase() === 'VNPAY') {
@@ -1571,7 +1636,9 @@ class CheckoutPage {
                     }
                 } catch (e) {
                     console.error('Create VNPAY URL failed:', e);
+                    this.showLoading(false);
                     this.showToast('Không tạo được liên kết thanh toán VNPAY, vui lòng thử lại', 'error');
+                    return;
                 }
             }
 
@@ -1585,37 +1652,88 @@ class CheckoutPage {
                     }
                 } catch (e) {
                     console.error('Create MOMO URL failed:', e);
+                    this.showLoading(false);
                     this.showToast('Không tạo được liên kết thanh toán MOMO, vui lòng thử lại', 'error');
+                    return;
                 }
             }
 
             // Nếu không phải VNPAY/MOMO hoặc thanh toán online thất bại, chuyển đến trang thành công
+            console.log('Payment is COD, redirecting to order detail');
             this.showToast('Đặt hàng thành công!', 'success');
-            
+
+            // Không ẩn loading ở đây, để redirect tự ẩn khi chuyển trang
             setTimeout(() => {
+                console.log('Timeout fired, redirecting with orderId:', response.idOrder);
                 this.redirectToOrderDetail(response.idOrder);
             }, 1500);
 
         } catch (error) {
             console.error('Error placing order:', error);
-            this.showToast('Không thể đặt hàng. Vui lòng thử lại!', 'error');
-        } finally {
             this.showLoading(false);
+            this.showToast('Không thể đặt hàng. Vui lòng thử lại!', 'error');
         }
     }
 
     redirectToOrderDetail(orderId) {
+        console.log('=== redirectToOrderDetail START ===');
+        console.log('Received orderId:', orderId, 'type:', typeof orderId);
+
+        // Kiểm tra orderId hợp lệ
+        if (!orderId) {
+            console.error('OrderId is null or undefined');
+            this.showLoading(false);
+            this.showToast('Không tìm thấy mã đơn hàng. Vui lòng kiểm tra lại!', 'error');
+            return;
+        }
+
+        // Đảm bảo orderId là số
+        const numericOrderId = Number(orderId);
+        if (isNaN(numericOrderId) || numericOrderId <= 0) {
+            console.error('Invalid orderId:', orderId, 'converted to:', numericOrderId);
+            this.showLoading(false);
+            this.showToast('Mã đơn hàng không hợp lệ. Vui lòng kiểm tra lại!', 'error');
+            return;
+        }
+
+        console.log('Valid orderId:', numericOrderId);
+
         // Xác định loại user và redirect phù hợp
         const token = localStorage.getItem('access_token');
         const userData = localStorage.getItem('liora_user');
 
+        let redirectUrl;
         if (token && userData) {
             // User đã đăng nhập (cả user thường và Google)
             // Sử dụng endpoint cho user đã đăng nhập
-            window.location.href = `/user/order-detail/${orderId}`;
+            redirectUrl = `/user/order-detail/${numericOrderId}`;
         } else {
             // Guest user - redirect đến trang tra cứu đơn hàng
-            window.location.href = `/user/order-detail/access?orderId=${orderId}`;
+            redirectUrl = `/user/order-detail/access?orderId=${numericOrderId}`;
+        }
+
+        console.log('Redirect URL:', redirectUrl);
+        console.log('Current location before redirect:', window.location.href);
+
+        // Thực hiện redirect - sử dụng replace để không lưu vào history
+        try {
+            // Thử nhiều cách redirect để đảm bảo hoạt động
+            if (window.location.replace) {
+                window.location.replace(redirectUrl);
+            } else {
+                window.location.href = redirectUrl;
+            }
+            console.log('Redirect command executed');
+        } catch (error) {
+            console.error('Error redirecting:', error);
+            // Fallback: thử cách khác
+            try {
+                window.location.assign(redirectUrl);
+            } catch (e2) {
+                console.error('Fallback redirect also failed:', e2);
+                this.showLoading(false);
+                this.showToast('Không thể chuyển đến trang chi tiết đơn hàng. Vui lòng thử lại!', 'error');
+            }
         }
     }
 
@@ -1744,8 +1862,8 @@ class CheckoutPage {
 
     async handleQuantityInputChange(e) {
         await CartUtils.handleQuantityInputChange(
-            e, 
-            this.updateCartProductQuantity.bind(this), 
+            e,
+            this.updateCartProductQuantity.bind(this),
             this.showToast.bind(this),
             this.updateOrderSummary.bind(this) // Callback để cập nhật tổng tiền sau khi thay đổi
         );
@@ -1887,7 +2005,7 @@ class CheckoutPage {
     }
 
     // ========== HELPER METHODS ==========
-    
+
     /**
      * Tính subtotal từ selectedItems
      */
@@ -1895,7 +2013,7 @@ class CheckoutPage {
         if (!this.selectedItems || this.selectedItems.length === 0) {
             return 0;
         }
-        
+
         return this.selectedItems.reduce((total, item) => {
             // Sử dụng totalPrice nếu có, nếu không thì tính từ productPrice * quantity
             const itemTotal = item.totalPrice || (item.productPrice * item.quantity);
@@ -1907,6 +2025,7 @@ class CheckoutPage {
     async apiCall(url, method = 'GET', data = null) {
         return CartUtils.apiCall(url, method, data);
     }
+
 
     navigateToCart(event) {
         event.preventDefault();
@@ -1933,3 +2052,4 @@ $(document).ready(() => {
         window.checkoutPage = new CheckoutPage();
     }
 });
+

@@ -159,9 +159,19 @@
                                             <span>Phí vận chuyển:</span>
                                             <span id="summaryShippingFee">...</span>
                                         </div>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Giảm giá:</span>
-                                            <span class="text-success" id="summaryDiscount">...</span>
+                                        <div class="d-flex justify-content-between mb-2" id="summaryDiscountRow"
+                                            style="display: none;">
+                                            <span>Giảm giá Voucher:</span>
+                                            <span class="text-warning fw-medium" id="summaryDiscount">
+                                                <i class="mdi mdi-tag-outline me-1"></i>...
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2" id="summaryXuUsedRow"
+                                            style="display: none;">
+                                            <span>Dùng Xu:</span>
+                                            <span class="text-warning fw-medium" id="summaryXuUsed">
+                                                <i class="mdi mdi-wallet-outline me-1"></i>...
+                                            </span>
                                         </div>
                                         <!-- Thêm dòng hiển thị mã giảm giá -->
                                         <div class="d-flex justify-content-between mb-2" id="discountCodeRow"
@@ -176,8 +186,8 @@
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between fw-bold fs-5">
-                                            <span>Tổng cộng:</span>
-                                            <span class="text-primary" id="summaryTotal">...</span>
+                                            <span>THỰC THU (Cash-in):</span>
+                                            <span class="text-success" id="summaryTotal">...</span>
                                         </div>
                                     </div>
 

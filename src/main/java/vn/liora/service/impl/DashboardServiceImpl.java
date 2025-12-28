@@ -1,5 +1,6 @@
 package vn.liora.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.liora.dto.response.LowStockProductResponse;
@@ -8,6 +9,7 @@ import vn.liora.dto.response.TopCustomerResponse;
 import vn.liora.dto.response.TopProductResponse;
 import vn.liora.entity.Order;
 import vn.liora.repository.OrderRepository;
+import vn.liora.repository.ReturnRequestRepository;
 import vn.liora.service.*;
 
 import java.math.BigDecimal;
@@ -19,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 public class DashboardServiceImpl implements IDashboardService {
     @Autowired
@@ -32,6 +34,8 @@ public class DashboardServiceImpl implements IDashboardService {
     private IUserService userService;
     @Autowired
     private IOrderProductService orderProductService;
+    @Autowired
+    private ReturnRequestRepository returnRequestRepository;
 
     @Override
     public BigDecimal getTotalRevenue() {
@@ -49,8 +53,10 @@ public class DashboardServiceImpl implements IDashboardService {
 
     @Override
     public long getTotalOrders() {
-        return orderService.getOrdersByOrderStatus("COMPLETED").size() + orderService.getOrdersByOrderStatus("PENDING").size() +
-               orderService.getOrdersByOrderStatus("CONFIRMED").size() + orderService.getOrdersByOrderStatus("CANCELLED").size();
+        return orderService.getOrdersByOrderStatus("COMPLETED").size()
+                + orderService.getOrdersByOrderStatus("PENDING").size() +
+                orderService.getOrdersByOrderStatus("CONFIRMED").size()
+                + orderService.getOrdersByOrderStatus("CANCELLED").size();
     }
 
     @Override
@@ -73,7 +79,8 @@ public class DashboardServiceImpl implements IDashboardService {
     @Override
     public long getTotalCustomersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         // Đếm tổng số khách hàng CÓ ĐƠN HÀNG trong khoảng thời gian
-        List<Order> ordersInRange = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
+        List<Order> ordersInRange = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate,
+                "COMPLETED");
         return ordersInRange.stream()
                 .map(o -> o.getUser() != null ? o.getUser().getUserId() : null)
                 .filter(userId -> userId != null)
@@ -88,7 +95,8 @@ public class DashboardServiceImpl implements IDashboardService {
 
     @Override
     public long getLowStockProducts() {
-        // Chỉ đếm sản phẩm sắp hết hàng (1-10), không bao gồm sản phẩm đã hết hàng (stock = 0)
+        // Chỉ đếm sản phẩm sắp hết hàng (1-10), không bao gồm sản phẩm đã hết hàng
+        // (stock = 0)
         return productService.findByStockLessThanEqual(10).stream()
                 .filter(p -> p.getStock() > 0)
                 .count();
@@ -103,14 +111,14 @@ public class DashboardServiceImpl implements IDashboardService {
     public double getConversionRate() {
         // Đếm số khách hàng đã có ít nhất 1 đơn hàng COMPLETED
         long customersWhoOrdered = orderService.countCustomersWithCompletedOrders();
-        
+
         // Tổng số khách hàng (trừ admin)
         long totalCustomers = userService.count() - 1;
-        
+
         if (totalCustomers == 0) {
             return 0.0;
         }
-        
+
         // Conversion Rate = (Số khách hàng đã mua / Tổng số khách hàng) × 100%
         return ((double) customersWhoOrdered / totalCustomers) * 100.0;
     }
@@ -121,28 +129,29 @@ public class DashboardServiceImpl implements IDashboardService {
         List<Order> recentOrders = orderService.getRecentOrders(limit);
 
         return recentOrders.stream()
-                    .map(o -> {
-                        String customerName;
-                        if (o.getUser() != null) {
-                            if (o.getUser().getLastname() != null) {
-                                String firstname = o.getUser().getFirstname() != null ? o.getUser().getFirstname() + " " : "";
-                                customerName = firstname + o.getUser().getLastname();
-                            } else {
-                                customerName = o.getUser().getUsername();
-                            }
+                .map(o -> {
+                    String customerName;
+                    if (o.getUser() != null) {
+                        if (o.getUser().getLastname() != null) {
+                            String firstname = o.getUser().getFirstname() != null ? o.getUser().getFirstname() + " "
+                                    : "";
+                            customerName = firstname + o.getUser().getLastname();
                         } else {
-                            customerName = "Ẩn danh";
+                            customerName = o.getUser().getUsername();
                         }
-                        return RecentOrderResponse.builder()
-                                .id(o.getIdOrder())
-                                .customerName(customerName)
-                                .totalAmount(Optional.ofNullable(o.getTotal()).orElse(BigDecimal.ZERO))
-                                .status(o.getOrderStatus())
-                                .paymentStatus(o.getPaymentStatus())
-                                .createdAt(o.getOrderDate())
-                                .build();
-                    })
-                    .collect(Collectors.toList());
+                    } else {
+                        customerName = "Ẩn danh";
+                    }
+                    return RecentOrderResponse.builder()
+                            .id(o.getIdOrder())
+                            .customerName(customerName)
+                            .totalAmount(Optional.ofNullable(o.getTotal()).orElse(BigDecimal.ZERO))
+                            .status(o.getOrderStatus())
+                            .paymentStatus(o.getPaymentStatus())
+                            .createdAt(o.getOrderDate())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -151,9 +160,10 @@ public class DashboardServiceImpl implements IDashboardService {
     }
 
     @Override
-    public List<TopProductResponse> getTopProductsByDateRange(int limit, LocalDateTime startDate, LocalDateTime endDate) {
+    public List<TopProductResponse> getTopProductsByDateRange(int limit, LocalDateTime startDate,
+            LocalDateTime endDate) {
         List<Object[]> results = orderProductService.getTopSellingProductsByDateRange(startDate, endDate);
-        
+
         return results.stream()
                 .limit(limit)
                 .map(row -> TopProductResponse.builder()
@@ -168,7 +178,8 @@ public class DashboardServiceImpl implements IDashboardService {
     }
 
     @Override
-    public List<RecentOrderResponse> getRecentOrdersByDateRange(int limit, LocalDateTime startDate, LocalDateTime endDate) {
+    public List<RecentOrderResponse> getRecentOrdersByDateRange(int limit, LocalDateTime startDate,
+            LocalDateTime endDate) {
         List<Order> allOrders = orderService.getOrdersByDateRange(startDate, endDate)
                 .stream()
                 .map(orderResponse -> {
@@ -190,7 +201,8 @@ public class DashboardServiceImpl implements IDashboardService {
                     String customerName;
                     if (o.getUser() != null) {
                         if (o.getUser().getLastname() != null) {
-                            String firstname = o.getUser().getFirstname() != null ? o.getUser().getFirstname() + " " : "";
+                            String firstname = o.getUser().getFirstname() != null ? o.getUser().getFirstname() + " "
+                                    : "";
                             customerName = firstname + o.getUser().getLastname();
                         } else {
                             customerName = o.getUser().getUsername();
@@ -213,7 +225,8 @@ public class DashboardServiceImpl implements IDashboardService {
     @Override
     public List<LowStockProductResponse> getLowStockProductsList(int threshold) {
         return productService.findByStockLessThanEqual(threshold).stream()
-                .filter(product -> product.getStock() > 0) // Chỉ lấy sản phẩm sắp hết hàng, không lấy sản phẩm đã hết hàng
+                .filter(product -> product.getStock() > 0) // Chỉ lấy sản phẩm sắp hết hàng, không lấy sản phẩm đã hết
+                                                           // hàng
                 .map(product -> LowStockProductResponse.builder()
                         .productId(product.getProductId())
                         .name(product.getName())
@@ -290,19 +303,20 @@ public class DashboardServiceImpl implements IDashboardService {
     @Override
     public double getReturningCustomersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         // Khách hàng đã đặt đơn trong khoảng thời gian (chỉ tính orders đã COMPLETED)
-        List<Order> ordersInRange = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
-        
+        List<Order> ordersInRange = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate,
+                "COMPLETED");
+
         // Tổng số khách hàng có đơn hàng (tính trong khoảng thời gian)
         long totalCustomersInRange = ordersInRange.stream()
                 .map(o -> o.getUser() != null ? o.getUser().getUserId() : null)
                 .filter(userId -> userId != null)
                 .distinct()
                 .count();
-        
+
         if (totalCustomersInRange == 0) {
             return 0;
         }
-        
+
         // Khách hàng quay lại = khách hàng có > 1 đơn hàng trong khoảng thời gian
         long returningCustomers = ordersInRange.stream()
                 .collect(Collectors.groupingBy(o -> o.getUser() != null ? o.getUser().getUserId() : null))
@@ -310,7 +324,7 @@ public class DashboardServiceImpl implements IDashboardService {
                 .stream()
                 .filter(orderList -> orderList.size() > 1)
                 .count();
-        
+
         return ((double) returningCustomers / totalCustomersInRange) * 100;
     }
 
@@ -320,18 +334,21 @@ public class DashboardServiceImpl implements IDashboardService {
     }
 
     @Override
-    public List<TopCustomerResponse> getTopCustomersByDateRange(int limit, LocalDateTime startDate, LocalDateTime endDate) {
-        // Lấy top khách hàng chi tiêu cao nhất trong khoảng thời gian (chỉ tính orders đã COMPLETED)
-        List<Order> ordersInRange = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
-        
+    public List<TopCustomerResponse> getTopCustomersByDateRange(int limit, LocalDateTime startDate,
+            LocalDateTime endDate) {
+        // Lấy top khách hàng chi tiêu cao nhất trong khoảng thời gian (chỉ tính orders
+        // đã COMPLETED)
+        List<Order> ordersInRange = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate,
+                "COMPLETED");
+
         // Group by user and calculate total spent
         Map<Long, TopCustomerResponse> customerMap = new LinkedHashMap<>();
-        
+
         for (Order order : ordersInRange) {
             if (order.getUser() == null || order.getTotal() == null) {
                 continue;
             }
-            
+
             Long userId = order.getUser().getUserId();
             if (!customerMap.containsKey(userId)) {
                 // Handle null firstname and lastname
@@ -341,13 +358,13 @@ public class DashboardServiceImpl implements IDashboardService {
                 if (fullName.isEmpty()) {
                     fullName = order.getUser().getUsername() != null ? order.getUser().getUsername() : "Không có tên";
                 }
-                
+
                 // Handle null email
                 String email = order.getUser().getEmail();
                 if (email == null || email.isEmpty()) {
                     email = "N/A";
                 }
-                
+
                 customerMap.put(userId, TopCustomerResponse.builder()
                         .userId(userId)
                         .fullName(fullName)
@@ -356,27 +373,28 @@ public class DashboardServiceImpl implements IDashboardService {
                         .totalSpent(BigDecimal.ZERO)
                         .build());
             }
-            
+
             TopCustomerResponse customer = customerMap.get(userId);
             customer.setOrdersCount(customer.getOrdersCount() + 1);
             customer.setTotalSpent(customer.getTotalSpent().add(order.getTotal()));
         }
-        
+
         // Sort by total spent descending and limit
         return customerMap.values().stream()
                 .sorted((a, b) -> b.getTotalSpent().compareTo(a.getTotalSpent()))
                 .limit(limit)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public Map<String, Long> getNewCustomersByMonth() {
         Map<String, Long> result = new LinkedHashMap<>();
-        
+
         // Lấy dữ liệu 12 tháng gần nhất
-        LocalDateTime startDate = LocalDateTime.now().minusMonths(11).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime startDate = LocalDateTime.now().minusMonths(11).withDayOfMonth(1).withHour(0).withMinute(0)
+                .withSecond(0);
         List<Object[]> data = userService.getNewCustomersByMonth(startDate);
-        
+
         // Tạo map đầy đủ 12 tháng (điền 0 cho tháng không có data)
         LocalDateTime current = LocalDateTime.now().minusMonths(11).withDayOfMonth(1);
         for (int i = 0; i < 12; i++) {
@@ -384,7 +402,7 @@ public class DashboardServiceImpl implements IDashboardService {
             result.put(key, 0L);
             current = current.plusMonths(1);
         }
-        
+
         // Điền data thực vào
         for (Object[] row : data) {
             int year = ((Number) row[0]).intValue();
@@ -393,18 +411,190 @@ public class DashboardServiceImpl implements IDashboardService {
             String key = String.format("Tháng %d/%d", month, year);
             result.put(key, count);
         }
-        
+
         return result;
     }
-    
+
     @Override
     public long countSoldProductsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return orderProductService.countSoldProductsByDateRange(startDate, endDate);
     }
-    
+
     @Override
     public long countSoldBrandsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return orderProductService.countSoldBrandsByDateRange(startDate, endDate);
     }
-}
 
+    @Override
+    public BigDecimal getGrossRevenue(LocalDateTime startDate, LocalDateTime endDate) {
+        // Gross Revenue = Subtotal + Shipping Fee = Total + Voucher + Xu
+        List<Order> orders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
+        return orders.stream()
+                .map(o -> {
+                    BigDecimal total = o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO;
+                    BigDecimal discount = o.getTotalDiscount() != null ? o.getTotalDiscount() : BigDecimal.ZERO;
+                    BigDecimal xuUsed = o.getXuUsed() != null ? o.getXuUsed() : BigDecimal.ZERO;
+                    return total.add(discount).add(xuUsed);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public BigDecimal getMarketingSpend(LocalDateTime startDate, LocalDateTime endDate) {
+        // Marketing Spend = Voucher + Xu
+        List<Order> orders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
+        return orders.stream()
+                .map(o -> {
+                    BigDecimal discount = o.getTotalDiscount() != null ? o.getTotalDiscount() : BigDecimal.ZERO;
+                    BigDecimal xuUsed = o.getXuUsed() != null ? o.getXuUsed() : BigDecimal.ZERO;
+                    return discount.add(xuUsed);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public BigDecimal getNetRevenue(LocalDateTime startDate, LocalDateTime endDate) {
+        // Net Revenue = Total (Cash-in) - đã có sẵn trong getTotalRevenueByDateRange
+        return getTotalRevenueByDateRange(startDate, endDate);
+    }
+
+    @Override
+    public BigDecimal getAverageOrderValue(LocalDateTime startDate, LocalDateTime endDate) {
+        List<Order> orders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
+        if (orders.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal totalRevenue = orders.stream()
+                .map(o -> o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return totalRevenue.divide(BigDecimal.valueOf(orders.size()), 2, java.math.RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public double getReturnRate(LocalDateTime startDate, LocalDateTime endDate) {
+        // Đếm số đơn hàng đã hoàn thành trong khoảng thời gian
+        List<Order> completedOrders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate,
+                "COMPLETED");
+        if (completedOrders.isEmpty()) {
+            return 0.0;
+        }
+
+        // Đếm số return request đã được ACCEPTED trong khoảng thời gian
+        List<vn.liora.entity.ReturnRequest> acceptedReturns = returnRequestRepository
+                .findByStatusAndDateRange("ACCEPTED", startDate, endDate);
+        long returnedOrdersCount = acceptedReturns.size();
+
+        return ((double) returnedOrdersCount / completedOrders.size()) * 100.0;
+    }
+
+    @Override
+    public Map<String, BigDecimal> getRevenueByPaymentMethod(LocalDateTime startDate, LocalDateTime endDate) {
+        List<Order> orders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate, "COMPLETED");
+        return orders.stream()
+                .collect(Collectors.groupingBy(
+                        o -> o.getPaymentMethod() != null ? o.getPaymentMethod() : "UNKNOWN",
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                o -> o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO,
+                                BigDecimal::add)));
+    }
+
+    @Override
+    public Map<String, Long> getOrderStatusDistribution(LocalDateTime startDate, LocalDateTime endDate) {
+        List<Order> orders = orderRepository.findByOrderDateBetween(startDate, endDate);
+        return orders.stream()
+                .collect(Collectors.groupingBy(
+                        o -> o.getOrderStatus() != null ? o.getOrderStatus() : "UNKNOWN",
+                        Collectors.counting()));
+    }
+
+    @Override
+    public double getRepeatPurchaseRate(LocalDateTime startDate, LocalDateTime endDate) {
+        // Đếm số khách hàng có từ 2 đơn hàng COMPLETED trở lên trong khoảng thời gian
+        List<Order> completedOrders = orderRepository.findByOrderDateBetweenAndOrderStatus(startDate, endDate,
+                "COMPLETED");
+        if (completedOrders.isEmpty()) {
+            return 0.0;
+        }
+
+        // Đếm số khách hàng unique
+        long totalCustomers = completedOrders.stream()
+                .map(o -> o.getUser() != null ? o.getUser().getUserId() : null)
+                .filter(userId -> userId != null)
+                .distinct()
+                .count();
+
+        if (totalCustomers == 0) {
+            return 0.0;
+        }
+
+        // Đếm số khách hàng có từ 2 đơn hàng trở lên
+        Map<Long, Long> customerOrderCount = completedOrders.stream()
+                .filter(o -> o.getUser() != null)
+                .collect(Collectors.groupingBy(
+                        o -> o.getUser().getUserId(),
+                        Collectors.counting()));
+
+        long repeatCustomers = customerOrderCount.values().stream()
+                .filter(count -> count >= 2)
+                .count();
+
+        return ((double) repeatCustomers / totalCustomers) * 100.0;
+    }
+
+    @Override
+    public BigDecimal getRevenuePerCustomer(LocalDateTime startDate, LocalDateTime endDate) {
+        // Tính nguồn thu dự kiến: tổng giá trị các đơn hàng đang xử lý (chưa hoàn
+        // thành)
+        // Các trạng thái: PENDING, CONFIRMED, SHIPPING, DELIVERED
+        List<Order> allOrders = orderRepository.findByOrderDateBetween(startDate, endDate);
+
+        BigDecimal expectedRevenue = allOrders.stream()
+                .filter(o -> {
+                    String status = o.getOrderStatus();
+                    // Chỉ tính các đơn hàng đang xử lý, chưa hoàn thành
+                    return "PENDING".equals(status)
+                            || "CONFIRMED".equals(status)
+                            || "SHIPPING".equals(status)
+                            || "DELIVERED".equals(status);
+                })
+                .map(o -> o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return expectedRevenue;
+    }
+
+    @Override
+    public BigDecimal getThisWeekRevenue() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.minusDays(now.getDayOfWeek().getValue() - 1).withHour(0).withMinute(0)
+                .withSecond(0);
+        return getTotalRevenueByDateRange(startOfWeek, now);
+    }
+
+    @Override
+    public BigDecimal getThisMonthRevenue() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        return getTotalRevenueByDateRange(startOfMonth, now);
+    }
+
+    @Override
+    public long getTodayOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfDay = now.withHour(0).withMinute(0).withSecond(0);
+        return orderRepository.findByOrderDateBetweenAndOrderStatus(startOfDay, now, "COMPLETED").size();
+    }
+
+    @Override
+    public long getTodayNewCustomers() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfDay = now.withHour(0).withMinute(0).withSecond(0);
+        return userService.countNewCustomersByDateRange(startOfDay, now);
+    }
+
+    @Override
+    public long getConfirmedOrders() {
+        return orderService.getOrdersByOrderStatus("CONFIRMED").size();
+    }
+}

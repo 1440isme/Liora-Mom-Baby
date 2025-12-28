@@ -168,7 +168,8 @@ public class UserController {
     @GetMapping("/myOrdersWithProducts")
     public ResponseEntity<ApiResponse<PaginatedResponse<Object>>> getMyOrdersWithProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String status) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -181,7 +182,8 @@ public class UserController {
                 throw new AppException(ErrorCode.USER_NOT_FOUND);
             }
 
-            List<OrderResponse> orders = orderService.getMyOrdersPaginated(user.getUserId(), page, size);
+            // Get orders with status filter
+            List<OrderResponse> orders = orderService.getMyOrdersPaginatedByStatus(user.getUserId(), status, page, size);
 
             // Tạo response với thông tin sản phẩm đầu tiên
             List<Object> ordersWithProducts = orders.stream().map(order -> {
@@ -225,8 +227,8 @@ public class UserController {
                 }
             }).collect(java.util.stream.Collectors.toList());
 
-            // Tính toán thông tin phân trang
-            long totalElements = orderService.countMyOrders(user.getUserId());
+            // Tính toán thông tin phân trang với status filter
+            long totalElements = orderService.countMyOrdersByStatus(user.getUserId(), status);
             int totalPages = (int) Math.ceil((double) totalElements / size);
 
             PaginatedResponse<Object> paginatedResponse = PaginatedResponse.<Object>builder()
